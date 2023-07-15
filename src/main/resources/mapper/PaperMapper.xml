@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.academickg.mapper.PaperMapper">
+<!--    分页查询   -->
+    <select id="pageQuery" resultType="com.example.academickg.entity.dao.Paper">
+        select * from Paper limit #{current}, #{size}
+    </select>
+<!--    按照id查询  -->
+    <select id="selectListByIds" resultType="com.example.academickg.entity.dao.Paper">
+        select * from Paper 
+        where id in
+        <foreach collection="list" open="(" close=")" item="id" separator="," >
+            #{id}
+        </foreach>
+    </select>
+    <insert id="saveBatch" parameterType="java.util.List">
+        insert into Paper(id,Title,WC,Journal,ESI,Year) values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.id}, #{item.Title},
+            #{item.wc}, #{item.Journal}, #{item.esi}, #{Year})
+        </foreach>
+    </insert>
+<!--查询年份列表-->
+    <select id="selectYearList" parameterType="java.util.List" resultType="map">
+        SELECT Year, COUNT(*) as yearCount from Paper
+        Where id in #{idList}
+        GROUP BY Year ORDER BY Year;
+    </select>
+<!--  按照id查询paper  -->
+    <resultMap id="paperMap" type="com.example.academickg.entity.dto.PaperDto">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="Title" jdbcType="VARCHAR" property="title" />
+        <result column="Year" jdbcType="INTEGER" property="year" />
+        <result column="Journal" jdbcType="VARCHAR" property="journal" />
+        <collection
+                column="id" property="Authors"
+                ofType="String" select="selectAuthorsById">
+        </collection>
+        <collection
+                column="id" property="Keywords"
+                ofType="String" select="selectKeywordsById">
+        </collection>
+    </resultMap>
+    <resultMap id="authorMap" type="com.example.academickg.entity.dto.authorDto">
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="organization" jdbcType="VARCHAR" property="organization"/>
+        <result column="country" jdbcType="VARCHAR" property="country"/>
+    </resultMap>
+    <!-- 按照ID查询Paper全部内容  -->
+    <select id="selectPaperById" resultMap="paperMap">
+        select * from Paper where id = #{id}
+    </select>
+    <!-- 查询Paper的Authors内容  -->
+    <select id="selectAuthorsById" resultMap="authorMap">
+        SELECT Author.Name as name, Author.Organization as organization,
+               Author.Country as country
+        FROM paper_author
+                 LEFT JOIN Author on Author.id=paper_author.Author_id
+                 LEFT JOIN Paper on Paper.id=paper_author.Paper_id
+        where Paper.id = #{id};
+    </select>
+    <!-- 查询Paper的Keywords内容 -->
+    <select id="selectKeywordsById" resultType="String">
+        SELECT Keywords.`Name` as Keyword
+        FROM paper_keywords
+                 LEFT JOIN Keywords on Keywords.id=paper_keywords.Keyword_id
+                 LEFT JOIN Paper on Paper.id=paper_keywords.Paper_id
+        where Paper.id = #{id};
+    </select>
+<!-- 按ID列表查询Paper内容  -->
+    <select id="selectPaperByIdList" parameterType="list" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
+        select * from Paper
+        where id in
+        <foreach collection="list" open="(" close=")" item="id" separator="," >
+            #{id}
+        </foreach>
+    </select>
+    <select id="selectall" resultType="com.example.academickg.entity.dao.Paper">
+        select * from Paper
+    </select>
+
+    <!--    <select id="selectAuthorsByPaperId" resultType="java.util.Map">-->
+<!--        SELECT Author.`Name` as Author ,Author.Country as AuthorCountry-->
+<!--        From paper_author-->
+<!--            LEFT JOIN Author on Author.id=paper_author.Author_id-->
+<!--            LEFT JOIN Paper on Paper.id=paper_author.Paper_id-->
+<!--        where Paper.id = #{id}-->
+<!--    </select>-->
+<!--    <select id="selectKeywordsByPaperId" parameterType="Integer" resultType="java.util.Map">-->
+<!--        SELECT Keywords.`Name` as Keyword-->
+<!--        FROM paper_keywords-->
+<!--                 LEFT JOIN Keywords on Keywords.id=paper_keywords.Keyword_id-->
+<!--                 LEFT JOIN Paper on Paper.id=paper_keywords.Paper_id-->
+<!--        where Paper.id = #{id};-->
+<!--    </select>-->
+<!--    <select id="selectAuthorsByPaperIdList" parameterType="list" resultType="list">-->
+<!--        SELECT Author.`Name` as Author ,Author.Country as AuthorCountry-->
+<!--        From paper_author-->
+<!--                 LEFT JOIN Author on Author.id=paper_author.Author_id-->
+<!--                 LEFT JOIN Paper on Paper.id=paper_author.Paper_id-->
+<!--        where Paper.id in #{idList}-->
+<!--    </select>-->
+
+</mapper>
