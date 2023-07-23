@@ -4,9 +4,10 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
-import com.example.academickg.annotation.lock;
 import com.example.academickg.common.Result;
+import com.example.academickg.entity.constants.Regex;
 import com.example.academickg.entity.dao.Paper;
+import com.example.academickg.entity.dto.PaperDto;
 import com.example.academickg.mapper.PaperMapper;
 import com.example.academickg.service.impl.PaperServiceImpl;
 import com.example.academickg.utils.BM25;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -36,7 +38,7 @@ public class PaperController {
     private StringRedisTemplate stringRedisTemplate;
 
     /**
-     * 小批量查询指定id的论文
+     * 按照ID查询相关论文
      */
     @log
     @GetMapping("/query")
@@ -62,11 +64,6 @@ public class PaperController {
     @log
     @GetMapping("/advanced-search?queryField=")
     public Result searchByKeywords(@RequestParam String queryField){
-        StringUtils str = new StringUtils();
-        if (! str.containNumOrChar(queryField) || ! queryField.contains("=")) {
-            return Result.paramError("Check your query to make sure search terms, parentheses, " +
-                    "and Boolean operators (AND, OR, NOT) are used properly.", null);
-        }
         try {
             // 字符串转化为小写
             queryField = queryField.toLowerCase();
@@ -81,29 +78,32 @@ public class PaperController {
             return Result.paramError("Check your query to make sure search terms, parentheses, " +
                     "and Boolean operators (AND, OR, NOT) are used properly.", null);
         }
-        // 切割字符串，返回检索式列表
-        String [] queryFields = str.splitQueryField(queryField);
-        // 遍历检索式列表，对各个字段进行检索
-        for (String field : queryFields) {
-            // 判断字段是否为主题检索
-            if (field.substring(0, 3).equalsIgnoreCase("ts=")) {
-                BM25 bm25 = new BM25(1.2, 0);
-                //bm25.similarity()
-            }
-            // 判断字段是否为期刊检索
-            if (field.substring(0, 3).equalsIgnoreCase("so=")) {
-
-            }
-            // 判断字段是否为作者检索
-            if (field.substring(0, 3).equalsIgnoreCase("au=")) {
-
-            }
-            // 判断字段是否为年份检索
-            if (field.substring(0, 3).equalsIgnoreCase("py=")) {
-
-            }
+        StringUtils str = new StringUtils();
+        // 判断是否含有字符,以及含有=。
+        if (! str.containNumOrChar(queryField) || ! queryField.contains("=")) {
+            return Result.paramError("Check your query to make sure search terms, parentheses, " +
+                    "and Boolean operators (AND, OR, NOT) are used properly.", null);
         }
-        return Result.success("", null);
+        // 检查索引式是否符合要求,例如“AF=”或者“ AF=”，索引字段前不允许含有字母与数字
+        if (! queryField.contains(Regex.FORMAT_QUERY)){
+            return Result.paramError("Check your query to make sure search terms, parentheses, " +
+                    "and Boolean operators (AND, OR, NOT) are used properly.", null);
+        }
+        //判断是否正确使用布尔操作符，检查不正确使用布尔操作符的情况
+        if (queryField.contains(Regex.FALSE_BOOLEAN_FORMAT)){
+            return Result.paramError("Check your query to make sure search terms, parentheses, " +
+                    "and Boolean operators (AND, OR, NOT) are used properly.", null);
+        }
+        HashMap<String, Integer> map = paperService.singleSetQueryFieldProcess(queryField);
+        if (map == null){
+            HashMap<Object, Object> map1 = paperService.multiSetQueryFieldProcess(queryField);
+            List<PaperDto> paperDtoList = paperService.multiSetQueriesProcess(map1);
+        }else {
+            List<PaperDto> paperDtoList = paperService.singleSetQueriesProcess(map);
+        }
+
+
+        return Result.success("", paperDtoList);
     }
 
 
@@ -147,35 +147,4 @@ public class PaperController {
     }
 
 
-//
-//    @GetMapping("/find/{id}")
-//    Paper findById(@PathVariable Integer id){
-//        return paperMapper.selectById(id);
-//    }
-//
-//    // 按照id删除
-//    @lock
-//    @DeleteMapping("/delete/{id}")
-//    public int deleteById(@PathVariable Integer id){
-//        return paperMapper.deleteById(id);
-//    }
-//
-//    // 插入一条数据
-//    @lock
-//    @RequestMapping(value = "/insert/entity", method = RequestMethod.POST)
-//    public int insertPaper(@RequestBody Paper paper){
-//        return paperMapper.insert(paper);
-//    }
-//
-//    @lock
-//    // 修改一条数据
-//    @RequestMapping(value = "update/entity", method = RequestMethod.POST)
-//    public int updatePaper(@RequestBody Paper paper){
-//        return paperMapper.update(paper, null);
-//    }
-//    @PostMapping("/import/txt")
-//    public Boolean importPaperRecordsByTxt(MultipartFile file) throws Exception{
-//        InputStream inputStream = file.getInputStream();
-//        return false;
-//    }
 }

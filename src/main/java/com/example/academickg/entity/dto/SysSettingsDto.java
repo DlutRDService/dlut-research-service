@@ -2,7 +2,6 @@ package com.example.academickg.entity.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

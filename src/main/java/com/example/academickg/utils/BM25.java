@@ -17,8 +17,6 @@ public class BM25 {
     //b是一个常数，它的作用是规定L对评分的影响有多大
     private final double b;
 
-
-
     /**
      * BM25 相关度算法实现
      * @param k 常量k，用来限制TF值的增长极限 默认1.2
@@ -29,7 +27,6 @@ public class BM25 {
         this.k = k;
         this.b = b;
     }
-
     /**
      * BM25 相关度算法实现 k=1.2
      * @param b b是一个常数，它的作用是规定L对评分的影响有多大

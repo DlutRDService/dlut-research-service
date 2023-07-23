@@ -1,7 +1,6 @@
 package com.example.academickg.controller;
 
 import com.example.academickg.common.Result;
-import com.example.academickg.mapper.PaperMapper;
 import com.example.academickg.service.impl.EmailCodeServiceImpl;
 import com.example.academickg.service.impl.UserInfoServiceImpl;
 import jakarta.annotation.Resource;
@@ -15,7 +14,7 @@ import com.example.academickg.exception.BusinessException;
 
 import java.io.IOException;
 
-import com.example.academickg.entity.constants.Constants;
+import com.example.academickg.entity.constants.EmailConstants;
 import com.example.academickg.utils.CreateImageCode;
 
 @RestController
@@ -106,9 +105,9 @@ public class AccountController {
         response.setContentType("image/jpeg");
         String code = vCode.getCode();
         if (type == null || type == 0){
-            session.setAttribute(Constants.CHECK_CODE_KEY, code);
+            session.setAttribute(EmailConstants.CHECK_CODE_KEY, code);
         } else {
-            session.setAttribute(Constants.CHECK_CODE_KEY_EMAIL, code);
+            session.setAttribute(EmailConstants.CHECK_CODE_KEY_EMAIL, code);
         }
         // System.out.println((String) session.getAttribute(Constants.CHECK_CODE_KEY));
         vCode.write(response.getOutputStream());
@@ -123,13 +122,13 @@ public class AccountController {
     @RequestMapping("/sendEmailCode")
     public Result sendEmailCode(HttpSession session, String email, String checkCode, Integer type){
         try {
-            if (!checkCode.equalsIgnoreCase((String) session.getAttribute(Constants.CHECK_CODE_KEY))){
+            if (!checkCode.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CHECK_CODE_KEY))){
                 throw new BusinessException("图片验证码不正确");
             }
             emailCodeService.sendEmailCode(email, type);
             return Result.success("验证码已发送", null);
         } finally {
-            session.removeAttribute(Constants.CHECK_CODE_KEY_EMAIL);
+            session.removeAttribute(EmailConstants.CHECK_CODE_KEY_EMAIL);
         }
     }
 

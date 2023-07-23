@@ -1,9 +1,10 @@
 package com.example.academickg.component;
 
 import com.example.academickg.entity.constants.MilvusConstants;
-import com.example.academickg.entity.dto.PaperSimilarityDto;
+import com.google.common.collect.Lists;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.grpc.DataType;
+import io.milvus.grpc.SearchResults;
 import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
 import io.milvus.param.R;
@@ -13,8 +14,6 @@ import io.milvus.param.collection.HasCollectionParam;
 import io.milvus.param.dml.SearchParam;
 import io.milvus.param.index.CreateIndexParam;
 import io.milvus.param.partition.CreatePartitionParam;
-import io.milvus.response.SearchResultsWrapper;
-import io.milvus.grpc.SearchResults;
 import jakarta.annotation.Resource;
 import io.milvus.param.RpcStatus;
 import io.milvus.grpc.GetIndexBuildProgressResponse;
@@ -23,35 +22,31 @@ import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import com.google.common.collect.Lists;
-
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
-public class Milvus {
-    private static final Logger logger = LoggerFactory.getLogger(Milvus.class);
+public class MilvusComponent {
+    private static final Logger logger = LoggerFactory.getLogger(MilvusComponent.class);
     @Resource
     private MilvusServiceClient milvusServiceClient;
-
     /**
      * 判断集合是否存在
      */
-    public Integer isCollection(String collectionName){
+    public Boolean isCollection(String collectionName){
         R<Boolean> response = milvusServiceClient.hasCollection(
                 HasCollectionParam.newBuilder()
                         .withCollectionName(collectionName)
                         .build());
-        return response.getStatus();
+        return response.toString() != null;
     }
-
     /**
      * 创建集合
      */
-    public void createCollection(){
+    public R<RpcStatus> createCollection(String collectionName){
+        if(isCollection(collectionName)) {
+            logger.error("该集合已经存在，请检查。");
+            return null;
+        }
         FieldType archiveId = FieldType.newBuilder()
                 .withName(MilvusConstants.Field.ARCHIVE_ID)
                 .withDescription("主键id")
@@ -66,22 +61,20 @@ public class Milvus {
                 .build();
         FieldType archiveFeature = FieldType.newBuilder()
                 .withName(MilvusConstants.Field.ARCHIVE_FEATURE)
-                .withDescription("档案特征值")
+                .withDescription("特征值")
                 .withDataType(DataType.FloatVector)
                 .withDimension(MilvusConstants.FEATURE_DIM)
                 .build();
         CreateCollectionParam createCollectionReq = CreateCollectionParam.newBuilder()
                 .withCollectionName(MilvusConstants.COLLECTION_NAME)
-                .withDescription("档案集合")
+                .withDescription("集合")
                 .withShardsNum(MilvusConstants.SHARDS_NUM)
                 .addFieldType(archiveId)
                 .addFieldType(orgId)
                 .addFieldType(archiveFeature)
                 .build();
-        R<RpcStatus> response = milvusServiceClient.createCollection(createCollectionReq);
+        return milvusServiceClient.createCollection(createCollectionReq);
     }
-
-    // 创建分区
 
 
     /**
@@ -118,10 +111,7 @@ public class Milvus {
     /**
      * 查询
      */
-    public PaperSimilarityDto paperSimilarity(double[] arcsoftFeature, Integer orgId, int num) {
-        List<Double> arrayList= Arrays.stream(arcsoftFeature).boxed().collect(Collectors.toList());
-        List<List<Double>> list = new ArrayList<>();
-        list.add(arrayList);
+    public R<SearchResults> query(List<?> list, Integer num, Integer orgId){
         SearchParam.Builder builder = SearchParam.newBuilder()
                 //集合名称
                 .withCollectionName(MilvusConstants.COLLECTION_NAME)
@@ -143,19 +133,10 @@ public class Milvus {
                     .withExpr(MilvusConstants.Field.ORG_ID + " == " + orgId)
                     .withPartitionNames(Lists.newArrayList(MilvusConstants.getPartitionName(orgId)));
         }
-        R<SearchResults> search = milvusServiceClient.search(builder.build());
-        if (search.getData() == null) return null;
-        SearchResultsWrapper wrapper = new SearchResultsWrapper(search.getData().getResults());
-        for (int i = 0; i < list.size(); ++i) {
-            List<SearchResultsWrapper.IDScore> scores = wrapper.getIDScore(i);
-            if (scores.size() > 0) {
-                System.err.println(scores);
-                SearchResultsWrapper.IDScore idScore = scores.get(0);
-                return new PaperSimilarityDto(idScore.getLongID(), idScore.getScore());
-            }
-        }
-        return null;
+        return milvusServiceClient.search(builder.build());
     }
+
+
 
 
 }

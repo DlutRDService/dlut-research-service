@@ -11,7 +11,6 @@ public class CodeGenerator {
     public static void main(String[] args) {
         generate();
     }
-
     private static void generate(){
         FastAutoGenerator.create("jdbc:mysql://localhost:3306/AcademicKG?serverTimezone=GMT%2b8&allowMultiQueries=true",
                         "zsl", "Lish145210@")
