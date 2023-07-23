@@ -1,7 +1,7 @@
 package com.example.academickg.service.impl;
 
 import com.example.academickg.common.Result;
-import com.example.academickg.entity.constants.Constants;
+import com.example.academickg.entity.constants.EmailConstants;
 import com.example.academickg.entity.dao.UserInfo;
 import com.example.academickg.mapper.EmailCodeMapper;
 import com.example.academickg.mapper.UserInfoMapper;
@@ -80,7 +80,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfo.setPassword(password);
         userInfo.setLastLoginTime(LocalDateTime.now());
         userInfo.setRegistrationTime(LocalDateTime.now());
-        userInfo.setStatus(Constants.STATUS);
+        userInfo.setStatus(EmailConstants.STATUS);
         userInfoMapper.insert(userInfo);
     }
 }

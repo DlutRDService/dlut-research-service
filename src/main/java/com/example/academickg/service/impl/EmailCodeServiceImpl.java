@@ -1,11 +1,9 @@
 package com.example.academickg.service.impl;
 
-import com.example.academickg.common.Result;
-import com.example.academickg.component.redis.RedisComponent;
-import com.example.academickg.entity.constants.Constants;
+import com.example.academickg.component.RedisComponent;
+import com.example.academickg.entity.constants.EmailConstants;
 import com.example.academickg.config.AppConfig;
 import com.example.academickg.entity.dao.EmailCode;
-import com.example.academickg.entity.dao.UserInfo;
 import com.example.academickg.entity.dto.SysSettingsDto;
 import com.example.academickg.exception.BusinessException;
 import com.example.academickg.mapper.EmailCodeMapper;
@@ -22,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.Objects;
+
 import com.example.academickg.utils.StringUtils;
 
 
@@ -57,7 +55,7 @@ public class EmailCodeServiceImpl extends ServiceImpl<EmailCodeMapper, EmailCode
 //                throw new BusinessException("邮箱已被占用");
 //            }
 //        }
-        String code = StringUtils.getRandomNumber(Constants.LENGTH_5);
+        String code = StringUtils.getRandomNumber(EmailConstants.LENGTH_5);
         //TODO 发送验证码
         sendEmailCode(email, code);
 
@@ -67,7 +65,7 @@ public class EmailCodeServiceImpl extends ServiceImpl<EmailCodeMapper, EmailCode
         EmailCode emailCode = new EmailCode();
         emailCode.setCode(code);
         emailCode.setEmail(email);
-        emailCode.setStatus(Constants.ZERO);
+        emailCode.setStatus(EmailConstants.ZERO);
         emailCode.setCreateTime(new Date());
         emailCodeMapper.insert(emailCode);
     }

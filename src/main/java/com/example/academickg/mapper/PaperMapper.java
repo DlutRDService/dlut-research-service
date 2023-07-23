@@ -14,7 +14,6 @@ import java.util.Map;
 
 
 public interface PaperMapper extends BaseMapper<Paper> {
-    List<Paper> selectall();
     //批量插入
     Boolean saveBatch(List<Paper> paperList);
     //按id批量查询
@@ -58,9 +57,11 @@ public interface PaperMapper extends BaseMapper<Paper> {
     // 通过条件更改
     @Override
     int update(Paper entity, Wrapper<Paper> updateWrapper);
-
-    //@Override
     List<Paper> pageQuery(Integer current, Integer size);
-
+    List<PaperDto> selectByYear(Integer Year);
+    List<PaperDto> selectByAuthor(String Author);
+    List<PaperDto> selectByWC(String WC);
+    List<PaperDto> selectByESI(String ESI);
+    List<PaperDto> selectByJournal(String Journal);
 
 }
