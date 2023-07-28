@@ -1,7 +1,6 @@
 package com.example.academickg.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.academickg.component.RedisComponent;
 import com.example.academickg.entity.constants.Regex;
 import com.example.academickg.entity.dao.Paper;
 import com.example.academickg.mapper.PaperMapper;
@@ -15,7 +14,7 @@ import com.example.academickg.entity.dto.PaperDto;
 import java.util.*;
 
 @Service
-public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements IPaperService {
+public class PaperServiceImpl implements IPaperService {
     @Resource
     private PaperMapper paperMapper;
 
@@ -54,53 +53,75 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
      *
      */
     public List<PaperDto> singleSetQueriesProcess(HashMap<String, Integer> hashMap) {
+        List<PaperDto> paperDto;
         Set<String> queryFields = hashMap.keySet();
         for (String field : queryFields) {
             // 将“AF = ”等格式统一为“AF=”
             field = field.replaceAll(" *= *", "=");
             // 去掉检索式中的()
             field = field.replaceAll(Regex.MATCH_BRACKET, "");
-            // 判断字段是否为主题检索，主题检索采用BM25算法实现
-            if (field.substring(0, 3).equalsIgnoreCase("ts=")) {
-                field = field.replace("ts=", "");
-                BM25 bm25 = new BM25(1.2, 0);
-                //bm25.similarity();
+            if (queryFields.size()==1){
+                paperDto = selectOneQueryField(field);
+                return paperDto;
             }
-            // 判断字段是否为期刊检索
-            if (field.substring(0, 3).equalsIgnoreCase("so=")) {
-                field = field.replace("so=", "").toUpperCase();
-                paperMapper.selectByJournal(field);
-            }
-            // 判断字段是否为作者检索
-            if (field.substring(0, 3).equalsIgnoreCase("au=")) {
-                field = field.replace("au=", "");
-                paperMapper.selectByAuthor(field);
-            }
-            // 判断字段是否为年份检索
-            if (field.substring(0, 3).equalsIgnoreCase("py=")) {
-                field = field.replace("py=", "");
-                paperMapper.selectByYear(Integer.valueOf(field));
-            }
-            // 判断字段是否为WC类别检索
-            if (field.substring(0, 3).equalsIgnoreCase("wc=")) {
-                field = field.replace("wc=", "");
-                paperMapper.selectByWC(field);
-            }
-            // 判断字段是否为ESI类别检索
-            if (field.substring(0, 4).equalsIgnoreCase("esi=")) {
-                field = field.replace("esi=", "");
-                paperMapper.selectByESI(field);
-            }
-            // 判断字段是否为
-
-            return null;
+//        paperDto = ;
         }
         return null;
     }
-    public List<PaperDto> multiSetQueriesProcess(){
+    public List<PaperDto> multiSetQueriesProcess(HashMap<Object, Object> hashMap){
+        return null;
+    }
+
+    @Override
+    public void putHashToRedis() {
 
     }
 
+    @Override
+    public HashMap<String, List<String>> queryFieldProcess(String queryField) {
+        return null;
+    }
 
+    @Override
+    public List<PaperDto> queryProcess(HashMap<String, List<String>> hashMap) {
+        return null;
+    }
 
+    public List<PaperDto> selectOneQueryField(String queryField){
+        // 判断字段是否为主题检索，主题检索采用BM25算法实现
+        if (queryField.substring(0, 3).equalsIgnoreCase("ts=")) {
+            queryField = queryField.replace("ts=", "");
+            BM25 bm25 = new BM25(1.2, 0);
+            //bm25.similarity();
+        }
+        // 判断字段是否为期刊检索
+        if (queryField.substring(0, 3).equalsIgnoreCase("so=")) {
+            queryField = queryField.replace("so=", "").toUpperCase();
+            return paperMapper.selectByJournal(queryField);
+        }
+        // 判断字段是否为作者检索
+        if (queryField.substring(0, 3).equalsIgnoreCase("au=")) {
+            queryField = queryField.replace("au=", "");
+            return paperMapper.selectByAuthor(queryField);
+        }
+        // 判断字段是否为年份检索
+        if (queryField.substring(0, 3).equalsIgnoreCase("py=")) {
+            queryField = queryField.replace("py=", "");
+            return paperMapper.selectByYear(Integer.valueOf(queryField));
+        }
+        // 判断字段是否为WC类别检索
+        if (queryField.substring(0, 3).equalsIgnoreCase("wc=")) {
+            queryField = queryField.replace("wc=", "");
+            return paperMapper.selectByWC(queryField);
+        }
+        // 判断字段是否为ESI类别检索
+        if (queryField.substring(0, 4).equalsIgnoreCase("esi=")) {
+            queryField = queryField.replace("esi=", "");
+            return paperMapper.selectByESI(queryField);
+        }
+        return null;
+    }
+//    public List<PaperDto> selectMultiQueryField(){
+//         paperMapper.selectMultiQuery();
+//    }
 }

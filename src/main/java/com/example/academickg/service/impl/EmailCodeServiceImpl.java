@@ -3,6 +3,7 @@ package com.example.academickg.service.impl;
 import com.example.academickg.component.RedisComponent;
 import com.example.academickg.entity.constants.EmailConstants;
 import com.example.academickg.config.AppConfig;
+import com.example.academickg.entity.constants.Regex;
 import com.example.academickg.entity.dao.EmailCode;
 import com.example.academickg.entity.dto.SysSettingsDto;
 import com.example.academickg.exception.BusinessException;
@@ -50,6 +51,9 @@ public class EmailCodeServiceImpl extends ServiceImpl<EmailCodeMapper, EmailCode
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void sendEmailCode(String email, Integer type) {
+        if (!email.matches(Regex.DLUT_MAIL)){
+            throw new BusinessException("请使用大工邮箱，或检查您所输入的邮箱信息");
+        }
 //        if (Objects.equals(type, Constants.ZERO)){
 //            if (null != userInfoMapper.selectByEmail(email)){
 //                throw new BusinessException("邮箱已被占用");

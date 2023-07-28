@@ -3,7 +3,6 @@ package com.example.academickg.utils;
 import org.apache.commons.lang3.RandomStringUtils;
 import com.example.academickg.entity.constants.Regex;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,11 +35,11 @@ public class StringUtils {
         Matcher matcher = pattern.matcher(s);
         int first;
         int end = 0;
-        if (matcher.groupCount() == 1) {
-            hashMap.put(matcher.group(), 1);
-            return hashMap;
-        }
         while (matcher.find()){
+            if (matcher.groupCount() == 2){
+                hashMap.put(matcher.group(),1);
+                return hashMap;
+            }
             first = s.indexOf(matcher.group());
             String subQuery = s.substring(end, first);
             end = s.lastIndexOf(matcher.group());

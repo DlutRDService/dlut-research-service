@@ -10,7 +10,7 @@ import com.example.academickg.entity.dao.Paper;
 import com.example.academickg.entity.dto.PaperDto;
 import com.example.academickg.mapper.PaperMapper;
 import com.example.academickg.service.impl.PaperServiceImpl;
-import com.example.academickg.utils.BM25;
+import com.example.academickg.utils.ScriptTriggerUtils;
 import com.example.academickg.utils.StringUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
@@ -37,33 +37,44 @@ public class PaperController {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-    /**
-     * 按照ID查询相关论文
-     */
-    @log
-    @GetMapping("/query")
-    public Result queryByIdList(@RequestParam("paperIds") List<Integer> idList){
-        Object data = null;
-        if (idList.size()!=0){
-            if (idList.size()!=1) {
-                data = paperService.queryPaperByIdList(idList);
-            }
-            if (idList.size()==1) {
-                data = paperService.queryPaperById(idList.get(0));
-            }
-        }else {
-            return Result.paramError("Error empty character",null);
+//    /**
+//     * 按照ID查询相关论文
+//     */
+//    @log
+//    @GetMapping("/query")
+//    public Result queryByIdList(@RequestParam("paperIds") List<Integer> idList){
+//        Object data = null;
+//        if (idList.size()!=0){
+//            if (idList.size()!=1) {
+//                data = paperService.queryPaperByIdList(idList);
+//            }
+//            if (idList.size()==1) {
+//                data = paperService.queryPaperById(idList.get(0));
+//            }
+//        }else {
+//            return Result.paramError("Error empty character",null);
+//        }
+//        return Result.success(null, data);
+//    }
+    @GetMapping("test")
+    public Result test(){
+        List<String> Titles = paperMapper.selectAll();
+        int num = 0;
+        for (String title : Titles) {
+            System.out.println(num);
+            ScriptTriggerUtils.execute("importMilvus.py", title, String.valueOf(num));
+            num++;
         }
-        return Result.success(null, data);
+        return Result.success("", null);
     }
-
     /**
-     * 主题匹配查询，使用BM25算法
+     * 高级检索
      * @param queryField 检索字段
      */
     @log
-    @GetMapping("/advanced-search?queryField=")
+    @GetMapping("/advanced-search")
     public Result searchByKeywords(@RequestParam String queryField){
+        //current = (current-1) * pageSize;
         try {
             // 字符串转化为小写
             queryField = queryField.toLowerCase();
@@ -85,12 +96,12 @@ public class PaperController {
                     "and Boolean operators (AND, OR, NOT) are used properly.", null);
         }
         // 检查索引式是否符合要求,例如“AF=”或者“ AF=”，索引字段前不允许含有字母与数字
-        if (! queryField.contains(Regex.FORMAT_QUERY)){
+        if (! queryField.matches(Regex.FORMAT_QUERY)){
             return Result.paramError("Check your query to make sure search terms, parentheses, " +
                     "and Boolean operators (AND, OR, NOT) are used properly.", null);
         }
         //判断是否正确使用布尔操作符，检查不正确使用布尔操作符的情况
-        if (queryField.contains(Regex.FALSE_BOOLEAN_FORMAT)){
+        if (queryField.matches(Regex.FALSE_BOOLEAN_FORMAT)){
             return Result.paramError("Check your query to make sure search terms, parentheses, " +
                     "and Boolean operators (AND, OR, NOT) are used properly.", null);
         }
@@ -98,21 +109,13 @@ public class PaperController {
         if (map == null){
             HashMap<Object, Object> map1 = paperService.multiSetQueryFieldProcess(queryField);
             List<PaperDto> paperDtoList = paperService.multiSetQueriesProcess(map1);
+            return Result.success("", paperDtoList);
         }else {
             List<PaperDto> paperDtoList = paperService.singleSetQueriesProcess(map);
+            return Result.success("", paperDtoList);
         }
-
-
-        return Result.success("", paperDtoList);
     }
 
-
-    //实现分页查询
-    @GetMapping("/pageQuery")
-    public List<Paper> findPage(@RequestParam Integer current, @RequestParam Integer pageSize){
-        current = (current-1) * pageSize;
-        return paperMapper.pageQuery(current, pageSize);
-    }
     // 导出
     @RequestMapping(value = "/export", method = RequestMethod.POST)
     public void exportPaperRecords(@RequestBody  String ids, HttpServletResponse response) throws Exception{
@@ -121,9 +124,8 @@ public class PaperController {
         ExcelWriter writer = ExcelUtil.getWriter(true);
         writer.write(list, true);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-        String fileName = URLEncoder.encode("论文信息", StandardCharsets.UTF_8);
+        String fileName = URLEncoder.encode("Papers", StandardCharsets.UTF_8);
         response.setHeader("Content-Disposition","attachment;filename=" + fileName + ".xlsx");
-
         ServletOutputStream outputStream = response.getOutputStream();
         writer.flush(outputStream, true);
         outputStream.close();
@@ -135,7 +137,8 @@ public class PaperController {
         InputStream inputStream = file.getInputStream();
         ExcelReader reader = ExcelUtil.getReader(inputStream);
         List<Paper> list = reader.read(0,1, Paper.class);
-        return paperService.saveOrUpdateBatch(list);
+        // return paperService.saveOrUpdateBatch(list);
+        return null;
     }
 
     /**

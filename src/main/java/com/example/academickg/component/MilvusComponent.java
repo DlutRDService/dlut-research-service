@@ -21,10 +21,12 @@ import io.milvus.param.index.GetIndexBuildProgressParam;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Data
+@Component("milvusComponent")
 public class MilvusComponent {
     private static final Logger logger = LoggerFactory.getLogger(MilvusComponent.class);
     @Resource
@@ -135,8 +137,4 @@ public class MilvusComponent {
         }
         return milvusServiceClient.search(builder.build());
     }
-
-
-
-
 }

@@ -64,4 +64,7 @@ public interface PaperMapper extends BaseMapper<Paper> {
     List<PaperDto> selectByESI(String ESI);
     List<PaperDto> selectByJournal(String Journal);
 
+    void selectMultiQuery(List<String> union, List<String> intersection, List<String> differenceSet);
+
+    List<String> selectAll();
 }

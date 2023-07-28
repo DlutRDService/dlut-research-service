@@ -110,7 +110,9 @@
     <select id="selectByKeyword" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
         select * from Paper where Year= #{Year}
     </select>
-
+    <select id="selectAll" resultType="java.lang.String">
+        select Title from Paper where id > 307
+    </select>
 
 
 </mapper>

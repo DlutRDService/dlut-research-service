@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MilvusConfig {
     @Value("${milvus.host}")
-    private String host;  //milvus所在服务器地址   、
+    private String host;  //milvus所在服务器地址
     @Value("${milvus.port}")
     private Integer port;  //milvus端口
     @Bean

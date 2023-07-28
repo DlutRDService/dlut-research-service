@@ -1,10 +1,13 @@
 package com.example.academickg.entity.constants;
 
 public class Regex {
+    //大工邮箱
+    public static final String DLUT_MAIL = ".*(@mail.dlut.edu.cn|@dlut.edu.cn)$";
     // 纯数字
     public static final String DIGIT_REGEX = "[0-9]+";
     // 含有数字
     public static final String CONTAIN_DIGIT_REGEX = ".*[0-9].*";
+    public static final String CONTAIN_LETTER_REGEX = ".*[0-9a-zA-Z].*";
     // 纯字母
     public static final String LETTER_REGEX = "[a-zA-Z]+";
     // 纯中文
@@ -31,8 +34,7 @@ public class Regex {
     public static final String NOT_MATCH = "(not)";
     public static final String OR_MATCH = "(or)";
     public static final String AND_MATCH_WITH_BRACKET = "and +[a-z]{2}=";
-    public static final String OR_MATCH = "or +[a-z]{2}=";
     public static final String OR_MATCHWITH_BRACKET = "or +[a-z]{2}=";
-    public static final String NOT_MATCH = "not +[a-z]{2}=";
     public static final String NOT_MATCHWITH_BRACKET = "not +[a-z]{2}=";
+
 }

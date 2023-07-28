@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
  * @since 2023-07-12
  */
 @Service
-public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements IUserInfoService {
+public class UserInfoServiceImpl implements IUserInfoService {
     private static final Logger logger = LoggerFactory.getLogger(UserInfoServiceImpl.class);
     @Resource
     private UserInfoMapper userInfoMapper;
@@ -54,6 +54,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
         return Result.permissionsError("密码修改失败", null);
     }
+
+    @Override
+    public Result insert(Integer account, String password, String email) {
+        return null;
+    }
+
     public Result verify(Integer account, String email, String checkCode){
         if (userInfoMapper.selectByAccount(account) == 1){
             return Result.paramError("账户已存在，请勿重复注册，若忘记密码，可用邮箱进行找回", null);
