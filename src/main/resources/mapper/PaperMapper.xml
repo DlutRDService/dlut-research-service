@@ -5,14 +5,6 @@
     <select id="pageQuery" resultType="com.example.academickg.entity.dao.Paper">
         select * from Paper limit #{current}, #{size}
     </select>
-<!--    按照id查询  -->
-    <select id="selectListByIds" resultType="com.example.academickg.entity.dao.Paper">
-        select * from Paper 
-        where id in
-        <foreach collection="list" open="(" close=")" item="id" separator="," >
-            #{id}
-        </foreach>
-    </select>
 <!--  插入新纪录   -->
     <insert id="saveBatch" parameterType="java.util.List">
         insert into Paper(id,Title,WC,Journal,ESI,Year) values
@@ -50,6 +42,14 @@
     <!-- 按照ID查询Paper全部内容  -->
     <select id="selectPaperById" resultMap="paperMap">
         select * from Paper where id = #{id}
+    </select>
+    <!--  按照id列表查询paper的全部内容  -->
+    <select id="selectPaperByIds" resultMap="paperMap">
+        select * from Paper
+        where id in
+        <foreach collection="list" open="(" close=")" item="id" separator="," >
+            #{id}
+        </foreach>
     </select>
     <!-- 查询Paper的Authors内容  -->
     <select id="selectAuthorsById" resultMap="authorMap">
@@ -110,8 +110,11 @@
     <select id="selectByKeyword" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
         select * from Paper where Year= #{Year}
     </select>
-    <select id="selectAll" resultType="java.lang.String">
-        select Title from Paper where id > 307
+    <select id="selectTitleAndId" resultType="hashmap">
+        select id,Title from Paper
+    </select>
+    <select id="selectMultiQuery">
+
     </select>
 
 

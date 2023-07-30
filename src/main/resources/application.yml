@@ -1,5 +1,5 @@
 server:
-  port:8080
+  port: 8080
 spring:
   # 数据库配置
   datasource:
@@ -27,4 +27,4 @@ mybatis-plus:
 
 milvus:
   host: localhost
-  port: 2379
+  port: 19530

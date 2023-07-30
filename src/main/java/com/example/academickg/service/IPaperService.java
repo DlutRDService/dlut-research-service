@@ -9,7 +9,6 @@ import java.util.List;
 
 
 public interface IPaperService{
-    void putHashToRedis();
     HashMap<String, List<String>> queryFieldProcess(String queryField);
     List<PaperDto> queryProcess(HashMap<String, List<String>> hashMap);
 }

@@ -1,8 +1,6 @@
 package com.example.academickg.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.academickg.entity.constants.Regex;
-import com.example.academickg.entity.dao.Paper;
+import com.example.academickg.constants.Regex;
 import com.example.academickg.mapper.PaperMapper;
 import com.example.academickg.service.IPaperService;
 import com.example.academickg.utils.BM25;
@@ -18,8 +16,24 @@ public class PaperServiceImpl implements IPaperService {
     @Resource
     private PaperMapper paperMapper;
 
+    public PaperDto selectPapersById(Integer id){
+        return paperMapper.selectPaperById(id);
+    }
     /**
-     * 传入检索式字段，已经过格式检查
+     * 按照id列表返回论文信息
+     */
+    public List<PaperDto> selectPapersByIdList(List<Integer> idList){
+        return paperMapper.selectPaperByIdList(idList);
+    }
+
+    /**
+     * 查询论文标题
+     */
+    public HashMap<Integer, String> selectTitleAndId(){
+        return paperMapper.selectTitleAndId();
+    }
+    /**
+     * 传入已经过格式检查的检索式字段
      * @param queryField 索引字符串
      * @return 处理结果
      */
@@ -72,10 +86,6 @@ public class PaperServiceImpl implements IPaperService {
         return null;
     }
 
-    @Override
-    public void putHashToRedis() {
-
-    }
 
     @Override
     public HashMap<String, List<String>> queryFieldProcess(String queryField) {
@@ -88,7 +98,7 @@ public class PaperServiceImpl implements IPaperService {
     }
 
     public List<PaperDto> selectOneQueryField(String queryField){
-        // 判断字段是否为主题检索，主题检索采用BM25算法实现
+        // 判断字段是否为主题检索，主题检索推荐算法实现。
         if (queryField.substring(0, 3).equalsIgnoreCase("ts=")) {
             queryField = queryField.replace("ts=", "");
             BM25 bm25 = new BM25(1.2, 0);
@@ -121,7 +131,4 @@ public class PaperServiceImpl implements IPaperService {
         }
         return null;
     }
-//    public List<PaperDto> selectMultiQueryField(){
-//         paperMapper.selectMultiQuery();
-//    }
 }

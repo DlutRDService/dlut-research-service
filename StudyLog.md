@@ -449,3 +449,25 @@ docker-compose ps
 # 查看监视接口
 docker port milvus-standalone 19530/tcp
 ```
+
+# 7.28学习记录
+## Redis学习
+ * Redis的List删除命令：
+　　 lrem : lrem mylist 0 "value"    //从mylist中删除全部等值value的元素   0为全部，负值为从尾部开始。
+　　 ltrim: ltrim mylist 1 -1     //保留mylist中 1到末尾的值，即删除第一个值。
+　　 lpop: lpop mylist
+　　 rpop: rpop mylist
+    如果想要删除指定index的值：
+　   lset mylist index "del"
+　   lrem mylist 0 "del"
+# 7.30学习记录
+note：今天很多的问题来自与依赖注入，对Spring各个注解不是很明白
+配置类那个问题解决了，@Component注解改成了@Service莫名其妙。。。(挖个坑留意下)
+@Configuration与@Bean 在Springboot中倒是直接注入了不再需要ApplicationContext进行上下文注入
+## Redis学习
+ * python中，Redis的时间设置采用ex参数,直接在set方法中使用即可。
+## SpringBoot注解
+## 项目操作
+note：很多网页的知识还要在多了解，前端多少还是要了解点的，不然还是挺难的。
+解决了推荐问题，猛地一想多条件查询直接字符拼接算了。
+

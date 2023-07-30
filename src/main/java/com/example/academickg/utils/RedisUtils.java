@@ -28,6 +28,11 @@ public class RedisUtils<V> {
         HashOperations<String, Object, Object> hashOps = redisTemplate.opsForHash();
         return redis_key == null ? null : hashOps.multiGet(redis_key, Collections.singleton(hashKeys));
     }
+    public List<Float> getHashValue(String redis_key, String hashKey){
+        HashOperations<String ,String, List<Float>> hashOps = redisTemplate.opsForHash();
+        return redis_key == null ? null : hashOps.get(redis_key, hashKey);
+    }
+
     public boolean set(String redis_key, V value){
         try{
             redisTemplate.opsForValue().set(redis_key, value);

@@ -1,12 +1,11 @@
 package com.example.academickg.service.impl;
 
 import com.example.academickg.common.Result;
-import com.example.academickg.entity.constants.EmailConstants;
+import com.example.academickg.constants.EmailConstants;
 import com.example.academickg.entity.dao.UserInfo;
 import com.example.academickg.mapper.EmailCodeMapper;
 import com.example.academickg.mapper.UserInfoMapper;
 import com.example.academickg.service.IUserInfoService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -15,14 +15,6 @@ from sentenceVector import sentenceVector
 
 connections.connect(host="localhost", port="19530")
 collection = Collection("PaperMilvus")
-print(collection.is_empty)
-print(collection.primary_field)
-index = {
-    "index_type": "IVF_FLAT",
-    "metric_type": "L2",
-    "params": {"nlist": 128},
-}
-collection.create_index("paper_intro", index)
 collection.load()
 res = collection.query(
     expr = "paper_id == 307",
@@ -35,4 +27,5 @@ print(sorted_res)
 # expr = "paper_id in [0,1,2]"
 # collection.delete(expr)
 connections.disconnect("PaperMilvus")
+
 

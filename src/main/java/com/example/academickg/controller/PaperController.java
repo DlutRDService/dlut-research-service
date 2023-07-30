@@ -4,18 +4,24 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.example.academickg.common.Result;
-import com.example.academickg.entity.constants.Regex;
+import com.example.academickg.constants.RedisKey;
+import com.example.academickg.constants.Regex;
 import com.example.academickg.entity.dao.Paper;
 import com.example.academickg.entity.dto.PaperDto;
-import com.example.academickg.mapper.PaperMapper;
+import com.example.academickg.service.impl.MilvusServiceImpl;
 import com.example.academickg.service.impl.PaperServiceImpl;
+import com.example.academickg.utils.RedisUtils;
 import com.example.academickg.utils.ScriptTriggerUtils;
 import com.example.academickg.utils.StringUtils;
+import io.milvus.grpc.SearchResults;
+import io.milvus.param.R;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import com.example.academickg.annotation.log;
+import jnr.ffi.annotations.In;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,48 +29,30 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
 @RestController
 @RequestMapping("/paper")
 public class PaperController {
     @Resource
-    private PaperMapper paperMapper;
-    @Resource
     private PaperServiceImpl paperService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private MilvusServiceImpl milvusService;
 
-//    /**
-//     * 按照ID查询相关论文
-//     */
-//    @log
-//    @GetMapping("/query")
-//    public Result queryByIdList(@RequestParam("paperIds") List<Integer> idList){
-//        Object data = null;
-//        if (idList.size()!=0){
-//            if (idList.size()!=1) {
-//                data = paperService.queryPaperByIdList(idList);
-//            }
-//            if (idList.size()==1) {
-//                data = paperService.queryPaperById(idList.get(0));
-//            }
-//        }else {
-//            return Result.paramError("Error empty character",null);
-//        }
-//        return Result.success(null, data);
-//    }
+
+    @GetMapping("updateVector")
+    public Result updateVector(){
+        HashMap<Integer, String> hashMap = paperService.selectTitleAndId();
+        for (Integer key: hashMap.keySet()) {
+            ScriptTriggerUtils.execute("importMilvus.py", hashMap.get(key), String.valueOf(key));
+        }
+        return Result.success("向量导入完毕", null);
+    }
     @GetMapping("test")
     public Result test(){
-        List<String> Titles = paperMapper.selectAll();
-        int num = 0;
-        for (String title : Titles) {
-            System.out.println(num);
-            ScriptTriggerUtils.execute("importMilvus.py", title, String.valueOf(num));
-            num++;
-        }
         return Result.success("", null);
     }
     /**
@@ -115,12 +103,24 @@ public class PaperController {
             return Result.success("", paperDtoList);
         }
     }
+    @GetMapping("full-record/{id}")
+    public Result paperInformation(@PathVariable Integer id){
+        ArrayList<Integer> idList = new ArrayList<>();
+        idList.add(id);
+        RedisUtils<List<Float>> redisUtils = new RedisUtils<>();
+        List<Float> vector = redisUtils.getHashValue(RedisKey.REDIS_KEY_TEMP_PAPER_VECTOR, String.valueOf(id));
+        R<SearchResults> result = milvusService.query(vector, 3);
+        List<Long> resultIds = result.getData().getResults().getIds().getIntId().getDataList();
+        List<Integer> resultIdList = JSONArray.parseArray(resultIds.toString(), Integer.class);
+        idList.addAll(resultIdList);
+        return Result.success("", paperService.selectPapersByIdList(idList));
+    }
 
     // 导出
     @RequestMapping(value = "/export", method = RequestMethod.POST)
     public void exportPaperRecords(@RequestBody  String ids, HttpServletResponse response) throws Exception{
         List<Integer> idList = JSON.parseArray(JSON.parseObject(ids).getString("ids"), Integer.class);
-        List<Paper> list = paperMapper.selectListByIds(idList);
+        List<PaperDto> list = paperService.selectPapersByIdList(idList);
         ExcelWriter writer = ExcelUtil.getWriter(true);
         writer.write(list, true);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
@@ -141,13 +141,19 @@ public class PaperController {
         return null;
     }
 
-    /**
-     * 删除缓存
-     */
-    public Result flushRedis(String key){
-        stringRedisTemplate.delete(key);
-        return Result.success(null, null);
+    public Result recommendation(String ts){
+        ScriptTriggerUtils.execute("vectorAndImportRedis.py", ts);
+        List<Float> queryVector = null;
+        // 获取该向量值
+        List<String> value = stringRedisTemplate.opsForList().range(RedisKey.REDIS_KEY_TEMP_QUERY_VECTOR, 0, -1);
+        if(value != null){
+            queryVector = StringUtils.toFLoatList(value);
+        }
+        R<SearchResults> result = milvusService.query(queryVector, 100);
+        List<Long> ids = result.getData().getResults().getIds().getIntId().getDataList();
+        List<Integer> idList = JSONArray.parseArray(ids.toString(), Integer.class);
+        List<PaperDto> paperDtos = paperService.selectPapersByIdList(idList);
+        return Result.success("", paperDtos);
     }
-
 
 }

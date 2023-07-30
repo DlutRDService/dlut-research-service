@@ -2,22 +2,23 @@ package com.example.academickg.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.academickg.entity.dto.PaperDto;
 import com.example.academickg.entity.dao.Paper;
 import org.apache.ibatis.annotations.MapKey;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Handler;
 
 
 public interface PaperMapper extends BaseMapper<Paper> {
     //批量插入
     Boolean saveBatch(List<Paper> paperList);
     //按id批量查询
-    List<Paper> selectListByIds(List<Integer> idList);
+    List<PaperDto> selectPaperByIds(List<Integer> idList);
 
     PaperDto selectPaperById(Integer id);
 
@@ -66,5 +67,5 @@ public interface PaperMapper extends BaseMapper<Paper> {
 
     void selectMultiQuery(List<String> union, List<String> intersection, List<String> differenceSet);
 
-    List<String> selectAll();
+    HashMap<Integer, String> selectTitleAndId();
 }

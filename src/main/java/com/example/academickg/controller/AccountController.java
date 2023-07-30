@@ -14,7 +14,7 @@ import com.example.academickg.exception.BusinessException;
 
 import java.io.IOException;
 
-import com.example.academickg.entity.constants.EmailConstants;
+import com.example.academickg.constants.EmailConstants;
 import com.example.academickg.utils.CreateImageCode;
 
 @RestController

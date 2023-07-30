@@ -1,9 +1,9 @@
 package com.example.academickg.service.impl;
 
 import com.example.academickg.component.RedisComponent;
-import com.example.academickg.entity.constants.EmailConstants;
+import com.example.academickg.constants.EmailConstants;
 import com.example.academickg.config.AppConfig;
-import com.example.academickg.entity.constants.Regex;
+import com.example.academickg.constants.Regex;
 import com.example.academickg.entity.dao.EmailCode;
 import com.example.academickg.entity.dto.SysSettingsDto;
 import com.example.academickg.exception.BusinessException;
@@ -35,10 +35,8 @@ import com.example.academickg.utils.StringUtils;
  * @since 2023-07-12
  */
 @Service
-public class EmailCodeServiceImpl extends ServiceImpl<EmailCodeMapper, EmailCode> implements IEmailCodeService {
+public class EmailCodeServiceImpl implements IEmailCodeService {
     private static final Logger logger = LoggerFactory.getLogger(EmailCodeServiceImpl.class);
-    @Resource
-    private UserInfoMapper userInfoMapper;
     @Resource
     private EmailCodeMapper emailCodeMapper;
     @Resource
@@ -97,6 +95,5 @@ public class EmailCodeServiceImpl extends ServiceImpl<EmailCodeMapper, EmailCode
             logger.error("邮件发送失败", e);
             throw new BusinessException("邮件发送失败");
         }
-
     }
 }

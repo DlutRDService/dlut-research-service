@@ -1,9 +1,11 @@
 package com.example.academickg.utils;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import com.example.academickg.entity.constants.Regex;
+import com.example.academickg.constants.Regex;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,5 +62,19 @@ public class StringUtils {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(s);
         return matcher.group();
+    }
+
+    public static List<Float> toFLoatList(List<String> stringList){
+        List<Float> floats = new ArrayList<>(stringList.size());
+        for (String s : stringList) {
+            if (s!=null){
+                floats.add(toFloat(s));
+            }
+        }
+        return floats;
+    }
+
+    public static Float toFloat(String s){
+        return Float.parseFloat(s);
     }
 }
