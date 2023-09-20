@@ -1,16 +1,14 @@
 package com.example.academickg.service.impl;
 
 import com.example.academickg.component.RedisComponent;
-import com.example.academickg.constants.EmailConstants;
+import com.example.academickg.entity.constants.EmailConstants;
 import com.example.academickg.config.AppConfig;
-import com.example.academickg.constants.Regex;
+import com.example.academickg.entity.constants.Regex;
 import com.example.academickg.entity.dao.EmailCode;
 import com.example.academickg.entity.dto.SysSettingsDto;
 import com.example.academickg.exception.BusinessException;
 import com.example.academickg.mapper.EmailCodeMapper;
-import com.example.academickg.mapper.UserInfoMapper;
 import com.example.academickg.service.IEmailCodeService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;

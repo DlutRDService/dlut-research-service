@@ -1,6 +1,6 @@
 package com.example.academickg.service.impl;
 
-import com.example.academickg.constants.Regex;
+import com.example.academickg.entity.constants.Regex;
 import com.example.academickg.mapper.PaperMapper;
 import com.example.academickg.service.IPaperService;
 import com.example.academickg.utils.BM25;

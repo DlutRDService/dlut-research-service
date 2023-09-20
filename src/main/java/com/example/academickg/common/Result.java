@@ -3,7 +3,7 @@ package com.example.academickg.common;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import com.example.academickg.constants.StatusCode;
+import com.example.academickg.entity.constants.StatusCode;
 import org.springframework.stereotype.Component;
 
 /**

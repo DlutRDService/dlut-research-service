@@ -1,6 +1,6 @@
 package com.example.academickg.service.impl;
 
-import com.example.academickg.constants.MilvusConstants;
+import com.example.academickg.entity.constants.MilvusConstants;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.grpc.DataType;

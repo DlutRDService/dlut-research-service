@@ -7,5 +7,4 @@ public class authorDto {
     private String name;
     private String country;
     private String organization;
-
 }
