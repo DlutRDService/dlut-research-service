@@ -6,8 +6,8 @@ import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.example.academickg.common.Result;
-import com.example.academickg.constants.RedisKey;
-import com.example.academickg.constants.Regex;
+import com.example.academickg.entity.constants.RedisKey;
+import com.example.academickg.entity.constants.Regex;
 import com.example.academickg.entity.dao.Paper;
 import com.example.academickg.entity.dto.PaperDto;
 import com.example.academickg.service.impl.MilvusServiceImpl;
@@ -21,7 +21,6 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import com.example.academickg.annotation.log;
-import jnr.ffi.annotations.In;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +40,6 @@ public class PaperController {
     private StringRedisTemplate stringRedisTemplate;
     @Resource
     private MilvusServiceImpl milvusService;
-
 
     @GetMapping("updateVector")
     public Result updateVector(){

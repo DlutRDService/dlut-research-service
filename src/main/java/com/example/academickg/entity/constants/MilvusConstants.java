@@ -1,4 +1,4 @@
-package com.example.academickg.constants;
+package com.example.academickg.entity.constants;
 
 public class MilvusConstants {
     /**

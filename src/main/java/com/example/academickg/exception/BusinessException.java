@@ -49,9 +49,6 @@ public class BusinessException extends RuntimeException {
         this.throwable = throwable;
     }
 
-//    public BusinessException(Result result){
-//        this(result.getStatusCode(), result.getData(), null);
-//    }
 
 }
 

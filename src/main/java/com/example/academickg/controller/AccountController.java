@@ -6,15 +6,12 @@ import com.example.academickg.service.impl.UserInfoServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.example.academickg.exception.BusinessException;
 
 import java.io.IOException;
 
-import com.example.academickg.constants.EmailConstants;
+import com.example.academickg.entity.constants.EmailConstants;
 import com.example.academickg.utils.CreateImageCode;
 
 @RestController
@@ -43,12 +40,10 @@ public class AccountController {
      * @param email 注册邮箱
      * @param checkCode 注册验证码
      */
-    @RequestMapping("registration")
+    @PostMapping("registration")
     public Result registration(HttpSession session, Integer account, String email, String checkCode){
         result = userInfoService.verify(account, email, checkCode);
-        if (result.getData() == null){
-            return result;
-        }
+        if (result.getData() == null) return result;
         session.setAttribute("account", account);
         session.setAttribute("email", email);
         return result;
@@ -60,7 +55,7 @@ public class AccountController {
      * @param email 邮箱
      * @param checkCode 验证码
      */
-    @RequestMapping("verify")
+    @PostMapping("verify")
     public Result changePassword(HttpSession session, Integer account, String email, String checkCode){
         result = userInfoService.verify(account, email, checkCode);
         if (result.getData() == null){
@@ -75,7 +70,7 @@ public class AccountController {
      * 设置密码，密码设置成功后修改或导入数据库
      * @param password 密码
      */
-    @RequestMapping("setPassword")
+    @PostMapping("setPassword")
     public Result setPassword(HttpSession session, String password){
         result = userInfoService.changePassword(
                 (Integer) session.getAttribute("account"),
@@ -95,7 +90,7 @@ public class AccountController {
      * 生成验证码
      * @param type 0:登陆用验证码 1:邮箱发送用验证码
      */
-    @RequestMapping("getCaptcha")
+    @PostMapping("getCaptcha")
     public void getCaptcha(HttpServletResponse response, HttpSession session, Integer type) throws
             IOException {
         CreateImageCode vCode = new CreateImageCode(130,38,5,10);
@@ -119,7 +114,7 @@ public class AccountController {
      * @param checkCode 验证码
      * @param type 0：登陆用验证码 1：邮箱验证码
      */
-    @RequestMapping("/sendEmailCode")
+    @PostMapping("/sendEmailCode")
     public Result sendEmailCode(HttpSession session, String email, String checkCode, Integer type){
         try {
             if (!checkCode.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CHECK_CODE_KEY))){

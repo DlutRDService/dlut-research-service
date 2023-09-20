@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author zsl
  * @since 2023-06-03
  */
-public interface IKeywordsService extends IService<Keywords> {
+public interface IKeywordsService{
 
 }

@@ -1,7 +1,7 @@
 package com.example.academickg.utils;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import com.example.academickg.constants.Regex;
+import com.example.academickg.entity.constants.Regex;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +17,6 @@ public class StringUtils {
     public static String getRandomNumber(Integer count){
         return RandomStringUtils.random(count, false, true);
     }
-
     public Boolean containNumOrChar(String s){
         return s.matches(Regex.CONTAIN_LETTER_REGEX) || s.contains(Regex.CONTAIN_DIGIT_REGEX);
     }
