@@ -9,6 +9,8 @@ import com.example.academickg.common.Result;
 import com.example.academickg.constants.RedisKey;
 import com.example.academickg.constants.Regex;
 import com.example.academickg.constants.StatusCode;
+import com.example.academickg.entity.constants.RedisKey;
+import com.example.academickg.entity.constants.Regex;
 import com.example.academickg.entity.dao.Paper;
 import com.example.academickg.entity.dto.PaperDto;
 import com.example.academickg.service.impl.MilvusServiceImpl;

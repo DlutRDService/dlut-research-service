@@ -3,13 +3,13 @@ package com.example.academickg.service.impl;
 import com.example.academickg.common.Result;
 import com.example.academickg.constants.EmailConstants;
 import com.example.academickg.constants.StatusCode;
+import com.example.academickg.entity.constants.EmailConstants;
 import com.example.academickg.entity.dao.UserInfo;
 import com.example.academickg.mapper.EmailCodeMapper;
 import com.example.academickg.mapper.UserInfoMapper;
 import com.example.academickg.service.IUserInfoService;
 import jakarta.annotation.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,8 +23,8 @@ import java.time.LocalDateTime;
  * @since 2023-07-12
  */
 @Service
+@Slf4j
 public class UserInfoServiceImpl implements IUserInfoService {
-    private static final Logger logger = LoggerFactory.getLogger(UserInfoServiceImpl.class);
     @Resource
     private UserInfoMapper userInfoMapper;
     @Resource
