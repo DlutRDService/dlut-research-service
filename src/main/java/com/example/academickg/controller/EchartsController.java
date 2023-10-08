@@ -1,14 +1,12 @@
 package com.example.academickg.controller;
 
-import cn.hutool.core.collection.CollUtil;
 import com.example.academickg.common.Result;
+import com.example.academickg.constants.StatusCode;
 import com.example.academickg.mapper.PaperMapper;
-import io.swagger.models.auth.In;
 import jakarta.annotation.Resource;
 
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
@@ -20,7 +18,7 @@ public class EchartsController {
     @GetMapping("/paperNumByYears")
     public Result get(@RequestBody List<Integer> idList){
         List<Map<Object, Object>> yearList = paperMapper.selectYearList(idList);
-        return Result.success(null, yearList);
+        return new Result(StatusCode.STATUS_CODE_200, null, yearList);
     }
 
 

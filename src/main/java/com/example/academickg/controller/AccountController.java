@@ -1,6 +1,9 @@
 package com.example.academickg.controller;
 
+import com.example.academickg.annotation.GlobalInterceptor;
+import com.example.academickg.annotation.VerifyParams;
 import com.example.academickg.common.Result;
+import com.example.academickg.constants.StatusCode;
 import com.example.academickg.service.impl.EmailCodeServiceImpl;
 import com.example.academickg.service.impl.UserInfoServiceImpl;
 import jakarta.annotation.Resource;
@@ -18,7 +21,7 @@ import com.example.academickg.constants.EmailConstants;
 import com.example.academickg.utils.CreateImageCode;
 
 @RestController
-@RequestMapping("userInfo")
+@RequestMapping("login")
 public class AccountController {
 
     @Resource
@@ -30,7 +33,8 @@ public class AccountController {
     /**
      * 登陆，使用账号验证码或账号密码。
      */
-    @PostMapping("login")
+    @GlobalInterceptor
+    @PostMapping("sign-in")
     public Result login(HttpSession session, @RequestParam Integer account, @RequestParam String password) {
         session.setAttribute("account", account);
         session.setAttribute("password", password);
@@ -43,7 +47,8 @@ public class AccountController {
      * @param email 注册邮箱
      * @param checkCode 注册验证码
      */
-    @RequestMapping("registration")
+    @GlobalInterceptor
+    @RequestMapping("sign-up")
     public Result registration(HttpSession session, Integer account, String email, String checkCode){
         result = userInfoService.verify(account, email, checkCode);
         if (result.getData() == null){
@@ -53,7 +58,6 @@ public class AccountController {
         session.setAttribute("email", email);
         return result;
     }
-
     /**
      * 身份验证，用于修改密码时验证用户。(逻辑跟注册一样，可删除)
      * @param account 账号
@@ -86,7 +90,7 @@ public class AccountController {
             userInfoService.inputUserInfo((Integer) session.getAttribute("account"),
                     password,
                     (String) session.getAttribute("email"));
-            return Result.success("密码设置成功", null);
+            return new Result(StatusCode.STATUS_CODE_200, "密码设置成功", null);
         }
         session.setAttribute("password", password);
         return result;
@@ -112,21 +116,21 @@ public class AccountController {
         // System.out.println((String) session.getAttribute(Constants.CHECK_CODE_KEY));
         vCode.write(response.getOutputStream());
     }
-
     /**
      * 发送邮件验证码
      * @param email 目标邮箱
      * @param checkCode 验证码
      * @param type 0：登陆用验证码 1：邮箱验证码
      */
+    @GlobalInterceptor(checkParams = true)
     @RequestMapping("/sendEmailCode")
-    public Result sendEmailCode(HttpSession session, String email, String checkCode, Integer type){
+    public Result sendEmailCode(HttpSession session, @VerifyParams(required = true) String email, String checkCode, Integer type){
         try {
             if (!checkCode.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CHECK_CODE_KEY))){
                 throw new BusinessException("图片验证码不正确");
             }
             emailCodeService.sendEmailCode(email, type);
-            return Result.success("验证码已发送", null);
+            return new Result(StatusCode.STATUS_CODE_200,"验证码已发送", null);
         } finally {
             session.removeAttribute(EmailConstants.CHECK_CODE_KEY_EMAIL);
         }

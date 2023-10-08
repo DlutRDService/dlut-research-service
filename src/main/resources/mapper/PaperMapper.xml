@@ -7,7 +7,7 @@
     </select>
 <!--  插入新纪录   -->
     <insert id="saveBatch" parameterType="java.util.List">
-        insert into Paper(id,Title,WC,Journal,ESI,Year) values
+        insert into Paper(id,t1,WC,so,ESI,py) values
         <foreach collection="list" index="index" item="item" separator=",">
             (#{item.id}, #{item.Title},
             #{item.wc}, #{item.Journal}, #{item.esi}, #{Year})
@@ -15,9 +15,9 @@
     </insert>
 <!--查询年份列表-->
     <select id="selectYearList" parameterType="java.util.List" resultType="map">
-        SELECT Year, COUNT(*) as yearCount from Paper
+        SELECT py, COUNT(*) as yearCount from Paper
         Where id in #{idList}
-        GROUP BY Year ORDER BY Year;
+        GROUP BY py ORDER BY py;
     </select>
 <!--  PaperMap联合查询作者与关键词  -->
     <resultMap id="paperMap" type="com.example.academickg.entity.dto.PaperDto">
@@ -78,7 +78,7 @@
     </select>
 <!-- 按期刊查找   -->
     <select id="selectByJournal" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
-        select * from Paper where Journal = #{Journal}
+        select * from Paper where so = #{Journal}
     </select>
 <!-- 按ESI主题查找   -->
     <select id="selectByESI" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
@@ -104,17 +104,45 @@
     </select>
 <!--  按年份查找  -->
     <select id="selectByYear" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
-        select * from Paper where Year= #{Year}
+        select * from Paper where py= #{Year}
     </select>
 <!--  按关键词查找，需要写一个联合索引  -->
     <select id="selectByKeyword" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
-        select * from Paper where Year= #{Year}
+        select * from Paper where py= #{Year}
     </select>
     <select id="selectTitleAndId" resultType="hashmap">
-        select id,Title from Paper
+        select id,t1 from Paper
     </select>
     <select id="selectMultiQuery">
 
+    </select>
+    <select id="selectIdByYear" resultType="java.lang.Integer">
+        select id from Paper where py=#{Year}
+    </select>
+    <select id="selectIdByAuthor" resultType="java.lang.Integer">
+        select id
+        from Paper
+        where
+              (select Paper_id
+               from paper_author
+               where Author_id in
+                     (select id
+                      from Author
+                      where Name = #{name}
+                     )
+              )
+    </select>
+    <select id="selectIdByWC" resultType="java.lang.Integer">
+        select id from Paper where wc=#{WC}
+    </select>
+    <select id="selectIdByESI" resultType="java.lang.Integer">
+        select id from Paper where esi=#{ESI}
+    </select>
+    <select id="selectIdByJournal" resultType="java.lang.Integer">
+        select id from Paper where so=#{Journal}
+    </select>
+    <select id="selectIds" resultType="java.lang.Integer">
+        select id from Paper where ${s}
     </select>
 
 

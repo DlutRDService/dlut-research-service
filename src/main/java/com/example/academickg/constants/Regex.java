@@ -25,10 +25,9 @@ public class Regex {
     public static final String MATCH_ONLY_ONE_CONDITION_WITHOUT_BOOLEAN = "[a-z]{2} *=((?! and | not | or ).)*$";
     public static final String JUDGE_ONLY_ONE_CONDITION_WITH_BOOLEAN = "^(\\(| )*[a-z]{2} *=(.*( and | or | not ).*)*$";
     public static final String MATCH_ONLY_ONE_CONDITION_WITH_BOOLEAN = "[a-z]{2} *=(.*( and | or | not ).*)*$";
-    public static final String MATCH_MULTI_CONDITION_WITHOUT_BRACKET = "[a-z]{2} *=.*(and|or|not) *[a-z]{2} *=";
+    public static final String MATCH_MULTI_CONDITION = "[a-z]{2} *=.*(and|or|not) *(\\(| *)[a-z]{2} *=";
     public static final String MATCH_BRACKET = "= *(\\(|\\))";
     public static final String TRUE_BOOLEAN_FORMAT = "(and|or|not) *(?=[a-z]{2} *=)";
-    public static final String MATCH_MULTI_CODITION_WITH_BRACKET = "";
     // 匹配and字段
     public static final String AND_MATCH = "(and)";
     public static final String NOT_MATCH = "(not)";

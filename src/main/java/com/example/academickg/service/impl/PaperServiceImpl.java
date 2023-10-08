@@ -4,12 +4,16 @@ import com.example.academickg.constants.Regex;
 import com.example.academickg.mapper.PaperMapper;
 import com.example.academickg.service.IPaperService;
 import com.example.academickg.utils.BM25;
+import com.example.academickg.utils.StringQueryToListAlgorithm;
+import com.example.academickg.utils.SetOperationsAlgorithm;
+import com.example.academickg.utils.StringQueryToListAlgorithm;
 import com.example.academickg.utils.StringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import com.example.academickg.entity.dto.PaperDto;
 
 import java.util.*;
+
 
 @Service
 public class PaperServiceImpl implements IPaperService {
@@ -51,18 +55,28 @@ public class PaperServiceImpl implements IPaperService {
         }
         // 情况3，多个检索式但是，没有()的前提下
         if (! queryField.matches(Regex.MATCH_BRACKET)) {
-            if (queryField.matches(Regex.MATCH_MULTI_CONDITION_WITHOUT_BRACKET)){
+            if (queryField.matches(Regex.MATCH_MULTI_CONDITION)){
                 map = StringUtils.singleSetRegexQueryMatch(queryField, Regex.TRUE_BOOLEAN_FORMAT);
                 return map;
             }
         }
         return null;
     }
-    public HashMap<Object, Object> multiSetQueryFieldProcess(String queryField){
-        // 情况4,多个检索式有()，但()不表示并交关系
-        // 情况5,多个检索式有(),并且()表示并交关系
-        return null;
+    public Set<Integer> multiSetQueryFieldProcess(String queryField){
+        Map<String, Set<Integer>> setsMap = new HashMap<>();
+        List<String> expressionList = StringQueryToListAlgorithm.extractFieldQualifiers(queryField);
+        System.out.println(queryField);
+        System.out.println(expressionList);
+        for (String expression : expressionList) {
+            System.out.println(expression);
+            List<Integer> ids = paperMapper.selectIds(expression);
+            setsMap.put(expression, new HashSet<>(ids));
+        }
+        Set<Integer> result = SetOperationsAlgorithm.mixedOperation(setsMap, queryField);
+        System.out.println(result);
+        return result;
     }
+
     /**
      *
      */
@@ -78,11 +92,7 @@ public class PaperServiceImpl implements IPaperService {
                 paperDto = selectOneQueryField(field);
                 return paperDto;
             }
-//        paperDto = ;
         }
-        return null;
-    }
-    public List<PaperDto> multiSetQueriesProcess(HashMap<Object, Object> hashMap){
         return null;
     }
 
