@@ -1,6 +1,8 @@
 package com.example.academickg.service.impl;
 
 import com.example.academickg.common.Result;
+import com.example.academickg.constants.EmailConstants;
+import com.example.academickg.constants.StatusCode;
 import com.example.academickg.entity.constants.EmailConstants;
 import com.example.academickg.entity.dao.UserInfo;
 import com.example.academickg.mapper.EmailCodeMapper;
@@ -31,12 +33,12 @@ public class UserInfoServiceImpl implements IUserInfoService {
     @Override
     public Result login(Integer account, String password) {
         if (userInfoMapper.selectByAccount(account) == null){
-            return Result.systemError("用户不存在，请先注册", null);
+            return new Result(StatusCode.STATUS_CODE_400, "用户不存在，请先注册", null);
         }
         if (userInfoMapper.selectByAccountAndPassword(account, password) == null){
-            return Result.systemError("密码错误，请重新输入", null);
+            return new Result(StatusCode.STATUS_CODE_400, "密码错误，请重新输入", null);
         }
-        return Result.success("登陆成功", null);
+        return new Result(StatusCode.STATUS_CODE_200, "登陆成功", null);
     }
 
     /**
@@ -48,9 +50,9 @@ public class UserInfoServiceImpl implements IUserInfoService {
     @Override
     public Result changePassword(Integer account, String password, String email) {
         if (userInfoMapper.updatePassword(account, password, email)){
-            return Result.success("密码修改成功", true);
+            return new Result(StatusCode.STATUS_CODE_200, "密码修改成功", true);
         }
-        return Result.permissionsError("密码修改失败", null);
+        return new Result(StatusCode.STATUS_CODE_400, "密码修改失败", null);
     }
 
     @Override
@@ -60,15 +62,15 @@ public class UserInfoServiceImpl implements IUserInfoService {
 
     public Result verify(Integer account, String email, String checkCode){
         if (userInfoMapper.selectByAccount(account) == 1){
-            return Result.paramError("账户已存在，请勿重复注册，若忘记密码，可用邮箱进行找回", null);
+            return new Result(StatusCode.STATUS_CODE_400, "账户已存在，请勿重复注册，若忘记密码，可用邮箱进行找回", null);
         }
         if (userInfoMapper.selectByAccountAndEmail(account, email) == 1){
-            return Result.paramError("邮箱已绑定其他账号，请检查您的输入信息", null);
+            return new Result(StatusCode.STATUS_CODE_400, "邮箱已绑定其他账号，请检查您的输入信息", null);
         }
         if (!emailCodeMapper.selectCodeByEmail(email).equals(checkCode)){
-            return Result.paramError("验证码错误，请重新输入", null);
+            return new Result(StatusCode.STATUS_CODE_400, "验证码错误，请重新输入", null);
         }
-        return Result.success("操作成功，请设置密码", true);
+        return new Result(StatusCode.STATUS_CODE_200, "操作成功，请设置密码", true);
     }
 
     /**

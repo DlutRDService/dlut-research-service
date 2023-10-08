@@ -15,7 +15,7 @@ import com.example.academickg.entity.constants.EmailConstants;
 import com.example.academickg.utils.CreateImageCode;
 
 @RestController
-@RequestMapping("userInfo")
+@RequestMapping("login")
 public class AccountController {
 
     @Resource
@@ -27,7 +27,8 @@ public class AccountController {
     /**
      * 登陆，使用账号验证码或账号密码。
      */
-    @PostMapping("login")
+    @GlobalInterceptor
+    @PostMapping("sign-in")
     public Result login(HttpSession session, @RequestParam Integer account, @RequestParam String password) {
         session.setAttribute("account", account);
         session.setAttribute("password", password);
@@ -81,7 +82,7 @@ public class AccountController {
             userInfoService.inputUserInfo((Integer) session.getAttribute("account"),
                     password,
                     (String) session.getAttribute("email"));
-            return Result.success("密码设置成功", null);
+            return new Result(StatusCode.STATUS_CODE_200, "密码设置成功", null);
         }
         session.setAttribute("password", password);
         return result;
@@ -114,14 +115,15 @@ public class AccountController {
      * @param checkCode 验证码
      * @param type 0：登陆用验证码 1：邮箱验证码
      */
-    @PostMapping("/sendEmailCode")
-    public Result sendEmailCode(HttpSession session, String email, String checkCode, Integer type){
+    @GlobalInterceptor(checkParams = true)
+    @RequestMapping("/sendEmailCode")
+    public Result sendEmailCode(HttpSession session, @VerifyParams(required = true) String email, String checkCode, Integer type){
         try {
             if (!checkCode.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CHECK_CODE_KEY))){
                 throw new BusinessException("图片验证码不正确");
             }
             emailCodeService.sendEmailCode(email, type);
-            return Result.success("验证码已发送", null);
+            return new Result(StatusCode.STATUS_CODE_200,"验证码已发送", null);
         } finally {
             session.removeAttribute(EmailConstants.CHECK_CODE_KEY_EMAIL);
         }

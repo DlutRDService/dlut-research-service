@@ -1,8 +1,7 @@
 package com.example.academickg.exception;
 
-import com.example.academickg.common.Result;
+import com.example.academickg.constants.StatusCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.Serial;
 
 public class BusinessException extends RuntimeException {
@@ -21,6 +20,8 @@ public class BusinessException extends RuntimeException {
     private String message;
 
     private Throwable throwable;
+
+    private StatusCode statusCode;
 
     public BusinessException(){
         super();
@@ -47,6 +48,11 @@ public class BusinessException extends RuntimeException {
         this.code = code;
         this.message = message;
         this.throwable = throwable;
+    }
+
+    public BusinessException(StatusCode statusCode, String message){
+        super(message);
+        this.statusCode = statusCode;
     }
 
 

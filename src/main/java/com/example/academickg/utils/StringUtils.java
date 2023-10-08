@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StringUtils {
+public final class StringUtils {
 
     /**
      * 生成随机数
@@ -41,9 +41,11 @@ public class StringUtils {
                 hashMap.put(matcher.group(),1);
                 return hashMap;
             }
+
             first = s.indexOf(matcher.group());
             String subQuery = s.substring(end, first);
             end = s.lastIndexOf(matcher.group());
+
             subQuery = StringUtils.getRegexMatchContent(subQuery, Regex.FORMAT_QUERY);
             if (s.substring(first, end).contains(Regex.AND_MATCH)){
                 hashMap.put(subQuery, 1);

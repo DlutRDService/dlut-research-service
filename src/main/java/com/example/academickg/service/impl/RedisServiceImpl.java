@@ -4,7 +4,6 @@ import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.example.academickg.common.Result;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -24,6 +23,6 @@ public class RedisServiceImpl {
             files = JSONUtil.toBean(jsonStr, new TypeReference<>() {
             }, true);
         }
-        Result.success(null, null);
+        new Result(StatusCode.STATUS_CODE_200, null, null);
     }
 }

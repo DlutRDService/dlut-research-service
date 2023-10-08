@@ -11,10 +11,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Handler;
 
 
 public interface PaperMapper extends BaseMapper<Paper> {
+    List<Integer> selectIds(String s);
     //批量插入
     Boolean saveBatch(List<Paper> paperList);
     //按id批量查询
@@ -65,7 +65,10 @@ public interface PaperMapper extends BaseMapper<Paper> {
     List<PaperDto> selectByESI(String ESI);
     List<PaperDto> selectByJournal(String Journal);
 
-    void selectMultiQuery(List<String> union, List<String> intersection, List<String> differenceSet);
-
+    List<Integer> selectIdByYear(Integer Year);
+    List<Integer> selectIdByAuthor(String Author);
+    List<Integer> selectIdByWC(String WC);
+    List<Integer> selectIdByESI(String ESI);
+    List<Integer> selectIdByJournal(String Journal);
     HashMap<Integer, String> selectTitleAndId();
 }

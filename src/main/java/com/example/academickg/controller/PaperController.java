@@ -6,6 +6,9 @@ import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.example.academickg.common.Result;
+import com.example.academickg.constants.RedisKey;
+import com.example.academickg.constants.Regex;
+import com.example.academickg.constants.StatusCode;
 import com.example.academickg.entity.constants.RedisKey;
 import com.example.academickg.entity.constants.Regex;
 import com.example.academickg.entity.dao.Paper;
@@ -41,25 +44,26 @@ public class PaperController {
     @Resource
     private MilvusServiceImpl milvusService;
 
+    /**
+     * 启动Milvus导入脚本，首先查询Mysql中的数据，根据数据变动情况导入向量
+     */
     @GetMapping("updateVector")
-    public Result updateVector(){
+    public Result updateVector() {
         HashMap<Integer, String> hashMap = paperService.selectTitleAndId();
-        for (Integer key: hashMap.keySet()) {
+        for (Integer key : hashMap.keySet()) {
             ScriptTriggerUtils.execute("importMilvus.py", hashMap.get(key), String.valueOf(key));
         }
-        return Result.success("向量导入完毕", null);
+        return new Result(StatusCode.STATUS_CODE_200, "向量导入完毕", null);
     }
-    @GetMapping("test")
-    public Result test(){
-        return Result.success("", null);
-    }
+
     /**
-     * 高级检索
+     * 高级检索功能
+     *
      * @param queryField 检索字段
      */
     @log
     @GetMapping("/advanced-search")
-    public Result searchByKeywords(@RequestParam String queryField){
+    public Result searchByKeywords(@RequestParam String queryField) {
         //current = (current-1) * pageSize;
         try {
             // 字符串转化为小写
@@ -71,38 +75,40 @@ public class PaperController {
             queryField = queryField.replace('；', ';');
             queryField = queryField.replace('，', ',');
             queryField = queryField.replace('。', '.');
-        } catch (Exception e){
-            return Result.paramError("Check your query to make sure search terms, parentheses, " +
+        } catch (Exception e) {
+            return new Result(StatusCode.STATUS_CODE_400, "Check your query to make sure search terms, parentheses, " +
                     "and Boolean operators (AND, OR, NOT) are used properly.", null);
         }
         StringUtils str = new StringUtils();
         // 判断是否含有字符,以及含有=。
-        if (! str.containNumOrChar(queryField) || ! queryField.contains("=")) {
-            return Result.paramError("Check your query to make sure search terms, parentheses, " +
+        if (!str.containNumOrChar(queryField) || !queryField.contains("=")) {
+            return new Result(StatusCode.STATUS_CODE_400, "Check your query to make sure search terms, parentheses, " +
                     "and Boolean operators (AND, OR, NOT) are used properly.", null);
         }
         // 检查索引式是否符合要求,例如“AF=”或者“ AF=”，索引字段前不允许含有字母与数字
-        if (! queryField.matches(Regex.FORMAT_QUERY)){
-            return Result.paramError("Check your query to make sure search terms, parentheses, " +
+        if (!queryField.matches(Regex.FORMAT_QUERY)) {
+            return new Result(StatusCode.STATUS_CODE_400, "Check your query to make sure search terms, parentheses, " +
                     "and Boolean operators (AND, OR, NOT) are used properly.", null);
         }
         //判断是否正确使用布尔操作符，检查不正确使用布尔操作符的情况
-        if (queryField.matches(Regex.FALSE_BOOLEAN_FORMAT)){
-            return Result.paramError("Check your query to make sure search terms, parentheses, " +
+        if (queryField.matches(Regex.FALSE_BOOLEAN_FORMAT)) {
+            return new Result(StatusCode.STATUS_CODE_400, "Check your query to make sure search terms, parentheses, " +
                     "and Boolean operators (AND, OR, NOT) are used properly.", null);
         }
-        HashMap<String, Integer> map = paperService.singleSetQueryFieldProcess(queryField);
-        if (map == null){
-            HashMap<Object, Object> map1 = paperService.multiSetQueryFieldProcess(queryField);
-            List<PaperDto> paperDtoList = paperService.multiSetQueriesProcess(map1);
-            return Result.success("", paperDtoList);
-        }else {
+        if (queryField.matches(Regex.MATCH_MULTI_CONDITION)) {
+            HashMap<String, Integer> map = paperService.singleSetQueryFieldProcess(queryField);
             List<PaperDto> paperDtoList = paperService.singleSetQueriesProcess(map);
-            return Result.success("", paperDtoList);
+            return new Result(StatusCode.STATUS_CODE_200, "", paperDtoList);
+        } else {
+            Set<Integer> map1 = paperService.multiSetQueryFieldProcess(queryField);
+            List<Integer> idlist = new ArrayList<>(map1);
+            List<PaperDto> paperDtoList = paperService.selectPapersByIdList(idlist);
+            return new Result(StatusCode.STATUS_CODE_200, "", paperDtoList);
         }
     }
+
     @GetMapping("full-record/{id}")
-    public Result paperInformation(@PathVariable Integer id){
+    public Result paperInformation(@PathVariable Integer id) {
         ArrayList<Integer> idList = new ArrayList<>();
         idList.add(id);
         RedisUtils<List<Float>> redisUtils = new RedisUtils<>();
@@ -111,47 +117,58 @@ public class PaperController {
         List<Long> resultIds = result.getData().getResults().getIds().getIntId().getDataList();
         List<Integer> resultIdList = JSONArray.parseArray(resultIds.toString(), Integer.class);
         idList.addAll(resultIdList);
-        return Result.success("", paperService.selectPapersByIdList(idList));
+        return new Result(StatusCode.STATUS_CODE_200, "", paperService.selectPapersByIdList(idList));
     }
 
-    // 导出
+    /**
+     * 文件导出
+     *
+     * @param ids 导出目录
+     */
     @RequestMapping(value = "/export", method = RequestMethod.POST)
-    public void exportPaperRecords(@RequestBody  String ids, HttpServletResponse response) throws Exception{
+    public void exportPaperRecords(@RequestBody String ids, HttpServletResponse response) throws Exception {
         List<Integer> idList = JSON.parseArray(JSON.parseObject(ids).getString("ids"), Integer.class);
         List<PaperDto> list = paperService.selectPapersByIdList(idList);
         ExcelWriter writer = ExcelUtil.getWriter(true);
         writer.write(list, true);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
         String fileName = URLEncoder.encode("Papers", StandardCharsets.UTF_8);
-        response.setHeader("Content-Disposition","attachment;filename=" + fileName + ".xlsx");
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
         ServletOutputStream outputStream = response.getOutputStream();
         writer.flush(outputStream, true);
         outputStream.close();
         writer.close();
     }
-    //excel表格导入
+
+    /**
+     * 文件导入
+     *
+     * @param file
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/import/excel")
-    public Boolean importPaperRecordsByExcel(MultipartFile file) throws Exception{
+    public Boolean importPaperRecordsByExcel(MultipartFile file) throws Exception {
         InputStream inputStream = file.getInputStream();
         ExcelReader reader = ExcelUtil.getReader(inputStream);
-        List<Paper> list = reader.read(0,1, Paper.class);
+        List<Paper> list = reader.read(0, 1, Paper.class);
         // return paperService.saveOrUpdateBatch(list);
         return null;
     }
 
-    public Result recommendation(String ts){
+    public Result recommendation(String ts) {
         ScriptTriggerUtils.execute("vectorAndImportRedis.py", ts);
         List<Float> queryVector = null;
         // 获取该向量值
         List<String> value = stringRedisTemplate.opsForList().range(RedisKey.REDIS_KEY_TEMP_QUERY_VECTOR, 0, -1);
-        if(value != null){
+        if (value != null) {
             queryVector = StringUtils.toFLoatList(value);
         }
         R<SearchResults> result = milvusService.query(queryVector, 100);
         List<Long> ids = result.getData().getResults().getIds().getIntId().getDataList();
         List<Integer> idList = JSONArray.parseArray(ids.toString(), Integer.class);
         List<PaperDto> paperDtos = paperService.selectPapersByIdList(idList);
-        return Result.success("", paperDtos);
+        return new Result(StatusCode.STATUS_CODE_400, "", paperDtos);
     }
 
 }
