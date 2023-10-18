@@ -1,6 +1,8 @@
 package com.example.academickg.service.impl;
 
+import com.example.academickg.common.Result;
 import com.example.academickg.entity.constants.MilvusConstants;
+import com.example.academickg.entity.constants.StatusCode;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.grpc.DataType;
@@ -21,10 +23,16 @@ import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import com.alibaba.fastjson.JSON;
 
-
-import java.util.Collections;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Collections;
+
 
 @Service
 public class MilvusServiceImpl {
@@ -132,5 +140,37 @@ public class MilvusServiceImpl {
     }
 
 
+    public Result muiltTSQuery(List<String> queries){
+        String flaskApiUrl = "http://your-flask-api-url/api/query";
+
+        String json = JSON.toJSONString(queries);
+
+        try {
+            URL url = new URL(flaskApiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            connection.setDoOutput(true);
+
+            DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
+            outputStream.write(json.getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            outputStream.close();
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // 请求成功处理
+                return new Result(StatusCode.STATUS_CODE_200, "处理成功");
+            }  // 请求失败处理
+            connection.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
 }
+
+
+

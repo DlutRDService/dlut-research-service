@@ -16,9 +16,24 @@ public class Result {
     private StatusCode statusCode;
     private String msg;
     private Object data;
-    public Result(StatusCode statusCode1, String msg, Object data){
-        this.statusCode = statusCode1;
+    public Result(StatusCode statusCode, String msg, Object data){
+        this.statusCode = statusCode;
         this.msg = msg;
         this.data = data;
+    }
+    public Result(StatusCode statusCode, String msg){
+        this.statusCode = statusCode;
+        this.msg = msg;
+    }
+    public Result changeResultState(Result result,StatusCode statusCode, String msg, Object data){
+        result.setStatusCode(statusCode);
+        result.setMsg(msg);
+        result.setData(data);
+        return result;
+    }
+    public Result changeResultState(Result result,StatusCode statusCode, String msg){
+        result.setStatusCode(statusCode);
+        result.setMsg(msg);
+        return result;
     }
 }

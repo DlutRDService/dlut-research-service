@@ -2,7 +2,7 @@ package com.example.academickg.aop.GlobalOpsAop;
 
 import com.example.academickg.annotation.GlobalInterceptor;
 import com.example.academickg.annotation.VerifyParams;
-import com.example.academickg.constants.StatusCode;
+import com.example.academickg.entity.constants.StatusCode;
 import com.example.academickg.exception.BusinessException;
 import com.example.academickg.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;

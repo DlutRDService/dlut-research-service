@@ -1,27 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.academickg.mapper.UserInfoMapper">
+    <insert id="insert" parameterType="com.example.academickg.entity.dao.UserInfo">
+        INSERT INTO user_info (account, email, password, registrationTime, lastLoginTime, status, avatar)
+            values (#{account}, #{email}, #{password}, #{registrationTime}, #{lastLoginTime}, #{status}, #{avatar})
+    </insert>
     <update id="updatePassword">
         update user_info
         set password = #{password}
-        where account = #{account}
-          and email = #{email}
+        where email = #{email}
+    </update>
+    <update id="update">
+        update user_info
+        set password = #{password}, avatar = #{avatar}, nickName = #{nickName},
     </update>
 
-    <select id="selectByEmail" parameterType="string" resultType="java.lang.Integer">
-          SELECT 1 from user_info where email = #{email}
-    </select>
-    <select id="selectByAccount" parameterType="integer" resultType="java.lang.Integer">
-        SELECT 1 from user_info where account = #{account} limit 1
-    </select>
-    <select id="selectByAccountAndPassword" resultType="java.lang.Integer">
+    <select id="selectByEmailAndPassword" resultType="java.lang.Integer">
         SELECT 1
         from user_info
-        where account = #{account}
+        where email = #{email}
           and password = #{password}
         limit 1
     </select>
     <select id="selectByAccountAndEmail" resultType="java.lang.Integer">
         select 1 from user_info where account != #{account} and email = #{email}
+    </select>
+    <select id="isEmailExit" resultType="java.lang.Boolean">
+        SELECT 1 from user_info where email = #{email} limit 1
+    </select>
+    <select id="selectByEmail" resultType="java.lang.Integer">
+        SELECT user_id from user_info where email = #{email} limit 1
+    </select>
+    <select id="selectPasswordByEmail" resultType="java.lang.String">
+        SELECT password from user_info where email = #{email}
     </select>
 </mapper>

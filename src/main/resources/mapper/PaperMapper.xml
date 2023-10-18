@@ -34,7 +34,7 @@
                 ofType="String" select="selectKeywordsById">
         </collection>
     </resultMap>
-    <resultMap id="authorMap" type="com.example.academickg.entity.dto.authorDto">
+    <resultMap id="authorMap" type="com.example.academickg.entity.dto.AuthorDto">
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="organization" jdbcType="VARCHAR" property="organization"/>
         <result column="country" jdbcType="VARCHAR" property="country"/>

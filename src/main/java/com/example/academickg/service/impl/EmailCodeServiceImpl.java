@@ -9,8 +9,11 @@ import com.example.academickg.entity.dto.SysSettingsDto;
 import com.example.academickg.exception.BusinessException;
 import com.example.academickg.mapper.EmailCodeMapper;
 import com.example.academickg.service.IEmailCodeService;
+import com.example.academickg.utils.CreateImageCode;
 import jakarta.annotation.Resource;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,6 +21,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Date;
 
 import com.example.academickg.utils.StringUtils;
@@ -93,5 +97,20 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
             logger.error("邮件发送失败", e);
             throw new BusinessException("邮件发送失败");
         }
+    }
+
+    public void getCaptcha(HttpServletResponse response, HttpSession session, Integer type) throws IOException {
+        CreateImageCode vCode = new CreateImageCode(130,38,5,10);
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setDateHeader("Expires", 0);
+        response.setContentType("image/jpeg");
+        String code = vCode.getCode();
+        if (type == null || type == 0){
+            session.setAttribute(EmailConstants.CHECK_CODE_KEY, code);
+        } else {
+            session.setAttribute(EmailConstants.CHECK_CODE_KEY_EMAIL, code);
+        }
+        vCode.write(response.getOutputStream());
     }
 }

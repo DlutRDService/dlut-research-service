@@ -1,6 +1,7 @@
 package com.example.academickg.aop.logAspect;
 
 import com.alibaba.fastjson.JSON;
+import com.example.academickg.entity.constants.WebLog;
 import com.example.academickg.utils.IpUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.JoinPoint;

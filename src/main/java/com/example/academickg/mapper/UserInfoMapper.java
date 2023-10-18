@@ -1,7 +1,6 @@
 package com.example.academickg.mapper;
 
 import com.example.academickg.entity.dao.UserInfo;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * <p>
@@ -11,16 +10,19 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author zsl
  * @since 2023-07-12
  */
-public interface UserInfoMapper extends BaseMapper<UserInfo> {
+public interface UserInfoMapper{
+
+    Integer selectByEmailAndPassword(String email, String password);
+
+    // Integer insert(UserInfo userInfo);
+    Boolean updatePassword(String password, String email);
+
+    boolean isEmailExit(String email);
 
     Integer selectByEmail(String email);
 
-    Integer selectByAccount(Integer account);
+    String selectPasswordByEmail(String email);
+    Boolean insert(UserInfo userInfo);
 
-    Integer selectByAccountAndPassword(Integer account, String password);
-
-    Integer selectByAccountAndEmail(Integer account, String email);
-    // Integer insert(UserInfo userInfo);
-    Boolean updatePassword(Integer account, String password, String email);
-
+    Boolean update(UserInfo userInfo);
 }

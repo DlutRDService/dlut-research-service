@@ -1,7 +1,7 @@
 package com.example.academickg.controller;
 
 import com.example.academickg.common.Result;
-import com.example.academickg.constants.StatusCode;
+import com.example.academickg.entity.constants.StatusCode;
 import com.example.academickg.mapper.PaperMapper;
 import jakarta.annotation.Resource;
 
@@ -20,7 +20,5 @@ public class EchartsController {
         List<Map<Object, Object>> yearList = paperMapper.selectYearList(idList);
         return new Result(StatusCode.STATUS_CODE_200, null, yearList);
     }
-
-
 
 }

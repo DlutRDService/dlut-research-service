@@ -1,5 +1,8 @@
 package com.example.academickg.service.impl;
 
+import com.example.academickg.common.Result;
+import com.example.academickg.entity.dao.Author;
+import com.example.academickg.entity.dto.AuthorDto;
 import com.example.academickg.service.IAuthorService;
 import org.springframework.stereotype.Service;
 
@@ -13,5 +16,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class AuthorServiceImpl implements IAuthorService {
-
+    @Override
+    public Result getAuthorInfo(AuthorDto author) {
+        return null;
+    }
 }

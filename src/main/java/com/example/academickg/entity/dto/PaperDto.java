@@ -1,6 +1,5 @@
 package com.example.academickg.entity.dto;
 
-
 import lombok.Data;
 
 import java.util.List;

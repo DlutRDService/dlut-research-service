@@ -4,7 +4,8 @@ import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.example.academickg.common.Result;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.academickg.entity.constants.StatusCode;
+import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
