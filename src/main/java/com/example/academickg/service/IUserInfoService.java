@@ -3,6 +3,7 @@ package com.example.academickg.service;
 import com.example.academickg.common.Result;
 import com.example.academickg.entity.dao.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * <p>
@@ -13,9 +14,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2023-07-12
  */
 public interface IUserInfoService {
-    Result login(Integer account, String password);
 
-    Result changePassword(Integer account, String password, String email);
+    Result signByAccount(HttpSession session, String email, String password);
 
-    Result insert(Integer account, String password, String email);
+    Result signByCaptchaOrRegistration(HttpSession session, String email, String checkCode);
+
+    Result changePassword(HttpSession session, String newPassword);
 }

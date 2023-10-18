@@ -1,6 +1,6 @@
 package com.example.academickg.exception;
 
-import com.example.academickg.constants.StatusCode;
+import com.example.academickg.entity.constants.StatusCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.Serial;
 

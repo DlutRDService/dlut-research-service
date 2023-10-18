@@ -2,7 +2,7 @@ package com.example.academickg.entity.constants;
 
 public class Regex {
     //大工邮箱
-    public static final String DLUT_MAIL = ".*(@mail.dlut.edu.cn|@dlut.edu.cn)$";
+    public static final String DLUT_MAIL = ".*@(mail\\.dlut\\.edu\\.cn|dlut\\.edu\\.cn)$";
     // 纯数字
     public static final String DIGIT_REGEX = "[0-9]+";
     // 含有数字

@@ -35,7 +35,6 @@ if __name__ == '__main__':
         [sys.argv[1]],
         [vector],
     ]
-    if (pa)
     insert_result = collection.insert(entities)
     print(insert_result)
     collection.flush()
