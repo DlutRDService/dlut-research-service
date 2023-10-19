@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:src/main/java/com/example/academickg/entity/constants/WebLog.java
-package com.example.academickg.entity.constants;
-========
 package com.example.academickg.aop.logAspect;
->>>>>>>> origin/Mac:src/main/java/com/example/academickg/aop/logAspect/WebLog.java
 
 import lombok.Data;
 

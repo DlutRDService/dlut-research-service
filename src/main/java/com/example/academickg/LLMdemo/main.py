@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 
-from Milvus import connection, embedding, insert, connectCollection
+from milvus.Milvus import connection, embedding, insert, connectCollection
 
 app = Flask(__name__)
 

@@ -1,47 +1,27 @@
 package com.example.academickg.entity.dao;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Date;
-
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
- * <p>
- * 
- * </p>
- *
  * @author zsl
  * @since 2023-07-12
  */
 @TableName("email_code")
-@ApiModel(value = "EmailCode对象", description = "")
 @Data
-public class EmailCode implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class EmailCode{
 
+    @ApiModelProperty()
     private String email;
-
+    @ApiModelProperty()
     private String code;
-
+    @ApiModelProperty()
     private Date createTime;
-
+    @ApiModelProperty()
     private Integer status;
 
 
-    @Override
-    public String toString() {
-        return "EmailCode{" +
-        "email = " + email +
-        ", code = " + code +
-        ", createTime = " + createTime +
-        ", status = " + status +
-        "}";
-    }
 }

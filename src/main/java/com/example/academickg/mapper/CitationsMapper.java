@@ -1,6 +1,5 @@
 package com.example.academickg.mapper;
 
-import com.example.academickg.entity.dao.Citations;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

@@ -26,10 +26,12 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+# milvus配置
 milvus:
-  host: 192.168.43.49
+  host: 127.0.0.1
   port: 19530
 
+# flask配置
 flask:
   api:
     url: http://127.0.0.1:5000
