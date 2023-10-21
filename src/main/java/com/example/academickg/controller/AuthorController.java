@@ -1,20 +1,21 @@
 package com.example.academickg.controller;
 
-import com.example.academickg.common.Result;
+import com.example.academickg.annotation.log;
+import com.example.academickg.entity.constants.Result;
 import com.example.academickg.entity.dto.AuthorDto;
 import com.example.academickg.service.impl.AuthorServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author zsl
  * @since 2023-06-03
  */
-@Controller
-@RequestMapping("/author")
+@RestController
+@RequestMapping("author")
 public class AuthorController {
     /*
     * 构建作者画像：
@@ -40,7 +41,13 @@ public class AuthorController {
     private AuthorServiceImpl authorService;
 
     @PostMapping("authorInfo")
-    public Result authorInfo(@RequestParam AuthorDto author){
+    public Result authorInfo1(@RequestParam AuthorDto author){
         return authorService.getAuthorInfo(author);
+    }
+
+    @PostMapping("text")
+    @log
+    public Result authorInfo(@RequestParam Integer id){
+        return authorService.getAuthorInfoById(id);
     }
 }

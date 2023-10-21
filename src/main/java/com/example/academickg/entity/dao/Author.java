@@ -1,8 +1,7 @@
 package com.example.academickg.entity.dao;
 
-import java.io.Serializable;
-
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
@@ -10,7 +9,8 @@ import lombok.Data;
  * @since 2023-06-03
  */
 @Data
-public class Author implements Serializable {
+@TableName(value = "author")
+public class Author {
     @TableId(value = "id")
     private Integer id;
 
@@ -25,5 +25,6 @@ public class Author implements Serializable {
     private Double H;
 
     private Integer paperNum;
+    private Integer authenticate;
 
 }

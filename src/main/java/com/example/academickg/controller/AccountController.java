@@ -1,6 +1,6 @@
 package com.example.academickg.controller;
 
-import com.example.academickg.common.Result;
+import com.example.academickg.entity.constants.Result;
 import com.example.academickg.entity.dao.UserInfo;
 import com.example.academickg.service.impl.UserInfoServiceImpl;
 import jakarta.annotation.Resource;

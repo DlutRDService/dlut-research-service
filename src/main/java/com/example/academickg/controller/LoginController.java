@@ -1,6 +1,7 @@
 package com.example.academickg.controller;
 
-import com.example.academickg.common.Result;
+import com.example.academickg.component.ResultBuilder;
+import com.example.academickg.entity.constants.Result;
 import com.example.academickg.service.impl.EmailCodeServiceImpl;
 import com.example.academickg.service.impl.UserInfoServiceImpl;
 import jakarta.annotation.Resource;
@@ -25,7 +26,7 @@ public class LoginController {
     @Resource
     private UserInfoServiceImpl userInfoService;
     @Resource
-    private Result result;
+    private ResultBuilder resultBuilder;
 
     /**
      * 登陆，使用账号密码。
@@ -66,8 +67,7 @@ public class LoginController {
      */
     @PostMapping("setPassword")
     public Result setPassword(HttpSession session, @RequestParam String password){
-        result = userInfoService.changePassword(session, password);
-        return result;
+        return userInfoService.changePassword(session, password);
     }
     /**
      * 生成验证码
@@ -93,7 +93,7 @@ public class LoginController {
                 throw new BusinessException("图片验证码不正确");
             }
             emailCodeService.sendEmailCode(email, type);
-            return new Result(StatusCode.STATUS_CODE_200,"验证码已发送", null);
+            return resultBuilder.build(StatusCode.STATUS_CODE_200,"验证码已发送", null);
         } finally {
             session.removeAttribute(EmailConstants.CHECK_CODE_KEY_EMAIL);
         }

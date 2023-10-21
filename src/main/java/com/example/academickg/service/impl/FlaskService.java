@@ -1,7 +1,8 @@
 package com.example.academickg.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.example.academickg.common.Result;
+import com.example.academickg.component.ResultBuilder;
+import com.example.academickg.entity.constants.Result;
 import com.example.academickg.entity.constants.StatusCode;
 import com.example.academickg.service.IFlaskService;
 import jakarta.annotation.Resource;
@@ -23,7 +24,7 @@ public class FlaskService implements IFlaskService {
     private final RestTemplate restTemplate;
     private final String BASE_URL;
     @Resource
-    private Result result;
+    private ResultBuilder resultBuilder;
 
     @Autowired
     public FlaskService(RestTemplate restTemplate,
@@ -42,8 +43,7 @@ public class FlaskService implements IFlaskService {
         String jsonData = JSON.toJSONString(queries);
         Class<Integer[]> responseType= Integer [].class;
         List<Integer> resultList = getResultList(path, jsonData, responseType);
-        return result.changeResultState(
-                result,
+        return resultBuilder.build(
                 StatusCode.STATUS_CODE_200,
                 "请求成功，处理完毕",
                 List.of(resultList)
@@ -58,9 +58,10 @@ public class FlaskService implements IFlaskService {
      */
     public Result getEmbedding(String path, List<String> texts){
         String jsonData = JSON.toJSONString(texts);
-        Class<List<Float>[]> responseType = (Class<List<Float>[]>) List[].class;
-        List<List<Float>> resultList = getResultList(path, jsonData,responseType);
-        return result.changeResultState(result, StatusCode.STATUS_CODE_200, "查询完毕", resultList);
+        return null;
+        // Class<List<Float>[]> responseType = (Class<List<Float>[]>) List[].class;
+        //List<List<Float>> resultList = getResultList(path, jsonData,responseType);
+        //return result.changeResultState(result, StatusCode.STATUS_CODE_200, "查询完毕", resultList);
     }
 
     public <T> List<T> getResultList(String path, String jsonData, Class<T[]> responseType) {
@@ -95,7 +96,7 @@ public class FlaskService implements IFlaskService {
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
         // 返回 Flask 程序的响应
-        return result.changeResultState(result, StatusCode.STATUS_CODE_200, response.getBody());
+        return resultBuilder.build(StatusCode.STATUS_CODE_200, response.getBody(), "");
     }
 
 

@@ -1,8 +1,6 @@
 package com.example.academickg.service;
 
-import com.example.academickg.common.Result;
-import com.example.academickg.entity.dao.UserInfo;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.academickg.entity.constants.Result;
 import jakarta.servlet.http.HttpSession;
 
 /**

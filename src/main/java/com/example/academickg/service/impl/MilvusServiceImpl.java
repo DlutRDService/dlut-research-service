@@ -1,7 +1,8 @@
 package com.example.academickg.service.impl;
 
-import com.example.academickg.common.Result;
+import com.example.academickg.component.ResultBuilder;
 import com.example.academickg.entity.constants.MilvusConstants;
+import com.example.academickg.entity.constants.Result;
 import com.example.academickg.entity.constants.StatusCode;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
@@ -39,6 +40,8 @@ public class MilvusServiceImpl {
     private static final Logger logger = LoggerFactory.getLogger(MilvusServiceImpl.class);
     @Resource
     private MilvusServiceClient milvusServiceClient;
+    @Resource
+    private ResultBuilder resultBuilder;
 
     /**
      * 判断集合是否存在
@@ -160,7 +163,7 @@ public class MilvusServiceImpl {
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 // 请求成功处理
-                return new Result(StatusCode.STATUS_CODE_200, "处理成功");
+                return resultBuilder.build(StatusCode.STATUS_CODE_200, "处理成功", "");
             }  // 请求失败处理
             connection.disconnect();
         } catch (IOException e) {

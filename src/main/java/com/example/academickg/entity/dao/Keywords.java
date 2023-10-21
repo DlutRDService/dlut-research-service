@@ -1,5 +1,6 @@
 package com.example.academickg.entity.dao;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import lombok.Data;
  * @since 2023-06-03
  */
 @Data
+@TableName(value = "keyword")
 public class Keywords{
     @ApiModelProperty()
     private Integer id;

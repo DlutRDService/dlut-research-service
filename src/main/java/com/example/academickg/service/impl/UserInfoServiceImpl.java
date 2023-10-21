@@ -1,7 +1,8 @@
 package com.example.academickg.service.impl;
 
-import com.example.academickg.common.Result;
+import com.example.academickg.component.ResultBuilder;
 import com.example.academickg.entity.constants.Regex;
+import com.example.academickg.entity.constants.Result;
 import com.example.academickg.entity.constants.StatusCode;
 import com.example.academickg.entity.dao.UserInfo;
 import com.example.academickg.mapper.EmailCodeMapper;
@@ -29,7 +30,7 @@ public class UserInfoServiceImpl implements IUserInfoService {
     @Resource
     private EmailCodeMapper emailCodeMapper;
     @Resource
-    private Result result;
+    private ResultBuilder resultBuilder;
     private static final int SESSION_TIMEOUT_SECONDS = 1200;
 
     /**
@@ -43,15 +44,15 @@ public class UserInfoServiceImpl implements IUserInfoService {
         session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
         Integer userId = userInfoMapper.selectByEmail(email);
         if (userId == null){
-            return result.changeResultState(result, StatusCode.STATUS_CODE_400, "用户不存在，请注册或检查输入的邮箱与密码");
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, "用户不存在，请注册或检查输入的邮箱与密码");
         }
         if (userInfoMapper.selectByEmailAndPassword(email, password) == null){
-            return result.changeResultState(result, StatusCode.STATUS_CODE_400, "密码错误，请重新输入");
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码错误，请重新输入");
         }
         session.setAttribute("email", email);
         session.setAttribute("password", password);
         session.setAttribute("userId", userId);
-        return result.changeResultState(result, StatusCode.STATUS_CODE_200, "登陆成功");
+        return resultBuilder.build(StatusCode.STATUS_CODE_200, "登陆成功");
     }
 
     /**
@@ -63,17 +64,17 @@ public class UserInfoServiceImpl implements IUserInfoService {
     @Override
     public Result signByCaptchaOrRegistration(HttpSession session, String email, String checkCode) {
         session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
-        result = verify(email, checkCode);
+        Result result  = verify(email, checkCode);
         if (result.getData() == null){
             return result;
         } else if (result.getData() instanceof String) {
             session.setAttribute("email", email);
             session.setAttribute("password", result.getData());
-            return result.changeResultState(result, StatusCode.STATUS_CODE_200, "登陆成功");
+            return resultBuilder.build(StatusCode.STATUS_CODE_200, "登陆成功");
         }else {
             session.setAttribute("email", email);
             session.setAttribute("password", null);
-            return result.changeResultState(result,StatusCode.STATUS_CODE_200, "注册成功，请设置密码");
+            return resultBuilder.build(StatusCode.STATUS_CODE_200, "注册成功，请设置密码");
         }
     }
     @Override
@@ -82,12 +83,12 @@ public class UserInfoServiceImpl implements IUserInfoService {
         String oldPassword = (String) session.getAttribute("password");
         if (oldPassword == null){
             insert(newPassword, email);
-            return result.changeResultState(result, StatusCode.STATUS_CODE_200, "密码设置成功");
+            return resultBuilder.build(StatusCode.STATUS_CODE_200, "密码设置成功");
         }
         if (userInfoMapper.updatePassword(oldPassword, email)){
-            return result.changeResultState(result, StatusCode.STATUS_CODE_200, "密码修改成功");
+            return resultBuilder.build(StatusCode.STATUS_CODE_200, "密码修改成功");
         }
-        return result.changeResultState(result, StatusCode.STATUS_CODE_400, "密码修改失败");
+        return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码修改失败");
     }
     /**
      * 验证身份，可用于验证码登陆与密码信息修改
@@ -96,22 +97,22 @@ public class UserInfoServiceImpl implements IUserInfoService {
      */
     public Result verify(String email, String checkCode){
         if (!email.matches(Regex.DLUT_MAIL)){
-            return result.changeResultState(
-                    result, StatusCode.STATUS_CODE_400,
+            return resultBuilder.build(
+                    StatusCode.STATUS_CODE_400,
                     "请使用大工邮箱");
         }
         if (!emailCodeMapper.selectCodeByEmail(email).equals(checkCode)){
-            return result.changeResultState(
-                    result, StatusCode.STATUS_CODE_400,
+            return resultBuilder.build(
+                    StatusCode.STATUS_CODE_400,
                     "验证码输入错误，请重新输入");
         }
         if (userInfoMapper.isEmailExit(email)){
-            return result.changeResultState(
-                    result, StatusCode.STATUS_CODE_200,
+            return resultBuilder.build(
+                    StatusCode.STATUS_CODE_200,
                     "操作成功", userInfoMapper.selectPasswordByEmail(email));
         }else {
-            return result.changeResultState(
-                    result, StatusCode.STATUS_CODE_200,
+            return resultBuilder.build(
+                    StatusCode.STATUS_CODE_200,
                     "操作成功", false);
         }
 
@@ -148,12 +149,12 @@ public class UserInfoServiceImpl implements IUserInfoService {
      */
     public Result modifyUseInfo(Integer userId, UserInfo userInfo){
         if (userId == null) {
-            return result.changeResultState(result, StatusCode.STATUS_CODE_500, "拒绝访问");
+            return resultBuilder.build(StatusCode.STATUS_CODE_500, "拒绝访问");
         }
         if (userInfoMapper.update(userInfo)){
-            return result.changeResultState(result, StatusCode.STATUS_CODE_200, "修改成功");
+            return resultBuilder.build(StatusCode.STATUS_CODE_200, "修改成功");
         }else{
-            return result.changeResultState(result, StatusCode.STATUS_CODE_400, "修改失败");
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, "修改失败");
         }
     }
 }

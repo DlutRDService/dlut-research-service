@@ -3,7 +3,7 @@ package com.example.academickg.service.impl;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.example.academickg.common.Result;
+import com.example.academickg.component.ResultBuilder;
 import com.example.academickg.entity.constants.StatusCode;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -16,6 +16,8 @@ public class RedisServiceImpl {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private ResultBuilder resultBuilder;
     public void createRedisKey(List<Object> files, String keyName){
         String jsonStr = stringRedisTemplate.opsForValue().get(keyName);
         if (StrUtil.isBlank(jsonStr)){
@@ -24,6 +26,6 @@ public class RedisServiceImpl {
             files = JSONUtil.toBean(jsonStr, new TypeReference<>() {
             }, true);
         }
-        new Result(StatusCode.STATUS_CODE_200, null, null);
+        resultBuilder.build(StatusCode.STATUS_CODE_200, null, null);
     }
 }

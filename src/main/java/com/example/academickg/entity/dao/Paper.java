@@ -8,32 +8,32 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-@TableName(value = "Paper")
+@TableName(value = "paper")
 public class Paper implements Serializable {
     @TableId(value = "id")
     private Integer id;
 
-    @ApiModelProperty()
+    @ApiModelProperty(value = "标题")
     private String tl;
 
-    @ApiModelProperty()
+    @ApiModelProperty(value = "年份", example = "2017")
     private Integer py;
 
-    @ApiModelProperty()
+    @ApiModelProperty(value = "期刊", example = "Energy")
     private String so;
 
-    @ApiModelProperty()
+    @ApiModelProperty(value = "ESI类别", example = "Math")
     private String esi;
 
-    @ApiModelProperty()
+    @ApiModelProperty(value = "WC类别", example = "Artificial Intelligence")
     private String wc;
 
-    @ApiModelProperty()
+    @ApiModelProperty(value = "被引量", example = "20")
     private Integer tc;
 
-    @ApiModelProperty()
+    @ApiModelProperty(value = "引文数量", example = "3")
     private Integer nc;
 
-    @ApiModelProperty()
+    @ApiModelProperty(value = "论文摘要")
     private String ab;
 }

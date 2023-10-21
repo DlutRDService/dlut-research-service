@@ -3,10 +3,6 @@ package com.example.academickg.mapper;
 import com.example.academickg.entity.dao.UserInfo;
 
 /**
- * <p>
- *  Mapper 接口
- * </p>
- *
  * @author zsl
  * @since 2023-07-12
  */
