@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.academickg.mapper.PaperMapper">
+<mapper namespace="com.dlut.ResearchService.mapper.PaperMapper">
 <!--    分页查询   -->
-    <select id="pageQuery" resultType="com.example.academickg.entity.dao.Paper">
+    <select id="pageQuery" resultType="com.dlut.ResearchService.entity.dao.Paper">
         select * from Paper limit #{current}, #{size}
     </select>
 <!--  插入新纪录   -->
@@ -20,7 +20,7 @@
         GROUP BY py ORDER BY py;
     </select>
 <!--  PaperMap联合查询作者与关键词  -->
-    <resultMap id="paperMap" type="com.example.academickg.entity.dto.PaperDto">
+    <resultMap id="paperMap" type="com.dlut.ResearchService.entity.dto.PaperDto">
         <result column="id" jdbcType="INTEGER" property="id"/>
         <result column="Title" jdbcType="VARCHAR" property="title" />
         <result column="Year" jdbcType="INTEGER" property="year" />
@@ -34,7 +34,7 @@
                 ofType="String" select="selectKeywordsById">
         </collection>
     </resultMap>
-    <resultMap id="authorMap" type="com.example.academickg.entity.dto.AuthorDto">
+    <resultMap id="authorMap" type="com.dlut.ResearchService.entity.dto.AuthorDto">
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="organization" jdbcType="VARCHAR" property="organization"/>
         <result column="country" jdbcType="VARCHAR" property="country"/>
@@ -69,7 +69,7 @@
         where Paper.id = #{id};
     </select>
 <!-- 按ID列表查询Paper内容  -->
-    <select id="selectPaperByIdList" parameterType="list" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
+    <select id="selectPaperByIdList" parameterType="list" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
         select * from Paper
         where id in
         <foreach collection="list" open="(" close=")" item="id" separator="," >
@@ -77,19 +77,19 @@
         </foreach>
     </select>
 <!-- 按期刊查找   -->
-    <select id="selectByJournal" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
+    <select id="selectByJournal" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
         select * from Paper where so = #{Journal}
     </select>
 <!-- 按ESI主题查找   -->
-    <select id="selectByESI" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
+    <select id="selectByESI" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
         select * from Paper where esi = #{ESI}
     </select>
 <!-- 按WC主题查找   -->
-    <select id="selectByWC" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
+    <select id="selectByWC" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
         select * from Paper where wc = #{WC}
     </select>
 <!--  按作者查询，需要写一个联合索引  -->
-    <select id="selectByAuthor" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
+    <select id="selectByAuthor" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
         select *
         from Paper
         where id in
@@ -103,11 +103,11 @@
              )
     </select>
 <!--  按年份查找  -->
-    <select id="selectByYear" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
+    <select id="selectByYear" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
         select * from Paper where py= #{Year}
     </select>
 <!--  按关键词查找，需要写一个联合索引  -->
-    <select id="selectByKeyword" resultMap="paperMap" resultType="com.example.academickg.entity.dto.PaperDto">
+    <select id="selectByKeyword" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
         select * from Paper where py= #{Year}
     </select>
     <select id="selectTitleAndId" resultType="hashmap">

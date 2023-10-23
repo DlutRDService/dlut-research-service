@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.academickg.mapper.AuthorMapper">
+<mapper namespace="com.dlut.ResearchService.mapper.AuthorMapper">
 
-    <select id="selectAuthorInfoById" resultType="com.example.academickg.entity.dto.AuthorDto">
+    <select id="selectAuthorInfoById" resultType="com.dlut.ResearchService.entity.dto.AuthorDto">
         SELECT name, country, organization, H, paper_num, paper_peer_year
         FROM author
         WHERE id = #{id}
     </select>
+    <select id="getCoAuthor" parameterType="java.util.List" resultType="java.lang.String">
+        SELECT name FROM author
+        WHERE id IN
+        <foreach item = "item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
 </mapper>
