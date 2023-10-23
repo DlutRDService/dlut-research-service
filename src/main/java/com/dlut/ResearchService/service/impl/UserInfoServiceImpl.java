@@ -5,7 +5,6 @@ import com.dlut.ResearchService.entity.constants.Regex;
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.entity.dao.UserInfo;
-import com.dlut.ResearchService.mapper.EmailCodeMapper;
 import com.dlut.ResearchService.mapper.UserInfoMapper;
 import com.dlut.ResearchService.service.IUserInfoService;
 import jakarta.annotation.Resource;
@@ -28,7 +27,7 @@ public class UserInfoServiceImpl implements IUserInfoService {
     @Resource
     private UserInfoMapper userInfoMapper;
     @Resource
-    private EmailCodeMapper emailCodeMapper;
+    private RedisServiceImpl redisService;
     @Resource
     private ResultBuilder resultBuilder;
     private static final int SESSION_TIMEOUT_SECONDS = 1200;
@@ -101,7 +100,7 @@ public class UserInfoServiceImpl implements IUserInfoService {
                     StatusCode.STATUS_CODE_400,
                     "请使用大工邮箱");
         }
-        if (!emailCodeMapper.selectCodeByEmail(email).equals(checkCode)){
+        if (!redisService.get(email).equals(checkCode)){
             return resultBuilder.build(
                     StatusCode.STATUS_CODE_400,
                     "验证码输入错误，请重新输入");

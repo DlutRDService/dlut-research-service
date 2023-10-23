@@ -1,5 +1,6 @@
 package com.dlut.ResearchService.service;
 
+import com.dlut.ResearchService.entity.dto.EmailDto;
 import org.springframework.data.redis.core.RedisCallback;
 
 public interface IRedisService {
@@ -12,4 +13,7 @@ public interface IRedisService {
     boolean executeTransaction(RedisCallback<Boolean> callback);
 
     boolean acquireLock(String lockKey);
+
+
+    EmailDto getEmailDto();
 }

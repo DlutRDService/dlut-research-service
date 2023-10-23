@@ -1,6 +1,5 @@
 package com.dlut.ResearchService.entity.dao;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -9,18 +8,17 @@ import lombok.Data;
  * @since 2023-06-03
  */
 @Data
-@TableName(value = "keyword")
 public class Keywords{
-    @ApiModelProperty()
-    private Integer id;
+    @ApiModelProperty(value = "关键词id")
+    private Integer keyword_id;
 
-    @ApiModelProperty()
-    private String name;
+    @ApiModelProperty(value = "关键词名")
+    private String keyword_name;
 
-    @ApiModelProperty()
-    private Integer num;
+    @ApiModelProperty(value = "频次")
+    private Integer occurNums;
 
-    @ApiModelProperty()
-    private String research;
+    @ApiModelProperty(value = "研究领域")
+    private String relatedResearch;
 }
 

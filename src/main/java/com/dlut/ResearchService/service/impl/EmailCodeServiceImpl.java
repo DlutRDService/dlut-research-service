@@ -1,15 +1,12 @@
 package com.dlut.ResearchService.service.impl;
 
-import com.dlut.ResearchService.component.RedisComponent;
 import com.dlut.ResearchService.config.AppConfig;
+import com.dlut.ResearchService.entity.dto.EmailDto;
 import com.dlut.ResearchService.exception.BusinessException;
 import com.dlut.ResearchService.utils.CreateImageCode;
 import com.dlut.ResearchService.utils.StringUtils;
 import com.dlut.ResearchService.entity.constants.EmailConstants;
 import com.dlut.ResearchService.entity.constants.Regex;
-import com.dlut.ResearchService.entity.dao.EmailCode;
-import com.dlut.ResearchService.entity.dto.SysSettingsDto;
-import com.dlut.ResearchService.mapper.EmailCodeMapper;
 import com.dlut.ResearchService.service.IEmailCodeService;
 import jakarta.annotation.Resource;
 import jakarta.mail.internet.MimeMessage;
@@ -33,13 +30,11 @@ import java.util.Date;
 public class EmailCodeServiceImpl implements IEmailCodeService {
     private static final Logger logger = LoggerFactory.getLogger(EmailCodeServiceImpl.class);
     @Resource
-    private EmailCodeMapper emailCodeMapper;
-    @Resource
     private JavaMailSender javaMailSender;
     @Resource
     private AppConfig appConfig;
     @Resource
-    private RedisComponent redisComponent;
+    private RedisServiceImpl redisService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -48,20 +43,11 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
             throw new BusinessException("请使用大工邮箱，或检查您所输入的邮箱信息");
         }
         String code = StringUtils.getRandomNumber(EmailConstants.LENGTH_5);
+        // 将邮箱与验证码存入Redis
+        redisService.set(email, code);
         //TODO 发送验证码
         sendEmailCode(email, code);
-
-        // 将之前的值设置为无效
-        emailCodeMapper.disableEmailCode(email);
-
-        EmailCode emailCode = new EmailCode();
-        emailCode.setCode(code);
-        emailCode.setEmail(email);
-        emailCode.setStatus(EmailConstants.ZERO);
-        emailCode.setCreateTime(new Date());
-        emailCodeMapper.insert(emailCode);
     }
-
     /**
      * 邮箱发送
      * @param toEmail 发送地址
@@ -74,10 +60,10 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
             helper.setFrom(appConfig.getSendUserName());
             helper.setTo(toEmail);
 
-            SysSettingsDto sysSettingsDto = redisComponent.getSysSettingDto();
+            EmailDto emailDto = redisService.getEmailDto();
 
-            helper.setSubject(sysSettingsDto.getRegisterMailTitle());
-            helper.setText(String.format(sysSettingsDto.getRegisterEmailContent(), code));
+            helper.setSubject(emailDto.getRegisterMailTitle());
+            helper.setText(String.format(emailDto.getRegisterEmailContent(), code));
             helper.setSentDate(new Date());
 
             javaMailSender.send(message);
@@ -95,9 +81,9 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
         response.setContentType("image/jpeg");
         String code = vCode.getCode();
         if (type == null || type == 0){
-            session.setAttribute(EmailConstants.CHECK_CODE_KEY, code);
+            session.setAttribute(EmailConstants.CAPTCHA, code);
         } else {
-            session.setAttribute(EmailConstants.CHECK_CODE_KEY_EMAIL, code);
+            session.setAttribute(EmailConstants.CAPTCHA_EMAIL, code);
         }
         vCode.write(response.getOutputStream());
     }

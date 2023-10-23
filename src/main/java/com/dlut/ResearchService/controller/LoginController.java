@@ -89,13 +89,13 @@ public class LoginController {
     @PostMapping("/sendEmailCode")
     public Result sendEmailCode(HttpSession session, @VerifyParams(required = true) String email, String checkCode, Integer type){
         try {
-            if (!checkCode.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CHECK_CODE_KEY))){
+            if (!checkCode.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CAPTCHA))){
                 throw new BusinessException("图片验证码不正确");
             }
             emailCodeService.sendEmailCode(email, type);
             return resultBuilder.build(StatusCode.STATUS_CODE_200,"验证码已发送", null);
         } finally {
-            session.removeAttribute(EmailConstants.CHECK_CODE_KEY_EMAIL);
+            session.removeAttribute(EmailConstants.CAPTCHA_EMAIL);
         }
     }
 
