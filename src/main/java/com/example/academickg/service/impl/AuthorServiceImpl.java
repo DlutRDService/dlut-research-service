@@ -21,6 +21,8 @@ public class AuthorServiceImpl implements IAuthorService {
     private ResultBuilder resultBuilder;
     @Resource
     private AuthorMapper authorMapper;
+    @Resource
+    private MilvusServiceImpl milvusService;
 
     @Override
     public Result getAuthorInfo(AuthorDto author) {
@@ -62,4 +64,11 @@ public class AuthorServiceImpl implements IAuthorService {
         AuthorDto data = authorMapper.selectAuthorInfoById(id);
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "Sucess", data);
     }
+
+    @Override
+    public Result relatedPaperRecommendation(List<String> keywords) {
+        milvusService.searchRelatedPaper();
+        return null;
+    }
+
 }

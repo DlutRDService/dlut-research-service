@@ -18,4 +18,5 @@ public interface IAuthorService {
     Result selectByName(String name);
     Result selectByNames(List<String> names);
     Result getAuthorInfoById(Integer id);
+    Result relatedPaperRecommendation(List<String> keywords);
 }

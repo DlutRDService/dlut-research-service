@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.example.academickg.component.ResultBuilder;
 import com.example.academickg.entity.constants.StatusCode;
+import com.example.academickg.service.IRedisService;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class RedisServiceImpl {
+public class RedisServiceImpl implements IRedisService {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;

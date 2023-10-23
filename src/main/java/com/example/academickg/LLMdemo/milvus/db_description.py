@@ -20,20 +20,20 @@
 # -------------------------连接集合-----------------------
 # collection = Collection("AI_paper")
 # --------------------------创建分区----------------------
-# createPartition("AI_paper", "MachineLearning")
-# createPartition("AI_paper", "DeepLearning")
-# createPartition("AI_paper", "SwarmIntelligence")
-# createPartition("AI_paper", "DataIntelligence")
-# createPartition("AI_paper", "ComputerVision")
-# createPartition("AI_paper", "FuzzyTheory")
-# createPartition("AI_paper", "HumanMachineIntelligence")
-# createPartition("AI_paper", "ImageProcessing")
-# createPartition("AI_paper", "ControlSystem")
-# createPartition("AI_paper", "SmartSystem")
+# createPartition("AI_paper", "shards_MachineLearning")
+# createPartition("AI_paper", "shards_DeepLearning")
+# createPartition("AI_paper", "shards_SwarmIntelligence")
+# createPartition("AI_paper", "shards_DataIntelligence")
+# createPartition("AI_paper", "shards_ComputerVision")
+# createPartition("AI_paper", "shards_FuzzyTheory")
+# createPartition("AI_paper", "shards_HumanMachineIntelligence")
+# createPartition("AI_paper", "shards_ImageProcessing")
+# createPartition("AI_paper", "shards_ControlSystem")
+# createPartition("AI_paper", "shards_SmartSystem")
 # --------------------------创建索引-------------------
 # createIndex(collection, "vector")
 # ------------------------导入数据----------------------
-insert()
+# insert()
 
 
 

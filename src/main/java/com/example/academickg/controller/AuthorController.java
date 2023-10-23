@@ -50,4 +50,5 @@ public class AuthorController {
     public Result authorInfo(@RequestParam Integer id){
         return authorService.getAuthorInfoById(id);
     }
+
 }

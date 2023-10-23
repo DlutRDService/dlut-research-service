@@ -67,6 +67,7 @@ public class PaperServiceImpl implements IPaperService {
         List<String> expressionList = StringQueryToListAlgorithm.extractFieldQualifiers(queryField);
         System.out.println(queryField);
         System.out.println(expressionList);
+        assert expressionList != null;
         for (String expression : expressionList) {
             System.out.println(expression);
             List<Integer> ids = paperMapper.selectIds(expression);
