@@ -6,7 +6,7 @@ import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.entity.dao.UserInfo;
 import com.dlut.ResearchService.mapper.UserInfoMapper;
-import com.dlut.ResearchService.service.LogService;
+import com.dlut.ResearchService.service.ILogService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @Service
-public class LogServiceImpl implements LogService {
+public class LogServiceImpl implements ILogService {
     @Resource
     private UserInfoMapper userInfoMapper;
     @Resource
@@ -43,7 +43,7 @@ public class LogServiceImpl implements LogService {
         session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
         Integer userId = userInfoMapper.selectByEmail(email);
         if (userId == null){
-            return resultBuilder.build(StatusCode.STATUS_CODE_400, "用户不存在，请注册或检查输入的邮箱与密码");
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, "用户不存在，请检查输入的邮箱与密码或注册新用户");
         }
         if (userInfoMapper.selectByEmailAndPassword(email, password) == null){
             return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码错误，请重新输入");
@@ -58,12 +58,12 @@ public class LogServiceImpl implements LogService {
      * 验证码登陆, 第一次登陆直接注册
      * @param session 会话
      * @param email 邮箱
-     * @param checkCode 验证码
+     * @param captcha 验证码
      */
     @Override
-    public Result signByCaptchaOrRegistration(HttpSession session, String email, String checkCode) {
+    public Result signByEmailCodeOrRegistration(HttpSession session, String email, String emailCode) {
         session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
-        Result result  = verify(email, checkCode);
+        Result result  = verify(email, emailCode);
         if (result.getData() == null){
             return result;
         } else if (result.getData() instanceof String) {
@@ -92,15 +92,15 @@ public class LogServiceImpl implements LogService {
     /**
      * 验证身份，可用于验证码登陆与密码信息修改
      * @param email 邮箱
-     * @param checkCode 验证码
+     * @param emailCode 验证码
      */
-    public Result verify(String email, String checkCode){
+    public Result verify(String email, String emailCode){
         if (!email.matches(Regex.DLUT_MAIL)){
             return resultBuilder.build(
                     StatusCode.STATUS_CODE_400,
                     "请使用大工邮箱");
         }
-        if (!redisService.get(email).equals(checkCode)){
+        if (!redisService.get(email).equals(emailCode)){
             return resultBuilder.build(
                     StatusCode.STATUS_CODE_400,
                     "验证码输入错误，请重新输入");

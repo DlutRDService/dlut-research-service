@@ -12,6 +12,7 @@ import jakarta.annotation.Resource;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -38,22 +39,23 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void sendEmailCode(String email, Integer type) {
+    public void sendEmailCode(@NotNull String email) {
         if (!email.matches(Regex.DLUT_MAIL)){
             throw new BusinessException("请使用大工校园邮箱，或检查您所输入的邮箱信息");
         }
-        String code = StringUtils.getRandomNumber(EmailConstants.LENGTH_5);
-        // 将邮箱与验证码存入Redis
-        redisService.set(email, code);
-        //TODO 发送验证码
-        sendEmailCode(email, code);
+
+        String emailCode = StringUtils.getRandomNumber(EmailConstants.LENGTH_5);
+        redisService.set(email, emailCode);
+
+        // TODO 发送验证码
+        sendEmailCode(email, emailCode);
     }
     /**
      * 邮箱发送
      * @param toEmail 发送地址
-     * @param code    验证码
+     * @param emailCode 验证码
      */
-    public void sendEmailCode(String toEmail, String code){
+    public void sendEmailCode(String toEmail, String emailCode){
         try{
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -63,7 +65,7 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
             EmailDto emailDto = new EmailDto();
 
             helper.setSubject(emailDto.getRegisterMailTitle());
-            helper.setText(String.format(emailDto.getRegisterEmailContent(), code));
+            helper.setText(String.format(emailDto.getRegisterEmailContent(), emailCode));
             helper.setSentDate(new Date());
 
             javaMailSender.send(message);
@@ -73,18 +75,16 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
         }
     }
 
-    public void getCaptcha(HttpServletResponse response, HttpSession session, Integer type) throws IOException {
+    public void getCaptcha(@NotNull HttpServletResponse response, HttpSession session) throws IOException {
         CreateImageCode vCode = new CreateImageCode(130,38,5,10);
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);
         response.setContentType("image/jpeg");
+
         String code = vCode.getCode();
-        if (type == null || type == 0){
-            session.setAttribute(EmailConstants.CAPTCHA, code);
-        } else {
-            session.setAttribute(EmailConstants.CAPTCHA_EMAIL, code);
-        }
+        session.setAttribute(EmailConstants.CAPTCHA, code);
+
         vCode.write(response.getOutputStream());
     }
 }

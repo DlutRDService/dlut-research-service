@@ -17,7 +17,6 @@ public class ResultBuilder {
         result.setData(data);
         return result;
     }
-
     public Result build(StatusCode statusCode, String msg) {
         Result result = new Result();
         result.setStatusCode(statusCode);

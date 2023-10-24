@@ -31,13 +31,13 @@ public class LoginController {
     /**
      * 登陆，使用账号密码。
      * @param session 会话
-     * @param email 邮箱
+     * @param emailOrAccount 邮箱或账号
      * @param password 密码
      */
     @GlobalInterceptor
     @PostMapping("sign-in/account")
-    public Result signByAccount(HttpSession session, @RequestParam String email, @RequestParam String password) {
-        return logService.signByAccount(session, email, password);
+    public Result signByAccount(HttpSession session, @RequestParam String emailOrAccount, @RequestParam String password) {
+        return logService.signByAccount(session, emailOrAccount, password);
     }
 
     /**
@@ -45,20 +45,20 @@ public class LoginController {
      * @param email 邮箱
      * @param checkCode 验证码
      */
-    @PostMapping("sign-in/captcha")
-    public Result signByCaptcha(HttpSession session, @RequestParam String email, @RequestParam String checkCode){
-        return logService.signByCaptchaOrRegistration(session, email, checkCode);
+    @PostMapping("sign-in/emailCode")
+    public Result signByEmailCode(HttpSession session, @RequestParam String email, @RequestParam String emailCode){
+        return logService.signByEmailCodeOrRegistration(session, email, emailCode);
     }
 
     /**
      * 用户注册
      * @param email 注册邮箱
-     * @param checkCode 注册验证码
+     * @param emailCode 注册验证码
      */
     @GlobalInterceptor
     @PostMapping("sign-up")
-    public Result registration(HttpSession session, String email, String checkCode){
-        return logService.signByCaptchaOrRegistration(session, email, checkCode);
+    public Result registration(HttpSession session, String email, String emailCode){
+        return logService.signByEmailCodeOrRegistration(session, email, emailCode);
     }
 
     /**
@@ -71,31 +71,29 @@ public class LoginController {
     }
     /**
      * 生成验证码
-     * @param type 0:登陆用验证码 1:邮箱发送用验证码
      */
     @PostMapping("getCaptcha")
-    public void getCaptcha(HttpServletResponse response, HttpSession session, Integer type) throws
+    public void getCaptcha(HttpServletResponse response, HttpSession session) throws
             IOException {
-        emailCodeService.getCaptcha(response, session, type);
+        emailCodeService.getCaptcha(response, session);
     }
 
     /**
      * 发送邮件验证码
      * @param email 目标邮箱
-     * @param checkCode 验证码
-     * @param type 0：登陆用验证码 1：邮箱验证码
+     * @param captcha 图片验证码
      */
     @GlobalInterceptor(checkParams = true)
     @PostMapping("/sendEmailCode")
-    public Result sendEmailCode(HttpSession session, @VerifyParams(required = true) String email, String checkCode, Integer type){
+    public Result sendEmailCode(HttpSession session, @VerifyParams(required = true) String email, String captcha){
         try {
-            if (!checkCode.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CAPTCHA))){
-                throw new BusinessException("图片验证码不正确");
+            if (!captcha.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CAPTCHA))){
+                throw new BusinessException("图片验证码不正确，请刷新后重新输入");
             }
-            emailCodeService.sendEmailCode(email, type);
+            emailCodeService.sendEmailCode(email);
             return resultBuilder.build(StatusCode.STATUS_CODE_200,"验证码已发送", null);
         } finally {
-            session.removeAttribute(EmailConstants.CAPTCHA_EMAIL);
+            session.removeAttribute(EmailConstants.CAPTCHA);
         }
     }
 

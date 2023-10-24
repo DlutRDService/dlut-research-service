@@ -40,10 +40,6 @@ public class GlobalOpsAspect {
             if (interceptor == null) {
                 return null;
             }
-            // 校验登陆
-//            if (interceptor.checkLogin()) {
-//
-//            }
             // 校验参数
             if (interceptor.checkParams()){
                 validateParams(method, args);

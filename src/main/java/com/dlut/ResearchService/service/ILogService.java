@@ -7,11 +7,11 @@ import jakarta.servlet.http.HttpSession;
  * @author zsl
  * @since 2023-07-12
  */
-public interface LogService {
+public interface ILogService {
 
     Result signByAccount(HttpSession session, String email, String password);
 
-    Result signByCaptchaOrRegistration(HttpSession session, String email, String checkCode);
+    Result signByEmailCodeOrRegistration(HttpSession session, String email, String captcha);
 
     Result changePassword(HttpSession session, String newPassword);
 }

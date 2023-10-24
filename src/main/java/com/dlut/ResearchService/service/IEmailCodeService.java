@@ -1,6 +1,8 @@
 package com.dlut.ResearchService.service;
 
 
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * <p>
  *  服务类
@@ -10,5 +12,6 @@ package com.dlut.ResearchService.service;
  * @since 2023-07-12
  */
 public interface IEmailCodeService{
-    void sendEmailCode(String email, Integer type);
+    @Transactional(rollbackFor = Exception.class)
+    void sendEmailCode(String email);
 }
