@@ -43,7 +43,7 @@ public class LoginController {
     /**
      * 登陆，验证码登陆。
      * @param email 邮箱
-     * @param checkCode 验证码
+     * @param emailCode 验证码
      */
     @PostMapping("sign-in/emailCode")
     public Result signByEmailCode(HttpSession session, @RequestParam String email, @RequestParam String emailCode){

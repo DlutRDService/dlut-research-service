@@ -58,7 +58,7 @@ public class LogServiceImpl implements ILogService {
      * 验证码登陆, 第一次登陆直接注册
      * @param session 会话
      * @param email 邮箱
-     * @param captcha 验证码
+     * @param emailCode 验证码
      */
     @Override
     public Result signByEmailCodeOrRegistration(HttpSession session, String email, String emailCode) {
