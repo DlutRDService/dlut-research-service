@@ -40,7 +40,7 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
     @Transactional(rollbackFor = Exception.class)
     public void sendEmailCode(String email, Integer type) {
         if (!email.matches(Regex.DLUT_MAIL)){
-            throw new BusinessException("请使用大工邮箱，或检查您所输入的邮箱信息");
+            throw new BusinessException("请使用大工校园邮箱，或检查您所输入的邮箱信息");
         }
         String code = StringUtils.getRandomNumber(EmailConstants.LENGTH_5);
         // 将邮箱与验证码存入Redis
@@ -60,7 +60,7 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
             helper.setFrom(appConfig.getSendUserName());
             helper.setTo(toEmail);
 
-            EmailDto emailDto = redisService.getEmailDto();
+            EmailDto emailDto = new EmailDto();
 
             helper.setSubject(emailDto.getRegisterMailTitle());
             helper.setText(String.format(emailDto.getRegisterEmailContent(), code));

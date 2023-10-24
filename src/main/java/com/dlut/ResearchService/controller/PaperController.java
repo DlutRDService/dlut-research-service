@@ -116,7 +116,9 @@ public class PaperController {
         idList.add(id);
         RedisUtils<List<Float>> redisUtils = new RedisUtils<>();
         List<Float> vector = redisUtils.getHashValue(RedisKey.REDIS_KEY_TEMP_PAPER_VECTOR, String.valueOf(id));
-        R<SearchResults> result = milvusService.query(vector, 3);
+        R<SearchResults> result = milvusService.queryBySimilarity(vector, 3, "", "",
+                "",
+               "");
         List<Long> resultIds = result.getData().getResults().getIds().getIntId().getDataList();
         List<Integer> resultIdList = JSONArray.parseArray(resultIds.toString(), Integer.class);
         idList.addAll(resultIdList);
@@ -167,7 +169,9 @@ public class PaperController {
         if (value != null) {
             queryVector = StringUtils.toFLoatList(value);
         }
-        R<SearchResults> result = milvusService.query(queryVector, 100);
+        R<SearchResults> result = milvusService.queryBySimilarity(queryVector, 3, "", "",
+                "",
+                "");
         List<Long> ids = result.getData().getResults().getIds().getIntId().getDataList();
         List<Integer> idList = JSONArray.parseArray(ids.toString(), Integer.class);
         List<PaperDto> paperDtos = paperService.selectPapersByIdList(idList);

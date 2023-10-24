@@ -3,7 +3,7 @@ package com.dlut.ResearchService.controller;
 import com.dlut.ResearchService.component.ResultBuilder;
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.service.impl.EmailCodeServiceImpl;
-import com.dlut.ResearchService.service.impl.UserInfoServiceImpl;
+import com.dlut.ResearchService.service.impl.LogServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -24,7 +24,7 @@ public class LoginController {
     @Resource
     private EmailCodeServiceImpl emailCodeService;
     @Resource
-    private UserInfoServiceImpl userInfoService;
+    private LogServiceImpl logService;
     @Resource
     private ResultBuilder resultBuilder;
 
@@ -37,7 +37,7 @@ public class LoginController {
     @GlobalInterceptor
     @PostMapping("sign-in/account")
     public Result signByAccount(HttpSession session, @RequestParam String email, @RequestParam String password) {
-        return userInfoService.signByAccount(session, email, password);
+        return logService.signByAccount(session, email, password);
     }
 
     /**
@@ -47,7 +47,7 @@ public class LoginController {
      */
     @PostMapping("sign-in/captcha")
     public Result signByCaptcha(HttpSession session, @RequestParam String email, @RequestParam String checkCode){
-        return userInfoService.signByCaptchaOrRegistration(session, email, checkCode);
+        return logService.signByCaptchaOrRegistration(session, email, checkCode);
     }
 
     /**
@@ -58,7 +58,7 @@ public class LoginController {
     @GlobalInterceptor
     @PostMapping("sign-up")
     public Result registration(HttpSession session, String email, String checkCode){
-        return userInfoService.signByCaptchaOrRegistration(session, email, checkCode);
+        return logService.signByCaptchaOrRegistration(session, email, checkCode);
     }
 
     /**
@@ -67,7 +67,7 @@ public class LoginController {
      */
     @PostMapping("setPassword")
     public Result setPassword(HttpSession session, @RequestParam String password){
-        return userInfoService.changePassword(session, password);
+        return logService.changePassword(session, password);
     }
     /**
      * 生成验证码

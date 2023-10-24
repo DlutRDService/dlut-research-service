@@ -14,6 +14,4 @@ public interface IRedisService {
 
     boolean acquireLock(String lockKey);
 
-
-    EmailDto getEmailDto();
 }

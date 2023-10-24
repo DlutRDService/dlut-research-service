@@ -6,7 +6,7 @@ import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.entity.dao.UserInfo;
 import com.dlut.ResearchService.mapper.UserInfoMapper;
-import com.dlut.ResearchService.service.IUserInfoService;
+import com.dlut.ResearchService.service.LogService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +21,9 @@ import java.time.LocalDateTime;
  * @author zsl
  * @since 2023-07-12
  */
-@Service
 @Slf4j
-public class UserInfoServiceImpl implements IUserInfoService {
+@Service
+public class LogServiceImpl implements LogService {
     @Resource
     private UserInfoMapper userInfoMapper;
     @Resource
@@ -105,7 +105,7 @@ public class UserInfoServiceImpl implements IUserInfoService {
                     StatusCode.STATUS_CODE_400,
                     "验证码输入错误，请重新输入");
         }
-        if (userInfoMapper.isEmailExit(email)){
+        if (userInfoMapper.isEmailExit(email) != null){
             return resultBuilder.build(
                     StatusCode.STATUS_CODE_200,
                     "操作成功", userInfoMapper.selectPasswordByEmail(email));

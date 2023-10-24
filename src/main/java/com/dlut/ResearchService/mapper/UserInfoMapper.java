@@ -13,7 +13,7 @@ public interface UserInfoMapper{
     // Integer insert(UserInfo userInfo);
     Boolean updatePassword(String password, String email);
 
-    boolean isEmailExit(String email);
+    Boolean isEmailExit(String email);
 
     Integer selectByEmail(String email);
 

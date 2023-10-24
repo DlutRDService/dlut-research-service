@@ -2,9 +2,9 @@ package com.dlut.ResearchService.aop.GlobalOpsAop;
 
 import com.dlut.ResearchService.annotation.GlobalInterceptor;
 import com.dlut.ResearchService.annotation.VerifyParams;
-import com.example.academickg.entity.constants.StatusCode;
-import com.example.academickg.exception.BusinessException;
-import com.example.academickg.utils.JsonUtils;
+import com.dlut.ResearchService.entity.constants.StatusCode;
+import com.dlut.ResearchService.exception.BusinessException;
+import com.dlut.ResearchService.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;

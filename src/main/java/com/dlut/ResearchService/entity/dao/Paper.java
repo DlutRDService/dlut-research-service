@@ -3,10 +3,8 @@ package com.dlut.ResearchService.entity.dao;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
-
 @Data
-public class Paper implements Serializable {
+public class Paper {
     @ApiModelProperty(value = "作者id")
     private Integer paper_id;
 

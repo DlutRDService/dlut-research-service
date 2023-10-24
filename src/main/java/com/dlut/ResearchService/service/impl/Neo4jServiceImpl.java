@@ -5,9 +5,10 @@ import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.service.INeo4jService;
 import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class Neo4jServiceImpl implements INeo4jService {
     @Resource
     private ResultBuilder resultBuilder;

@@ -4,14 +4,10 @@ import com.dlut.ResearchService.entity.constants.Result;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * <p>
- *  服务类
- * </p>
- *
  * @author zsl
  * @since 2023-07-12
  */
-public interface IUserInfoService {
+public interface LogService {
 
     Result signByAccount(HttpSession session, String email, String password);
 
