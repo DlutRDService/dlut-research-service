@@ -1,5 +1,6 @@
 package com.dlut.ResearchService.aop.lockAspect;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -9,11 +10,11 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Component
+@Component("lockAspect")
 @Aspect
-public class lockAspect {
+@Slf4j
+public class LockAspect {
     private static final Lock lock = new ReentrantLock();
-    //private static final Logger log = LoggerFactory.getLogger(logAspect.class);
 
     /**
      * 切入点
@@ -32,7 +33,7 @@ public class lockAspect {
         try {
             result = joinPoint.proceed();
         } catch (Throwable e) {
-            e.printStackTrace();
+            log.error("获取锁失败");
             throw new RuntimeException(e);
         } finally {
             lock.unlock();

@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Component
+@Component("logAspect")
 @Aspect
-public class logAspect {
-    private static final Logger log = LoggerFactory.getLogger(logAspect.class);
+public class LogAspect {
+    private static final Logger log = LoggerFactory.getLogger(LogAspect.class);
 
     /**
      * 日志切入点
