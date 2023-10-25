@@ -1,4 +1,4 @@
-package com.dlut.ResearchService.aop.lockAspect;
+package com.dlut.ResearchService.aop;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

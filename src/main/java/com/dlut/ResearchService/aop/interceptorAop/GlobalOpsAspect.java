@@ -1,4 +1,4 @@
-package com.dlut.ResearchService.aop.GlobalOpsAop;
+package com.dlut.ResearchService.aop.interceptorAop;
 
 import com.dlut.ResearchService.annotation.GlobalInterceptor;
 import com.dlut.ResearchService.annotation.VerifyParams;
@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-@Aspect
 @Slf4j
+@Aspect
 @Component("globalOpsAspect")
 public class GlobalOpsAspect {
 
@@ -40,16 +40,15 @@ public class GlobalOpsAspect {
             if (interceptor == null) {
                 return null;
             }
-            // 校验参数
             if (interceptor.checkParams()){
                 validateParams(method, args);
             }
             return point.proceed();
         } catch (BusinessException e){
-            log.error("全局拦截器异常", e);
+            log.error("拦截器异常", e);
             throw e;
         } catch (Throwable e){
-            log.error("全局拦截器异常", e);
+            log.error("拦截器异常", e);
             throw new BusinessException();
         }
     }
