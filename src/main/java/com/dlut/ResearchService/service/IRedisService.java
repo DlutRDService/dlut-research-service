@@ -1,10 +1,11 @@
 package com.dlut.ResearchService.service;
 
-import com.dlut.ResearchService.entity.dto.EmailDto;
 import org.springframework.data.redis.core.RedisCallback;
 
 public interface IRedisService {
     void set(String key, String value);
+
+    void set(String key, String value, Integer expirationTime);
 
     String get(String key);
 
@@ -12,6 +13,5 @@ public interface IRedisService {
 
     boolean executeTransaction(RedisCallback<Boolean> callback);
 
-    boolean acquireLock(String lockKey);
-
+    boolean acquireLock(String lockKey, Integer expirationTime);
 }

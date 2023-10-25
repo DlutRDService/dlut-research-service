@@ -9,7 +9,7 @@ import com.dlut.ResearchService.utils.RedisUtils;
 import com.dlut.ResearchService.utils.ScriptTriggerUtils;
 import com.dlut.ResearchService.utils.StringUtils;
 import com.dlut.ResearchService.component.ResultBuilder;
-import com.dlut.ResearchService.entity.constants.RedisKey;
+import com.dlut.ResearchService.entity.constants.redis.RedisKey;
 import com.dlut.ResearchService.entity.constants.Regex;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.entity.dao.Paper;

@@ -7,15 +7,14 @@ import com.dlut.ResearchService.service.impl.LogServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;
-import com.dlut.ResearchService.exception.BusinessException;
 import com.dlut.ResearchService.annotation.VerifyParams;
 import com.dlut.ResearchService.annotation.GlobalInterceptor;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 
 import java.io.IOException;
 
-import com.dlut.ResearchService.entity.constants.EmailConstants;
 
 @RestController
 @RequestMapping("login")
@@ -33,31 +32,39 @@ public class LoginController {
      * @param session 会话
      * @param emailOrAccount 邮箱或账号
      * @param password 密码
+     * @param captcha 图片验证码
      */
     @GlobalInterceptor
     @PostMapping("sign-in/account")
-    public Result signByAccount(HttpSession session, @RequestParam String emailOrAccount, @RequestParam String password) {
+    public Result signByAccount(@NotNull HttpSession session, @RequestParam String emailOrAccount,
+                                @RequestParam String password, @NotNull @RequestParam String captcha) {
+        emailCodeService.checkCaptcha(session, captcha);
         return logService.signByAccount(session, emailOrAccount, password);
     }
 
     /**
      * 登陆，验证码登陆。
      * @param email 邮箱
-     * @param emailCode 验证码
+     * @param emailCode 邮箱验证码
+     * @param captcha 图片验证码
      */
     @PostMapping("sign-in/emailCode")
-    public Result signByEmailCode(HttpSession session, @RequestParam String email, @RequestParam String emailCode){
+    public Result signByEmailCode(@NotNull HttpSession session, @RequestParam String email, @RequestParam String emailCode,
+                                  @NotNull @RequestParam String captcha){
+        emailCodeService.checkCaptcha(session, captcha);
         return logService.signByEmailCodeOrRegistration(session, email, emailCode);
     }
 
     /**
      * 用户注册
      * @param email 注册邮箱
-     * @param emailCode 注册验证码
+     * @param emailCode 邮箱验证码
+     * @param captcha 图片验证码
      */
     @GlobalInterceptor
     @PostMapping("sign-up")
-    public Result registration(HttpSession session, String email, String emailCode){
+    public Result registration(HttpSession session, String email, String emailCode, String captcha){
+        emailCodeService.checkCaptcha(session, captcha);
         return logService.signByEmailCodeOrRegistration(session, email, emailCode);
     }
 
@@ -69,6 +76,7 @@ public class LoginController {
     public Result setPassword(HttpSession session, @RequestParam String password){
         return logService.changePassword(session, password);
     }
+
     /**
      * 生成验证码
      */
@@ -81,20 +89,11 @@ public class LoginController {
     /**
      * 发送邮件验证码
      * @param email 目标邮箱
-     * @param captcha 图片验证码
      */
     @GlobalInterceptor(checkParams = true)
     @PostMapping("/sendEmailCode")
-    public Result sendEmailCode(HttpSession session, @VerifyParams(required = true) String email, String captcha){
-        try {
-            if (!captcha.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CAPTCHA))){
-                throw new BusinessException("图片验证码不正确，请刷新后重新输入");
-            }
-            emailCodeService.sendEmailCode(email);
-            return resultBuilder.build(StatusCode.STATUS_CODE_200,"验证码已发送", null);
-        } finally {
-            session.removeAttribute(EmailConstants.CAPTCHA);
-        }
+    public Result sendEmailCode(@VerifyParams(required = true) String email){
+        emailCodeService.sendEmailCode(email);
+        return resultBuilder.build(StatusCode.STATUS_CODE_200,"验证码已发送", null);
     }
-
 }

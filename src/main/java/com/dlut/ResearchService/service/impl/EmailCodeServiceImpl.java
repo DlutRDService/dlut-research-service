@@ -12,9 +12,8 @@ import jakarta.annotation.Resource;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -23,13 +22,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.Date;
 
+import static com.dlut.ResearchService.entity.constants.redis.RedisKey.LOCK_KEY_PREFIX;
+import static com.dlut.ResearchService.entity.constants.redis.RedisTimePolicy.CAPTCHA_EXPIRATION_TIME;
+import static com.dlut.ResearchService.entity.constants.redis.RedisTimePolicy.CAPTCHA_LOCK_EXPIRATION_TIME;
+
+
 /**
  * @author zsl
  * @since 2023-07-12
  */
+@Slf4j
 @Service
 public class EmailCodeServiceImpl implements IEmailCodeService {
-    private static final Logger logger = LoggerFactory.getLogger(EmailCodeServiceImpl.class);
     @Resource
     private JavaMailSender javaMailSender;
     @Resource
@@ -37,23 +41,31 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
     @Resource
     private RedisServiceImpl redisService;
 
+    /**
+     * 向邮箱发送验证码
+     * @param email 目标邮箱
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void sendEmailCode(@NotNull String email) {
         if (!email.matches(Regex.DLUT_MAIL)){
-            throw new BusinessException("请使用大工校园邮箱，或检查您所输入的邮箱信息");
+            throw new BusinessException("请使用大工校园邮箱，检查您所输入的邮箱信息");
         }
-
-        String emailCode = StringUtils.getRandomNumber(EmailConstants.LENGTH_5);
-        redisService.set(email, emailCode);
-
+        boolean lockAcquired = redisService.acquireLock(LOCK_KEY_PREFIX, CAPTCHA_LOCK_EXPIRATION_TIME);
+        String emailCode;
+        if (lockAcquired) {
+            emailCode = StringUtils.getRandomNumber(EmailConstants.LENGTH_5);
+            redisService.set(email, emailCode, CAPTCHA_EXPIRATION_TIME);
+        }else {
+            emailCode = redisService.get(email);
+        }
         // TODO 发送验证码
         sendEmailCode(email, emailCode);
     }
     /**
      * 邮箱发送
      * @param toEmail 发送地址
-     * @param emailCode 验证码
+     * @param emailCode 邮箱验证码
      */
     public void sendEmailCode(String toEmail, String emailCode){
         try{
@@ -70,12 +82,15 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
 
             javaMailSender.send(message);
         } catch (Exception e){
-            logger.error("邮件发送失败", e);
+            log.error("邮件发送失败", e);
             throw new BusinessException("邮件发送失败");
         }
     }
 
-    public void getCaptcha(@NotNull HttpServletResponse response, HttpSession session) throws IOException {
+    /**
+     * 生成图片验证码
+     */
+    public void getCaptcha(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException {
         CreateImageCode vCode = new CreateImageCode(130,38,5,10);
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache");
@@ -86,5 +101,19 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
         session.setAttribute(EmailConstants.CAPTCHA, code);
 
         vCode.write(response.getOutputStream());
+    }
+
+    /**
+     * 检查图片验证码是否正确
+     * @param captcha 图片验证码
+     */
+    public void checkCaptcha(HttpSession session, String captcha){
+        try{
+            if (!captcha.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CAPTCHA))){
+                throw new BusinessException("图片验证码不正确，请刷新后重新输入");
+            }
+        } finally {
+            session.removeAttribute(EmailConstants.CAPTCHA);
+        }
     }
 }
