@@ -1,9 +1,5 @@
-package com.dlut.ResearchService.controller;
+package com.dlut.ResearchService.controller.queryController;
 
-import cn.hutool.poi.excel.ExcelReader;
-import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.ExcelWriter;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.dlut.ResearchService.utils.RedisUtils;
 import com.dlut.ResearchService.utils.ScriptTriggerUtils;
@@ -12,7 +8,6 @@ import com.dlut.ResearchService.component.ResultBuilder;
 import com.dlut.ResearchService.entity.constants.redis.RedisKey;
 import com.dlut.ResearchService.entity.constants.Regex;
 import com.dlut.ResearchService.entity.constants.StatusCode;
-import com.dlut.ResearchService.entity.dao.Paper;
 import com.dlut.ResearchService.entity.dto.PaperDto;
 import com.dlut.ResearchService.service.impl.MilvusServiceImpl;
 import com.dlut.ResearchService.service.impl.PaperServiceImpl;
@@ -20,18 +15,11 @@ import com.dlut.ResearchService.entity.constants.Result;
 import io.milvus.grpc.SearchResults;
 import io.milvus.param.R;
 import jakarta.annotation.Resource;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
 import com.dlut.ResearchService.annotation.log;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-
 
 @RestController
 @RequestMapping("/paper")
@@ -57,11 +45,8 @@ public class PaperController {
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "向量导入完毕", null);
     }
 
-
-
     /**
      * 高级检索功能
-     *
      * @param queryField 检索字段
      */
     @log
@@ -123,42 +108,6 @@ public class PaperController {
         List<Integer> resultIdList = JSONArray.parseArray(resultIds.toString(), Integer.class);
         idList.addAll(resultIdList);
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "", paperService.selectPapersByIdList(idList));
-    }
-
-    /**
-     * 文件导出
-     *
-     * @param ids 导出目录
-     */
-    @RequestMapping(value = "/export", method = RequestMethod.POST)
-    public void exportPaperRecords(@RequestBody String ids, HttpServletResponse response) throws Exception {
-        List<Integer> idList = JSON.parseArray(JSON.parseObject(ids).getString("ids"), Integer.class);
-        List<PaperDto> list = paperService.selectPapersByIdList(idList);
-        ExcelWriter writer = ExcelUtil.getWriter(true);
-        writer.write(list, true);
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-        String fileName = URLEncoder.encode("Papers", StandardCharsets.UTF_8);
-        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
-        ServletOutputStream outputStream = response.getOutputStream();
-        writer.flush(outputStream, true);
-        outputStream.close();
-        writer.close();
-    }
-
-    /**
-     * 文件导入
-     *
-     * @param file
-     * @return
-     * @throws Exception
-     */
-    @PostMapping("/import/excel")
-    public Boolean importPaperRecordsByExcel(MultipartFile file) throws Exception {
-        InputStream inputStream = file.getInputStream();
-        ExcelReader reader = ExcelUtil.getReader(inputStream);
-        List<Paper> list = reader.read(0, 1, Paper.class);
-        // return paperService.saveOrUpdateBatch(list);
-        return null;
     }
 
     public Result recommendation(String ts) {

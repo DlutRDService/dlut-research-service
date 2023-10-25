@@ -1,4 +1,4 @@
-package com.dlut.ResearchService.controller;
+package com.dlut.ResearchService.controller.queryController;
 
 import com.dlut.ResearchService.annotation.log;
 import com.dlut.ResearchService.entity.constants.Result;

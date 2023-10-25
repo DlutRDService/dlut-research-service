@@ -6,6 +6,7 @@ import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.service.IFlaskService;
 import jakarta.annotation.Resource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.List;
 
 
 @Service
-public class FlaskService implements IFlaskService {
+public class FlaskServiceImpl implements IFlaskService {
 
     private final RestTemplate restTemplate;
     private final String BASE_URL;
@@ -27,8 +28,8 @@ public class FlaskService implements IFlaskService {
     private ResultBuilder resultBuilder;
 
     @Autowired
-    public FlaskService(RestTemplate restTemplate,
-                        @Value("${flask.api.url}") String BASE_URL){
+    public FlaskServiceImpl(RestTemplate restTemplate,
+                            @Value("${flask.api.url}") String BASE_URL){
         this.restTemplate = restTemplate;
         this.BASE_URL = BASE_URL;
     }
@@ -57,11 +58,7 @@ public class FlaskService implements IFlaskService {
      * @return 返回编码列表
      */
     public Result getEmbedding(String path, List<String> texts){
-        String jsonData = JSON.toJSONString(texts);
         return null;
-        // Class<List<Float>[]> responseType = (Class<List<Float>[]>) List[].class;
-        //List<List<Float>> resultList = getResultList(path, jsonData,responseType);
-        //return result.changeResultState(result, StatusCode.STATUS_CODE_200, "查询完毕", resultList);
     }
 
     public <T> List<T> getResultList(String path, String jsonData, Class<T[]> responseType) {
@@ -99,8 +96,15 @@ public class FlaskService implements IFlaskService {
         return resultBuilder.build(StatusCode.STATUS_CODE_200, response.getBody(), "");
     }
 
+    @Override
+    public Result documentProcess(@NotNull MultipartFile file) {
+        // String fileName = file.getOriginalFilename();
+        return resultBuilder.build(StatusCode.STATUS_CODE_200, "", "");
+    }
 
-
-
+    @Override
+    public Result txtProcess(MultipartFile file) {
+        return null;
+    }
 }
 

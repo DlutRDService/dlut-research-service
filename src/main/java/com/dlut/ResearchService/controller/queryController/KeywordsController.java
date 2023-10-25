@@ -1,4 +1,4 @@
-package com.dlut.ResearchService.controller;
+package com.dlut.ResearchService.controller.queryController;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.stereotype.Controller;

@@ -2,6 +2,7 @@ package com.dlut.ResearchService.service;
 
 import com.dlut.ResearchService.entity.constants.Result;
 import jakarta.servlet.http.HttpSession;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author zsl
@@ -13,5 +14,5 @@ public interface ILogService {
 
     Result signByEmailCodeOrRegistration(HttpSession session, String email, String captcha);
 
-    Result changePassword(HttpSession session, String newPassword);
+    Result updatePassword(@NotNull HttpSession session, String newPassword, Integer account);
 }

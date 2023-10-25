@@ -10,6 +10,7 @@ import com.dlut.ResearchService.service.ILogService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -77,11 +78,11 @@ public class LogServiceImpl implements ILogService {
         }
     }
     @Override
-    public Result changePassword(HttpSession session, String newPassword) {
+    public Result updatePassword(@NotNull HttpSession session, String newPassword, Integer account) {
         String email = (String) session.getAttribute("email");
         String oldPassword = (String) session.getAttribute("password");
         if (oldPassword == null){
-            insert(newPassword, email);
+            insert(newPassword, email, account);
             return resultBuilder.build(StatusCode.STATUS_CODE_200, "密码设置成功");
         }
         if (userInfoMapper.updatePassword(oldPassword, email)){
@@ -122,7 +123,7 @@ public class LogServiceImpl implements ILogService {
      * @param password 密码
      * @param email    邮箱
      */
-    public void insert(String password, String email) {
+    public void insert(String password, String email, Integer account) {
         byte[] imageData = new byte[0];
         try {
             File file = new File("../../../default_avatar.png");
@@ -131,6 +132,7 @@ public class LogServiceImpl implements ILogService {
             log.error("初始头像加载错误");
         }
         UserInfo userInfo = new UserInfo();
+        userInfo.setAccount(account);
         userInfo.setEmail(email);
         userInfo.setAvatar(imageData);
         userInfo.setRegistrationTime(LocalDateTime.now());

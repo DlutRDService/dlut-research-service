@@ -11,4 +11,8 @@ public interface IFlaskService {
     Result getEmbedding(String path, List<String> jsonData);
     <T> List<T> getResultList(String path, String jsonData, Class<T[]> responseType);
     Result updatePaper(String path, MultipartFile multipartFile) throws IOException;
+
+    Result documentProcess(MultipartFile file);
+
+    Result txtProcess(MultipartFile file);
 }

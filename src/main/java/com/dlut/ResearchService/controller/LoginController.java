@@ -72,9 +72,9 @@ public class LoginController {
      * 设置密码，密码设置成功后修改或导入数据库
      * @param password 密码
      */
-    @PostMapping("setPassword")
-    public Result setPassword(HttpSession session, @RequestParam String password){
-        return logService.changePassword(session, password);
+    @PostMapping("setAccountAndPassword")
+    public Result setPassword(HttpSession session, @RequestParam String password, Integer account){
+        return logService.updatePassword(session, password, account);
     }
 
     /**
