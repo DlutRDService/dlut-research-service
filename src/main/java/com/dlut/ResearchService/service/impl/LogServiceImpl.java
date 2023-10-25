@@ -46,6 +46,9 @@ public class LogServiceImpl implements ILogService {
         if (userId == null){
             return resultBuilder.build(StatusCode.STATUS_CODE_400, "用户不存在，请检查输入的邮箱与密码或注册新用户");
         }
+        if (userInfoMapper.checkStatusById(userId) == 0){
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, "登陆失败，用户已登录，若账号异常请修改密码");
+        }
         if (userInfoMapper.selectByEmailAndPassword(email, password) == null){
             return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码错误，请重新输入");
         }
@@ -68,6 +71,9 @@ public class LogServiceImpl implements ILogService {
         if (result.getData() == null){
             return result;
         } else if (result.getData() instanceof String) {
+            if (userInfoMapper.checkStatusByEmail(email) == 0){
+                return resultBuilder.build(StatusCode.STATUS_CODE_400, "登陆失败，用户已登录，若账号异常请修改密码");
+            }
             session.setAttribute("email", email);
             session.setAttribute("password", result.getData());
             return resultBuilder.build(StatusCode.STATUS_CODE_200, "登陆成功");
@@ -95,7 +101,7 @@ public class LogServiceImpl implements ILogService {
      * @param email 邮箱
      * @param emailCode 验证码
      */
-    public Result verify(String email, String emailCode){
+    public Result verify(@NotNull String email, String emailCode){
         if (!email.matches(Regex.DLUT_MAIL)){
             return resultBuilder.build(
                     StatusCode.STATUS_CODE_400,

@@ -5,7 +5,6 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson.JSON;
 import com.dlut.ResearchService.entity.dao.Paper;
-import com.dlut.ResearchService.entity.dto.PaperDto;
 import com.dlut.ResearchService.service.impl.PaperServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
@@ -27,7 +26,7 @@ public class DocumentController {
     @RequestMapping(value = "/export", method = RequestMethod.POST)
     public void exportPaperRecords(@RequestBody String ids, HttpServletResponse response) throws Exception {
         List<Integer> idList = JSON.parseArray(JSON.parseObject(ids).getString("ids"), Integer.class);
-        List<PaperDto> list = paperService.selectPapersByIdList(idList);
+        List<Paper> list = paperService.selectPapersByIdList(idList);
         ExcelWriter writer = ExcelUtil.getWriter(true);
         writer.write(list, true);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");

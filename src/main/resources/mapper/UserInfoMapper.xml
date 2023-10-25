@@ -34,4 +34,10 @@
     <select id="selectPasswordByEmail" resultType="java.lang.String">
         SELECT password from user_info where email = #{email}
     </select>
+    <select id="checkStatusById" resultType="java.lang.Integer">
+        SELECT status from user_info WHERE user_id = #{userId}
+    </select>
+    <select id="checkStatusByEmail" resultType="java.lang.Integer">
+        SELECT status FROM user_info WHERE email = #{email}
+    </select>
 </mapper>

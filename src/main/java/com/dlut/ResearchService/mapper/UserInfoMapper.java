@@ -10,7 +10,6 @@ public interface UserInfoMapper{
 
     Integer selectByEmailAndPassword(String email, String password);
 
-    // Integer insert(UserInfo userInfo);
     Boolean updatePassword(String password, String email);
 
     Boolean isEmailExit(String email);
@@ -21,4 +20,8 @@ public interface UserInfoMapper{
     Boolean insert(UserInfo userInfo);
 
     Boolean update(UserInfo userInfo);
+
+    Integer checkStatusById(Integer userId);
+
+    Integer checkStatusByEmail(String email);
 }

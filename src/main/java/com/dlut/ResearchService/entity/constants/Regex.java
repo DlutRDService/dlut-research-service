@@ -32,8 +32,4 @@ public class Regex {
     public static final String AND_MATCH = "(and)";
     public static final String NOT_MATCH = "(not)";
     public static final String OR_MATCH = "(or)";
-    public static final String AND_MATCH_WITH_BRACKET = "and +[a-z]{2}=";
-    public static final String OR_MATCHWITH_BRACKET = "or +[a-z]{2}=";
-    public static final String NOT_MATCHWITH_BRACKET = "not +[a-z]{2}=";
-
 }

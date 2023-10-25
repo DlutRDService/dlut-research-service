@@ -2,7 +2,6 @@ package com.dlut.ResearchService.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.dlut.ResearchService.entity.dto.PaperDto;
 import com.dlut.ResearchService.entity.dao.Paper;
 import org.apache.ibatis.annotations.MapKey;
 
@@ -18,11 +17,11 @@ public interface PaperMapper extends BaseMapper<Paper> {
     //批量插入
     Boolean saveBatch(List<Paper> paperList);
     //按id批量查询
-    List<PaperDto> selectPaperByIds(List<Integer> idList);
+    List<Paper> selectPaperByIds(List<Integer> idList);
 
-    PaperDto selectPaperById(Integer id);
+    Paper selectPaperById(Integer id);
 
-    List<PaperDto> selectPaperByIdList(List<Integer> idList);
+    List<Paper> selectPaperByIdList(List<Integer> idList);
 
     //Map<String, Object> selectKeywordsByPaperId(Integer id);
 
@@ -59,12 +58,11 @@ public interface PaperMapper extends BaseMapper<Paper> {
     @Override
     int update(Paper entity, Wrapper<Paper> updateWrapper);
     List<Paper> pageQuery(Integer current, Integer size);
-    List<PaperDto> selectByYear(Integer Year);
-    List<PaperDto> selectByAuthor(String Author);
-    List<PaperDto> selectByWC(String WC);
-    List<PaperDto> selectByESI(String ESI);
-    List<PaperDto> selectByJournal(String Journal);
-
+    List<Paper> selectByYear(Integer Year);
+    List<Paper> selectByAuthor(String Author);
+    List<Paper> selectByWC(String WC);
+    List<Paper> selectByESI(String ESI);
+    List<Paper> selectByJournal(String Journal);
     List<Integer> selectIdByYear(Integer Year);
     List<Integer> selectIdByAuthor(String Author);
     List<Integer> selectIdByWC(String WC);

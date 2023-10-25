@@ -1,5 +1,6 @@
 package com.dlut.ResearchService.utils;
 
+import com.dlut.ResearchService.entity.constants.StatusCode;
 import org.apache.commons.lang3.RandomStringUtils;
 import com.dlut.ResearchService.entity.constants.Regex;
 
@@ -11,13 +12,26 @@ import java.util.regex.Pattern;
 
 public final class StringUtils {
 
+    public static String handleQueryField(String queryField){
+        // 字符串转化为小写
+        queryField = queryField.toLowerCase();
+        // 替换中文字符
+        queryField = queryField.replace('（', ')');
+        queryField = queryField.replace('）', '(');
+        queryField = queryField.replace('：', ':');
+        queryField = queryField.replace('；', ';');
+        queryField = queryField.replace('，', ',');
+        queryField = queryField.replace('。', '.');
+        return queryField;
+    }
+
     /**
      * 生成随机数
      */
     public static String getRandomNumber(Integer count){
         return RandomStringUtils.random(count, false, true);
     }
-    public Boolean containNumOrChar(String s){
+    public static Boolean containNumOrChar(String s){
         return s.matches(Regex.CONTAIN_LETTER_REGEX) || s.contains(Regex.CONTAIN_DIGIT_REGEX);
     }
 
@@ -41,11 +55,9 @@ public final class StringUtils {
                 hashMap.put(matcher.group(),1);
                 return hashMap;
             }
-
             first = s.indexOf(matcher.group());
             String subQuery = s.substring(end, first);
             end = s.lastIndexOf(matcher.group());
-
             subQuery = StringUtils.getRegexMatchContent(subQuery, Regex.FORMAT_QUERY);
             if (s.substring(first, end).contains(Regex.AND_MATCH)){
                 hashMap.put(subQuery, 1);

@@ -15,15 +15,7 @@ public class CreateImageCode {
     private String code = null; // 验证码
     private BufferedImage bufferedImage;
     Random random = new Random();
-    // 无参构造
-    public CreateImageCode(){createImage();}
-    // 有参构造
-    public CreateImageCode(int width, int height, int code_count){
-        this.height = height;
-        this.width = width;
-        this.code_count = code_count;
-        createImage();
-    }
+
     public CreateImageCode(int width, int height, int code_count, int line_count){
         this.height = height;
         this.width = width;

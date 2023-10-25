@@ -1,10 +1,10 @@
 package com.dlut.ResearchService.aop.interceptorAop;
 
+import com.alibaba.fastjson.JSON;
 import com.dlut.ResearchService.annotation.GlobalInterceptor;
 import com.dlut.ResearchService.annotation.VerifyParams;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.exception.BusinessException;
-import com.dlut.ResearchService.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -64,7 +64,7 @@ public class GlobalOpsAspect {
             if (ArrayUtils.contains(TYPE_BASE, parameter.getParameterizedType().getTypeName())){
                 checkValue(value, verifyParams);
             }
-            log.info(JsonUtils.toJson(value));
+            log.info(JSON.toJSONString(value));
         }
     }
     private void checkValue(Object value, VerifyParams verifyParams){

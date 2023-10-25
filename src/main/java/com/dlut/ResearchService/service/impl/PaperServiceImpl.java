@@ -1,6 +1,9 @@
 package com.dlut.ResearchService.service.impl;
 
-import com.dlut.ResearchService.utils.BM25;
+import com.dlut.ResearchService.component.ResultBuilder;
+import com.dlut.ResearchService.entity.constants.Result;
+import com.dlut.ResearchService.entity.constants.StatusCode;
+import com.dlut.ResearchService.entity.dao.Paper;
 import com.dlut.ResearchService.utils.StringUtils;
 import com.dlut.ResearchService.entity.constants.Regex;
 import com.dlut.ResearchService.mapper.PaperMapper;
@@ -9,32 +12,57 @@ import com.dlut.ResearchService.utils.StringQueryToListAlgorithm;
 import com.dlut.ResearchService.utils.SetOperationsAlgorithm;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-import com.dlut.ResearchService.entity.dto.PaperDto;
 
 import java.util.*;
+
+import static com.dlut.ResearchService.entity.constants.Query.BOOLEAN_OPERATORS_ERROR;
 
 
 @Service
 public class PaperServiceImpl implements IPaperService {
     @Resource
     private PaperMapper paperMapper;
-
-    public PaperDto selectPapersById(Integer id){
-        return paperMapper.selectPaperById(id);
+    @Resource
+    private ResultBuilder resultBuilder;
+    
+    public Result advancedQuery(String queryField){
+        try{
+            StringUtils.handleQueryField(queryField);
+        } catch (Exception e){
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, BOOLEAN_OPERATORS_ERROR);
+        }
+        // 判断是否含有字符,以及含有=。
+        if (!StringUtils.containNumOrChar(queryField) || !queryField.contains("=")) {
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, BOOLEAN_OPERATORS_ERROR);
+        }
+        // 检查索引式是否符合要求,例如“AF=”或者“ AF=”，索引字段前不允许含有字母与数字
+        if (!queryField.matches(Regex.FORMAT_QUERY)) {
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, BOOLEAN_OPERATORS_ERROR);
+        }
+        //判断是否正确使用布尔操作符，检查不正确使用布尔操作符的情况
+        if (queryField.matches(Regex.FALSE_BOOLEAN_FORMAT)) {
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, BOOLEAN_OPERATORS_ERROR);
+        }
+        // 判断是否多条件
+        if (queryField.matches(Regex.MATCH_MULTI_CONDITION)) {
+            HashMap<String, Integer> map = singleSetQueryFieldProcess(queryField);
+            List<Paper> paperDtoList = singleSetQueriesProcess(map);
+            return resultBuilder.build(StatusCode.STATUS_CODE_200, "", paperDtoList);
+        } else {
+            Set<Integer> map1 = multiSetQueryFieldProcess(queryField);
+            List<Integer> idlist = new ArrayList<>(map1);
+            List<Paper> paperDtoList = selectPapersByIdList(idlist);
+            return resultBuilder.build(StatusCode.STATUS_CODE_200, "", paperDtoList);
+        }
     }
+
     /**
      * 按照id列表返回论文信息
      */
-    public List<PaperDto> selectPapersByIdList(List<Integer> idList){
+    public List<Paper> selectPapersByIdList(List<Integer> idList){
         return paperMapper.selectPaperByIdList(idList);
     }
 
-    /**
-     * 查询论文标题
-     */
-    public HashMap<Integer, String> selectTitleAndId(){
-        return paperMapper.selectTitleAndId();
-    }
     /**
      * 传入已经过格式检查的检索式字段
      * @param queryField 索引字符串
@@ -77,11 +105,8 @@ public class PaperServiceImpl implements IPaperService {
         return result;
     }
 
-    /**
-     *
-     */
-    public List<PaperDto> singleSetQueriesProcess(HashMap<String, Integer> hashMap) {
-        List<PaperDto> paperDto;
+    public List<Paper> singleSetQueriesProcess(HashMap<String, Integer> hashMap) {
+        List<Paper> paperDto;
         Set<String> queryFields = hashMap.keySet();
         for (String field : queryFields) {
             // 将“AF = ”等格式统一为“AF=”
@@ -96,23 +121,20 @@ public class PaperServiceImpl implements IPaperService {
         return null;
     }
 
-
     @Override
     public HashMap<String, List<String>> queryFieldProcess(String queryField) {
         return null;
     }
 
     @Override
-    public List<PaperDto> queryProcess(HashMap<String, List<String>> hashMap) {
+    public List<Paper> queryProcess(HashMap<String, List<String>> hashMap) {
         return null;
     }
 
-    public List<PaperDto> selectOneQueryField(String queryField){
+    public List<Paper> selectOneQueryField(String queryField){
         // 判断字段是否为主题检索，主题检索推荐算法实现。
         if (queryField.substring(0, 3).equalsIgnoreCase("ts=")) {
             queryField = queryField.replace("ts=", "");
-            BM25 bm25 = new BM25(1.2, 0);
-            //bm25.similarity();
         }
         // 判断字段是否为期刊检索
         if (queryField.substring(0, 3).equalsIgnoreCase("so=")) {
