@@ -11,13 +11,14 @@ import com.dlut.ResearchService.service.IPaperService;
 import com.dlut.ResearchService.utils.StringQueryToListAlgorithm;
 import com.dlut.ResearchService.utils.SetOperationsAlgorithm;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 import static com.dlut.ResearchService.entity.constants.Query.BOOLEAN_OPERATORS_ERROR;
 
-
+@Slf4j
 @Service
 public class PaperServiceImpl implements IPaperService {
     @Resource
@@ -27,12 +28,17 @@ public class PaperServiceImpl implements IPaperService {
     
     public Result advancedQuery(String queryField){
         try{
-            StringUtils.handleQueryField(queryField);
+            // 判断是否含有字符,以及含有=。
+            if (!StringUtils.containNumOrChar(queryField) || !queryField.contains("=")) {
+                return resultBuilder.build(StatusCode.STATUS_CODE_400, BOOLEAN_OPERATORS_ERROR);
+            }
+            // 处理大小写
+            queryField = queryField.toLowerCase();
+            // 处理中文字符
+            queryField = StringUtils.subChineseChars(queryField);
+            // 处理and，not等转为大写
+            queryField = StringUtils.matchAndUpper(queryField, Regex.MATCH_OPERATOR);
         } catch (Exception e){
-            return resultBuilder.build(StatusCode.STATUS_CODE_400, BOOLEAN_OPERATORS_ERROR);
-        }
-        // 判断是否含有字符,以及含有=。
-        if (!StringUtils.containNumOrChar(queryField) || !queryField.contains("=")) {
             return resultBuilder.build(StatusCode.STATUS_CODE_400, BOOLEAN_OPERATORS_ERROR);
         }
         // 检查索引式是否符合要求,例如“AF=”或者“ AF=”，索引字段前不允许含有字母与数字
@@ -43,6 +49,16 @@ public class PaperServiceImpl implements IPaperService {
         if (queryField.matches(Regex.FALSE_BOOLEAN_FORMAT)) {
             return resultBuilder.build(StatusCode.STATUS_CODE_400, BOOLEAN_OPERATORS_ERROR);
         }
+        // 判断表达式样式，属于哪一类
+
+        // 处理TS
+        List<String>  ts = StringUtils.getMatchStrings(queryField, Regex.TS_FORMAT);
+
+        // 将TS用向量数据库检索,列表类型，传给Milvus，检索结果为list，将其转换成id in (...) 格式方便Mysql进行查询
+        // 处理检索结果，返回mysql查询
+        // 需要分表查询
+
+
         // 判断是否多条件
         if (queryField.matches(Regex.MATCH_MULTI_CONDITION)) {
             HashMap<String, Integer> map = singleSetQueryFieldProcess(queryField);
@@ -54,6 +70,7 @@ public class PaperServiceImpl implements IPaperService {
             List<Paper> paperDtoList = selectPapersByIdList(idlist);
             return resultBuilder.build(StatusCode.STATUS_CODE_200, "", paperDtoList);
         }
+
     }
 
     /**
