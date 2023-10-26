@@ -1,10 +1,12 @@
 package com.dlut.ResearchService.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-
+@Slf4j
 public class IpUtils {
     private static final String UNKNOWN = "unknown";
     private static final String LOCALHOST_IP = "127.0.0.1";
@@ -37,7 +39,7 @@ public class IpUtils {
                 try {
                     iNet = InetAddress.getLocalHost();
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    log.error(e.toString());
                 }
                 if (iNet != null)
                     ip = iNet.getHostAddress();

@@ -144,6 +144,9 @@
     <select id="selectIds" resultType="java.lang.Integer">
         select id from Paper where ${s}
     </select>
+    <select id="select" resultType="java.lang.Object">
+        SELECT * FROM Paper WHERE
+    </select>
 
 
 </mapper>

@@ -69,4 +69,5 @@ public interface PaperMapper extends BaseMapper<Paper> {
     List<Integer> selectIdByESI(String ESI);
     List<Integer> selectIdByJournal(String Journal);
     HashMap<Integer, String> selectTitleAndId();
+    Object select(String s);
 }

@@ -4,6 +4,7 @@ import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface DefaultValue {
+public @interface Description {
     String value();
+    String example() default "";
 }

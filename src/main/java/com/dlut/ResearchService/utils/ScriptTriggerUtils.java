@@ -1,9 +1,11 @@
 package com.dlut.ResearchService.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
+@Slf4j
 public class ScriptTriggerUtils {
     public static void execute(String fileName, String argument){
         String line;
@@ -20,7 +22,7 @@ public class ScriptTriggerUtils {
             in.close();
             proc.waitFor();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            log.error(e.toString());
         }
     }
     public static void execute(String fileName, String argument, String num){
