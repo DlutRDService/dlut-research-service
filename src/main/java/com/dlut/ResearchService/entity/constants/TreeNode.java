@@ -1,10 +1,10 @@
 package com.dlut.ResearchService.entity.constants;
 
 public class TreeNode {
-    public String value;
+    public Object value;
     public TreeNode left;
     public TreeNode right;
-    public TreeNode(String value){
+    public TreeNode(Object value){
         this.value = value;
     }
 }

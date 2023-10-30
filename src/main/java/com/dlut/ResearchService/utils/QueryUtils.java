@@ -2,8 +2,11 @@ package com.dlut.ResearchService.utils;
 
 import com.dlut.ResearchService.entity.constants.Regex;
 import com.dlut.ResearchService.entity.constants.TreeNode;
+import org.jboss.netty.handler.codec.serialization.ObjectEncoder;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -18,7 +21,14 @@ public class QueryUtils {
         Pattern pattern = Pattern.compile(Regex.MATCH_EACH_FIELD_OR_OPERATOR_OR_BRACKET);
         Matcher matcher = pattern.matcher(queryField);
         while (matcher.find()){
-            treeList.add(matcher.group(0));
+            // 匹配括号或者逻辑表达式
+            if (matcher.group(0).matches(Regex.)){
+                treeList.add(matcher.group(0));
+                continue;
+            }
+            //
+            if (matcher.group(0).matches())
+
         }
         treeList.add(")");
         return treeList;
@@ -49,6 +59,17 @@ public class QueryUtils {
         }
         // 最后栈中剩下的节点就是根节点
         return stack.pop();
+    }
+    private static boolean evaluateNode(TreeNode node){
+        if (node == null) {
+            return false;
+        }
+        return switch (node.value) {
+            case "AND" -> evaluateNode(node.left) && evaluateNode(node.right);
+            case "OR" -> evaluateNode(node.left) || evaluateNode(node.right);
+            case "NOT" -> !evaluateNode(node.left);
+            default -> ;
+        };
     }
 
     /**

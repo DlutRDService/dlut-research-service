@@ -26,6 +26,15 @@ public class PaperServiceImpl implements IPaperService {
     private PaperMapper paperMapper;
     @Resource
     private ResultBuilder resultBuilder;
+
+    /**
+     * 根据单一检索式进行查询
+     * @param query 子检索式
+     * @return 检索id列表
+     */
+    public List<Integer> selectByQuery(String query){
+        return paperMapper.selectIds(query);
+    }
     
     public Result advancedQuery(String queryField){
         // TODO 需要验证
@@ -83,7 +92,7 @@ public class PaperServiceImpl implements IPaperService {
         // 处理检索结果，返回mysql查询
         // 需要分表查询
 
-
+        return null;
 
 
     }
@@ -95,25 +104,25 @@ public class PaperServiceImpl implements IPaperService {
         return paperMapper.selectPaperByIdList(idList);
     }
 
-    /**
-     * 传入已经过格式检查的检索式字段
-     * @param queryField 索引字符串
-     * @return 处理结果
-     */
-    public Set<Integer> multiSetQueryFieldProcess(String queryField){
-        Map<String, Set<Integer>> setsMap = new HashMap<>();
-        List<String> expressionList = StringQueryToListAlgorithm.extractFieldQualifiers(queryField);
-        System.out.println(queryField);
-        System.out.println(expressionList);
-        assert expressionList != null;
-        for (String expression : expressionList) {
-            System.out.println(expression);
-            List<Integer> ids = paperMapper.selectIds(expression);
-            setsMap.put(expression, new HashSet<>(ids));
-        }
-        System.out.println(result);
-        return result;
-    }
+//    /**
+//     * 传入已经过格式检查的检索式字段
+//     * @param queryField 索引字符串
+//     * @return 处理结果
+//     */
+//    public Set<Integer> multiSetQueryFieldProcess(String queryField){
+//        Map<String, Set<Integer>> setsMap = new HashMap<>();
+//        List<String> expressionList = StringQueryToListAlgorithm.extractFieldQualifiers(queryField);
+//        System.out.println(queryField);
+//        System.out.println(expressionList);
+//        assert expressionList != null;
+//        for (String expression : expressionList) {
+//            System.out.println(expression);
+//            List<Integer> ids = paperMapper.selectIds(expression);
+//            setsMap.put(expression, new HashSet<>(ids));
+//        }
+//        System.out.println(result);
+//        return result;
+//    }
 
     public List<Paper> singleSetQueriesProcess(HashMap<String, Integer> hashMap) {
         List<Paper> paperDto;
