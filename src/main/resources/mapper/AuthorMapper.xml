@@ -3,13 +3,13 @@
 <mapper namespace="com.dlut.ResearchService.mapper.AuthorMapper">
 
     <select id="selectAuthorInfoById" resultType="com.dlut.ResearchService.entity.dto.AuthorDto">
-        SELECT name, country, organization, H, paper_num, paper_peer_year
+        SELECT author_name, author_country, author_org, H, paper_count, paper_count_per_year
         FROM author
-        WHERE id = #{id}
+        WHERE author_id = #{authorId}
     </select>
     <select id="getCoAuthor" parameterType="java.util.List" resultType="java.lang.String">
-        SELECT name FROM author
-        WHERE id IN
+        SELECT author_name FROM author
+        WHERE author.author_id IN
         <foreach item = "item" collection="list" open="(" separator="," close=")">
             #{item}
         </foreach>

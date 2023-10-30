@@ -9,7 +9,7 @@ import java.util.List;
  * @since 2023-06-03
  */
 public interface AuthorMapper {
-    AuthorDto selectAuthorInfoById(Integer author_id);
-    List<String> getCoAuthor(List<Integer> author_ids);
+    AuthorDto selectAuthorInfoById(Integer authorId);
+    List<String> getCoAuthor(List<Integer> authorIds);
 
 }

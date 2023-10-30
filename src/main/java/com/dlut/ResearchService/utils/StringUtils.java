@@ -91,7 +91,7 @@ public final class StringUtils {
         List<Float> floats = new ArrayList<>(stringList.size());
         for (String s : stringList) {
             if (s!=null){
-                floats.add(toFloat(s));
+                floats.add(stringToFloat(s));
             }
         }
         return floats;

@@ -7,37 +7,37 @@
     </select>
 <!--  插入新纪录   -->
     <insert id="saveBatch" parameterType="java.util.List">
-        insert into Paper(id,t1,WC,so,ESI,py) values
-        <foreach collection="list" index="index" item="item" separator=",">
-            (#{item.id}, #{item.Title},
-            #{item.wc}, #{item.Journal}, #{item.esi}, #{Year})
-        </foreach>
+<!--        insert into paper(paper_id, tl, au, de, so, py, wc, esi, tc, nc, ab) values-->
+<!--&lt;!&ndash;        <foreach collection="list" index="index" item="item" separator=",">&ndash;&gt;-->
+<!--&lt;!&ndash;            (#{item.id}, #{item.Title},&ndash;&gt;-->
+<!--&lt;!&ndash;            #{item.wc}, #{item.Journal}, #{item.esi}, #{Year})&ndash;&gt;-->
+<!--&lt;!&ndash;        </foreach>&ndash;&gt;-->
     </insert>
 <!--查询年份列表-->
     <select id="selectYearList" parameterType="java.util.List" resultType="map">
         SELECT py, COUNT(*) as yearCount from Paper
-        Where id in #{idList}
+        Where paper.paper_id in #{idList}
         GROUP BY py ORDER BY py;
     </select>
 <!--  PaperMap联合查询作者与关键词  -->
-    <resultMap id="paperMap" type="com.dlut.ResearchService.entity.dto.PaperDto">
-        <result column="id" jdbcType="INTEGER" property="id"/>
-        <result column="Title" jdbcType="VARCHAR" property="title" />
-        <result column="Year" jdbcType="INTEGER" property="year" />
-        <result column="Journal" jdbcType="VARCHAR" property="journal" />
+    <resultMap id="paperMap" type="com.dlut.ResearchService.entity.dao.Paper">
+        <result column="paper_id" jdbcType="INTEGER" property="paper_id"/>
+        <result column="tl" jdbcType="VARCHAR" property="tl" />
+        <result column="py" jdbcType="INTEGER" property="py" />
+        <result column="so" jdbcType="VARCHAR" property="so" />
         <collection
-                column="id" property="Authors"
+                column="author_id" property="au"
                 ofType="String" select="selectAuthorsById">
         </collection>
         <collection
-                column="id" property="Keywords"
+                column="keyword_id" property="de"
                 ofType="String" select="selectKeywordsById">
         </collection>
     </resultMap>
     <resultMap id="authorMap" type="com.dlut.ResearchService.entity.dto.AuthorDto">
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="organization" jdbcType="VARCHAR" property="organization"/>
-        <result column="country" jdbcType="VARCHAR" property="country"/>
+        <result column="author_name" jdbcType="VARCHAR" property="name"/>
+        <result column="author_org" jdbcType="VARCHAR" property="organization"/>
+        <result column="author_country" jdbcType="VARCHAR" property="country"/>
     </resultMap>
     <!-- 按照ID查询Paper全部内容  -->
     <select id="selectPaperById" resultMap="paperMap">
@@ -123,7 +123,7 @@
         select id
         from Paper
         where
-              (select Paper_id
+              (select paper_id
                from paper_author
                where Author_id in
                      (select id
