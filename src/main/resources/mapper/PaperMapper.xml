@@ -41,12 +41,12 @@
     </resultMap>
     <!-- 按照ID查询Paper全部内容  -->
     <select id="selectPaperById" resultMap="paperMap">
-        select * from Paper where id = #{id}
+        select tl, au, de, so, py, wc, esi, tc, nc, ab from paper where paper_id = #{paperId}
     </select>
     <!--  按照id列表查询paper的全部内容  -->
     <select id="selectPaperByIds" resultMap="paperMap">
-        select * from Paper
-        where id in
+        select * from paper
+        where paper_id in
         <foreach collection="list" open="(" close=")" item="id" separator="," >
             #{id}
         </foreach>

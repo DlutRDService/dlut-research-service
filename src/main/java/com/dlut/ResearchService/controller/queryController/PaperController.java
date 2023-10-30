@@ -7,7 +7,6 @@ import com.dlut.ResearchService.utils.ScriptTriggerUtils;
 import com.dlut.ResearchService.utils.StringUtils;
 import com.dlut.ResearchService.component.ResultBuilder;
 import com.dlut.ResearchService.entity.constants.redis.RedisKey;
-import com.dlut.ResearchService.entity.constants.Regex;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.service.impl.MilvusServiceImpl;
 import com.dlut.ResearchService.service.impl.PaperServiceImpl;
@@ -43,19 +42,19 @@ public class PaperController {
         return paperService.advancedQuery(queryField);
     }
 
-    @GetMapping("full-record/{id}")
-    public Result paperInformation(@PathVariable Integer id) {
-        ArrayList<Integer> idList = new ArrayList<>();
-        idList.add(id);
-        RedisUtils<List<Float>> redisUtils = new RedisUtils<>();
-        List<Float> vector = redisUtils.getHashValue(RedisKey.REDIS_KEY_TEMP_PAPER_VECTOR, String.valueOf(id));
-        R<SearchResults> result = milvusService.queryBySimilarity(vector, 3, "", "",
-                "",
-               "");
-        List<Long> resultIds = result.getData().getResults().getIds().getIntId().getDataList();
-        List<Integer> resultIdList = JSONArray.parseArray(resultIds.toString(), Integer.class);
-        idList.addAll(resultIdList);
-        return resultBuilder.build(StatusCode.STATUS_CODE_200, "", paperService.selectPapersByIdList(idList));
+    @GetMapping("full-record/{paperId}")
+    public Result paperInformation(@PathVariable Integer paperId) {
+//        ArrayList<Integer> idList = new ArrayList<>();
+//        idList.add(paperId);
+//        RedisUtils<List<Float>> redisUtils = new RedisUtils<>();
+//        List<Float> vector = redisUtils.getHashValue(RedisKey.REDIS_KEY_TEMP_PAPER_VECTOR, String.valueOf(paperId));
+//        R<SearchResults> result = milvusService.queryBySimilarity(vector, 3, "", "",
+//                "",
+//               "");
+//        List<Long> resultIds = result.getData().getResults().getIds().getIntId().getDataList();
+//        List<Integer> resultIdList = JSONArray.parseArray(resultIds.toString(), Integer.class);
+//        idList.addAll(resultIdList);
+        return paperService.paperInformation(paperId);
     }
 
     public Result recommendation(String ts) {
@@ -64,7 +63,7 @@ public class PaperController {
         // 获取该向量值
         List<String> value = stringRedisTemplate.opsForList().range(RedisKey.REDIS_KEY_TEMP_QUERY_VECTOR, 0, -1);
         if (value != null) {
-            queryVector = StringUtils.toFLoatList(value);
+            queryVector = StringUtils.stringListToFLoatList(value);
         }
         R<SearchResults> result = milvusService.queryBySimilarity(queryVector, 3, "", "",
                 "",

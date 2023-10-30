@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.MapKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public interface PaperMapper {
@@ -19,7 +20,6 @@ public interface PaperMapper {
     List<Paper> selectPaperByIdList(List<Integer> idList);
 
     //Map<String, Object> selectKeywordsByPaperId(Integer id);
-
     //查询年份
     @MapKey("Year")
     List<Map<Object, Object>> selectYearList(List<Integer> idList);
@@ -38,5 +38,5 @@ public interface PaperMapper {
     List<Integer> selectIdByJournal(String Journal);
     HashMap<Integer, String> selectTitleAndId();
     Object select(String s);
-    List<Integer> selectIds(String s);
+    Set<Integer> selectIds(String s);
 }

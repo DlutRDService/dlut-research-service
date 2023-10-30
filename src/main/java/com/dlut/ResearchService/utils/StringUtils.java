@@ -75,47 +75,19 @@ public final class StringUtils {
     }
 
     /**
-     * @param s 是否包含数字
+     * 判断字符串中是否包含字符
      */
-    public static Boolean containNumOrChar(String s){
-        return s.matches(Regex.CONTAIN_LETTER_REGEX) || s.contains(Regex.CONTAIN_DIGIT_REGEX);
+    public static Boolean containLetter(String s){
+        return s.matches(Regex.CONTAIN_LETTER_REGEX);
     }
 
-
-//    public static HashMap<String, Integer> singleSetRegexQueryMatch(String s, String regex){
-//        HashMap<String, Integer> hashMap = new HashMap<>();
-//        Pattern pattern = Pattern.compile(regex);
-//        Matcher matcher = pattern.matcher(s);
-//        int first;
-//        int end = 0;
-//        while (matcher.find()){
-//            if (matcher.groupCount() == 2){
-//                hashMap.put(matcher.group(),1);
-//                return hashMap;
-//            }
-//            first = s.indexOf(matcher.group());
-//            String subQuery = s.substring(end, first);
-//            end = s.lastIndexOf(matcher.group());
-//            subQuery = StringUtils.getRegexMatchContent(subQuery, Regex.FORMAT_QUERY);
-//            if (s.substring(first, end).contains(Regex.AND_MATCH)){
-//                hashMap.put(subQuery, 1);
-//            }
-//            if (s.substring(first, end).contains(Regex.OR_MATCH)){
-//                hashMap.put(subQuery, 2);
-//            }
-//            if (s.substring(first, end).contains(Regex.NOT_MATCH)){
-//                hashMap.put(subQuery, 3);
-//            }
-//        }
-//        return hashMap;
-//    }
     public static String getRegexMatchContent(String s, String regex){
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(s);
         return matcher.group();
     }
 
-    public static List<Float> toFLoatList(List<String> stringList){
+    public static List<Float> stringListToFLoatList(List<String> stringList){
         List<Float> floats = new ArrayList<>(stringList.size());
         for (String s : stringList) {
             if (s!=null){
@@ -125,7 +97,7 @@ public final class StringUtils {
         return floats;
     }
 
-    public static Float toFloat(String s){
+    public static Float stringToFloat(String s){
         return Float.parseFloat(s);
     }
 }

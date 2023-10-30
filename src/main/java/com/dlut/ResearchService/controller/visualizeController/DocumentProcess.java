@@ -1,7 +1,7 @@
 package com.dlut.ResearchService.controller.visualizeController;
 
 import com.dlut.ResearchService.entity.constants.Result;
-import com.dlut.ResearchService.service.impl.FlaskServiceImpl;
+import com.dlut.ResearchService.service.impl.WebClientServiceImpl;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,10 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("document")
 public class DocumentProcess {
     @Resource
-    private FlaskServiceImpl flaskServiceImpl;
+    private WebClientServiceImpl webClientServiceImpl;
 
     @PostMapping(value = "document/txtProcess")
     public Result documentProcess(@Nonnull @RequestParam MultipartFile file){
-        return flaskServiceImpl.txtProcess(file);
+        return webClientServiceImpl.txtProcess(file);
     }
 }

@@ -2,19 +2,14 @@ package com.dlut.ResearchService.utils;
 
 import com.dlut.ResearchService.entity.constants.Regex;
 import com.dlut.ResearchService.entity.constants.TreeNode;
-import org.jboss.netty.handler.codec.serialization.ObjectEncoder;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QueryUtils {
-    public static List<String> stringToPrefixString(String queryField){
+    public static List<String> queryToInfixString(String queryField){
         ArrayList<String> treeList = new ArrayList<>();
         treeList.add("(");
         treeList.add("AND");
@@ -34,7 +29,7 @@ public class QueryUtils {
         return treeList;
     }
 
-    public static TreeNode prefixStringToTreeNode(@NotNull List<String> tokens){
+    public static TreeNode infixStringToTreeNode(@NotNull List<String> tokens){
         Stack<TreeNode> stack = new Stack<>();
         for (String token : tokens) {
             if (token.equals("(")){
@@ -60,17 +55,26 @@ public class QueryUtils {
         // 最后栈中剩下的节点就是根节点
         return stack.pop();
     }
-    private static boolean evaluateNode(TreeNode node){
+    /**
+     * 处理解析树
+     * @param node 解析树
+     * @return 返回结果列表Set类型
+     */
+    public static Set<Integer> getEvaluateNode(TreeNode node){
         if (node == null) {
-            return false;
+            return null;
         }
-        return switch (node.value) {
-            case "AND" -> evaluateNode(node.left) && evaluateNode(node.right);
-            case "OR" -> evaluateNode(node.left) || evaluateNode(node.right);
-            case "NOT" -> !evaluateNode(node.left);
-            default -> ;
-        };
+        Set<Integer> result = new HashSet<>(getEvaluateNode(node.left));
+        switch (node.value.toString()) {
+            case "AND" -> result.retainAll(getEvaluateNode(node.right));
+            case "OR" -> result.addAll(getEvaluateNode(node.right));
+            case "NOT" -> result.removeAll(getEvaluateNode(node.right));
+            default -> {
+            }
+        }
+        return result;
     }
+
 
     /**
      * 匹配相关字符，并将其大写
@@ -85,4 +89,6 @@ public class QueryUtils {
         }
         return sb.toString();
     }
+
+
 }

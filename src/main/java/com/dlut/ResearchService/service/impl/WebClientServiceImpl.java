@@ -4,35 +4,25 @@ import com.alibaba.fastjson.JSON;
 import com.dlut.ResearchService.component.ResultBuilder;
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
-import com.dlut.ResearchService.service.IFlaskService;
+import com.dlut.ResearchService.service.IWebClientService;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-
+// TODO 将Rest改为Web后，需要修改类结构
 @Service
-public class FlaskServiceImpl implements IFlaskService {
-
-    private final RestTemplate restTemplate;
-    private final String BASE_URL;
+public class WebClientServiceImpl implements IWebClientService {
+    @Resource
+    private WebClient webClient;
     @Resource
     private ResultBuilder resultBuilder;
-
-    @Autowired
-    public FlaskServiceImpl(RestTemplate restTemplate,
-                            @Value("${flask.api.url}") String BASE_URL){
-        this.restTemplate = restTemplate;
-        this.BASE_URL = BASE_URL;
-    }
 
     /**
      * 根据查询的TS字段进行搜索
@@ -68,7 +58,7 @@ public class FlaskServiceImpl implements IFlaskService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
 
-        T[] responseArray = restTemplate.exchange(url, HttpMethod.POST, requestEntity, responseType).getBody();
+        T[] responseArray = webClient.exchange(url, HttpMethod.POST, requestEntity, responseType).getBody();
         if (responseArray != null) {
             return List.of(responseArray);
         } else {
@@ -90,7 +80,7 @@ public class FlaskServiceImpl implements IFlaskService {
         // 设置请求体
         HttpEntity<byte[]> requestEntity = new HttpEntity<>(fileBytes, headers);
         // 调用接口
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        ResponseEntity<String> response = webClient.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
         // 返回 Flask 程序的响应
         return resultBuilder.build(StatusCode.STATUS_CODE_200, response.getBody(), "");
