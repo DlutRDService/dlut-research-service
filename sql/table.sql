@@ -4,7 +4,7 @@
 -- ----------------------------
 drop table if exists sys_oper_log;
 create table sys_ops_log (
-        ops_id            bigint(20)       not null auto_increment    comment '日志主键',
+        ops_id            bigint(20)      not null auto_increment    comment '日志主键',
         title             varchar(50)     default ''                 comment '模块标题',
         business_type     int(2)          default 0                  comment '业务类型（0其它 1新增 2修改 3删除）',
         method            varchar(100)    default ''                 comment '方法名称',
@@ -141,7 +141,7 @@ create table organization (
 -- ----------------------------
 drop table if exists sys_dict_data;
 create table sys_dict_data (
-        dict_code      bigint(20)     not null auto_increment  comment '字典编码',
+        dict_code    bigint(20)     not null auto_increment    comment '字典编码',
         dict_name    varchar(100)   default null               comment '字典名称',
         dict_sort    varchar(100)   default null               comment '字典排序',
         dict_label   varchar(100)   default null               comment '字典标签',
@@ -163,9 +163,9 @@ create table sys_dict_data (
 # create table sys_author (
 #     author_id         bigint(20)      not null auto_increment    comment '作者id',
 #     author_name       varchar(200)    default null               comment 'TL标题',
-#     author_country    varchar(100) default null comment 'AU作者',
-#     author_org        varchar(100) default null comment 'DE关键词',
-#     so             varchar(50)  default null comment 'SO期刊',
+#     author_country    varchar(100)    default null comment 'AU作者',
+#     author_org        varchar(100)    default null comment 'DE关键词',
+#     so             varchar(50)        default null comment 'SO期刊',
 #     py             varchar(4)   default null comment 'PY发表年份',
 #     wc             varchar(100) default null comment 'WOS分类',
 #     esi            varchar(50)  default null comment 'ESI分类',

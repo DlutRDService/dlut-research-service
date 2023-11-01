@@ -1,12 +1,12 @@
 package com.dlut.ResearchService.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.dlut.ResearchService.component.ResultBuilder;
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.service.IWebClientService;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,14 +15,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 // TODO 将Rest改为Web后，需要修改类结构
 @Service
 public class WebClientServiceImpl implements IWebClientService {
+    private String url;
     @Resource
     private WebClient webClient;
     @Resource
     private ResultBuilder resultBuilder;
+
 
     /**
      * 根据查询的TS字段进行搜索
@@ -30,14 +33,21 @@ public class WebClientServiceImpl implements IWebClientService {
      * @param queries 传入的查询列表
      * @return 返回id列表
      */
-    public Result search(String path, List<String> queries) {
-        String jsonData = JSON.toJSONString(queries);
-        Class<Integer[]> responseType= Integer [].class;
-        List<Integer> resultList = getResultList(path, jsonData, responseType);
+    @Override
+    public Result search(String query) {
+        url = "api/search";
+        Set<Integer> response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(url)
+                        .queryParam("param", query)
+                        .build())
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Set<Integer>>(){})
+                .onErrorReturn(Collections.emptySet())
+                .block();
         return resultBuilder.build(
                 StatusCode.STATUS_CODE_200,
-                "请求成功，处理完毕",
-                List.of(resultList)
+                "请求成功，处理完毕", response
         );
     }
 
@@ -52,7 +62,7 @@ public class WebClientServiceImpl implements IWebClientService {
     }
 
     public <T> List<T> getResultList(String path, String jsonData, Class<T[]> responseType) {
-        String url = BASE_URL + "/" + path;
+        url = BASE_URL + "/" + path;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 

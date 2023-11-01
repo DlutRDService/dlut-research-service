@@ -8,6 +8,9 @@ import java.util.List;
 
 public interface IWebClientService {
     Result search(String path, List<String> jsonData);
+
+    Result search(String query);
+
     Result getEmbedding(String path, List<String> jsonData);
     <T> List<T> getResultList(String path, String jsonData, Class<T[]> responseType);
     Result updatePaper(String path, MultipartFile multipartFile) throws IOException;
