@@ -2,7 +2,7 @@
 -- ----------------------------
 -- 日志表
 -- ----------------------------
-drop table if exists sys_oper_log;
+drop table if exists sys_ops_log;
 create table sys_ops_log (
         ops_id            bigint(20)      not null auto_increment    comment '日志主键',
         title             varchar(50)     default ''                 comment '模块标题',
@@ -39,7 +39,7 @@ create table sys_user (
         password          varchar(50)     default null               comment '用户密码',
         salt              varchar(20)     default ''                 comment '盐加密',
         avatar            varchar(100)    default null               comment '头像路径',
-        sex               char(1)        default '0'                comment '性别(0未知1男2女)',
+        sex               char(1)         default '0'                comment '性别(0未知1男2女)',
         user_type         varchar(2)      default '00'               comment '用户类型(00系统用户01注册用户)',
         status            tinyint(1)      default 0                  comment '账号状态（0正常 1停用）',
         registration_time datetime                                   comment '创建时间',
@@ -82,34 +82,11 @@ create table author (
         author_org              varchar(100)    default null               comment '作者机构',
         paper_count             varchar(50)     default null               comment '发文数量',
         paper_count_per_year    varchar(4)      default null               comment '每年发文数量',
-        research                varchar(100)    default null               comment 'WOS分类',
-
-        tc                smallint(5)     default 0                  comment '被引量',
-        nc                smallint(5)     default 0                  comment '引文量',
-        ab                TEXT            default null               comment '文献摘要',
+        research                varchar(100)    default null               comment '研究领域',
+        H                       smallint(4)     default 0                  comment 'H指数',
+        high_cited_paper        smallint(4)     default 0                  comment '高被引文章',
         primary key (author_id)
 ) engine=innodb auto_increment=0 comment = '作者表';
-
--- ----------------------------
--- 模型表（会不会没啥必要）
--- ----------------------------
-# drop table if exists author;
-# create table author
-# (
-#     author_id      bigint(20) not null auto_increment comment '作者id',
-#     author_name    varchar(200) default null comment 'TL标题',
-#     author_country varchar(100) default null comment 'AU作者',
-#     author_org     varchar(100) default null comment 'DE关键词',
-#     so             varchar(50)  default null comment 'SO期刊',
-#     py             varchar(4)   default null comment 'PY发表年份',
-#     wc             varchar(100) default null comment 'WOS分类',
-#     esi            varchar(50)  default null comment 'ESI分类',
-#     tc             smallint(5)  default 0 comment '被引量',
-#     nc             smallint(5)  default 0 comment '引文量',
-#     ab             TEXT         default null comment '文献摘要',
-#     primary key (author_id)
-# ) engine = innodb
-#   auto_increment = 0 comment = '模型表';
 
 -- ----------------------------
 -- 关键词表
@@ -118,9 +95,10 @@ drop table if exists keyword;
 create table keyword (
     keyword_id     bigint(20)   not null auto_increment   comment '关键词id',
     keyword_name   varchar(50)  default null              comment '关键词名称',
-    keyword_nums   int(100)     default 1                 comment '关键词频次',
+    keyword_count  int(100)     default 1                 comment '关键词频次',
     research       varchar(200) default null              comment '研究领域',
-    primary key (keyword_id)
+    primary key (keyword_id),
+    key idx_keyword_kn(keyword_name)
 ) engine=innodb auto_increment=0 comment = '关键词表';
 
 -- ----------------------------
