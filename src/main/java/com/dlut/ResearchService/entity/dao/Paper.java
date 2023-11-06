@@ -33,7 +33,7 @@ public class Paper {
     private Integer tc;
 
     @ApiModelProperty(value = "引文数量", example = "3")
-    private Integer nc;
+    private Integer nr;
 
     @ApiModelProperty(value = "论文摘要")
     private String ab;

@@ -6,7 +6,7 @@ import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.entity.dao.UserInfo;
 import com.dlut.ResearchService.mapper.UserInfoMapper;
-import com.dlut.ResearchService.service.ILogService;
+import com.dlut.ResearchService.service.ILoginService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @Service
-public class LogServiceImpl implements ILogService {
+public class LoginServiceImpl implements ILoginService {
     @Resource
     private UserInfoMapper userInfoMapper;
     @Resource

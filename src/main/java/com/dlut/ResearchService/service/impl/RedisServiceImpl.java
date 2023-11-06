@@ -4,6 +4,7 @@ import com.dlut.ResearchService.service.IRedisService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,8 @@ public class RedisServiceImpl implements IRedisService {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-
+    @Resource
+    private RedisTemplate redisTemplate;
     @Override
     public void set(String key, String value) {
 

@@ -15,7 +15,6 @@ public class LoginValidationInterceptor {
     @Pointcut("execution(* com.dlut.ResearchService.controller.*.*(..)) " +
             "&& !execution(* com.dlut.ResearchService.controller.LoginController.*(..))")
     private void loginValidationPointcut(){
-
     }
     @Around("loginValidationPointcut()")
     public Object aroundMethodExecution(ProceedingJoinPoint point) throws Throwable {
@@ -23,10 +22,9 @@ public class LoginValidationInterceptor {
         // 检查用户是否已登录，如果未登录则阻止进一步处理请求
 
         // 执行目标方法
-        Object result = point.proceed();
 
         // 在目标方法执行后进行处理，如果需要的话
 
-        return result;
+        return point.proceed();
     }
 }

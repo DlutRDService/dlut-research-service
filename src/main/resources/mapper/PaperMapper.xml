@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dlut.ResearchService.mapper.PaperMapper">
-<!--    分页查询   -->
-    <select id="pageQuery" resultType="com.dlut.ResearchService.entity.dao.Paper">
-        select * from Paper limit #{current}, #{size}
-    </select>
 <!--  插入新纪录   -->
     <insert id="saveBatch" parameterType="java.util.List">
-<!--        insert into paper(paper_id, tl, au, de, so, py, wc, esi, tc, nc, ab) values-->
-<!--&lt;!&ndash;        <foreach collection="list" index="index" item="item" separator=",">&ndash;&gt;-->
-<!--&lt;!&ndash;            (#{item.id}, #{item.Title},&ndash;&gt;-->
-<!--&lt;!&ndash;            #{item.wc}, #{item.Journal}, #{item.esi}, #{Year})&ndash;&gt;-->
-<!--&lt;!&ndash;        </foreach>&ndash;&gt;-->
+        insert into paper(paper_id, tl, au, de, so, py, wc, esi, tc, nr, ab) values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.paper_id}, #{item.tl},#{item.au},#{item.de},#{item.so},#{item.py},#{item.nr}
+            #{item.wc}, #{item.tc}, #{item.esi}, #{item.ab})
+        </foreach>
     </insert>
 <!--查询年份列表-->
     <select id="selectYearList" parameterType="java.util.List" resultType="map">
@@ -69,84 +65,35 @@
         where Paper.id = #{id};
     </select>
 <!-- 按ID列表查询Paper内容  -->
-    <select id="selectPaperByIdList" parameterType="list" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
+    <select id="selectPaperByIdList" parameterType="list" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dao.Paper">
         select * from Paper
         where id in
         <foreach collection="list" open="(" close=")" item="id" separator="," >
             #{id}
         </foreach>
     </select>
-<!-- 按期刊查找   -->
-    <select id="selectByJournal" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
-        select * from Paper where so = #{Journal}
-    </select>
-<!-- 按ESI主题查找   -->
-    <select id="selectByESI" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
-        select * from Paper where esi = #{ESI}
-    </select>
-<!-- 按WC主题查找   -->
-    <select id="selectByWC" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
-        select * from Paper where wc = #{WC}
-    </select>
-<!--  按作者查询，需要写一个联合索引  -->
-    <select id="selectByAuthor" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
-        select *
-        from Paper
-        where id in
-            (select Paper_id
-             from paper_author
-             where Author_id in
-                (select id
-                 from Author
-                 where Name = #{name}
-                 )
-             )
-    </select>
-<!--  按年份查找  -->
-    <select id="selectByYear" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
-        select * from Paper where py= #{Year}
-    </select>
-<!--  按关键词查找，需要写一个联合索引  -->
-    <select id="selectByKeyword" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dto.PaperDto">
-        select * from Paper where py= #{Year}
-    </select>
-    <select id="selectTitleAndId" resultType="hashmap">
-        select id,t1 from Paper
-    </select>
-    <select id="selectMultiQuery">
 
-    </select>
-    <select id="selectIdByYear" resultType="java.lang.Integer">
-        select id from Paper where py=#{Year}
-    </select>
-    <select id="selectIdByAuthor" resultType="java.lang.Integer">
-        select id
-        from Paper
-        where
-              (select paper_id
-               from paper_author
-               where Author_id in
-                     (select id
-                      from Author
-                      where Name = #{name}
-                     )
-              )
-    </select>
-    <select id="selectIdByWC" resultType="java.lang.Integer">
-        select id from Paper where wc=#{WC}
-    </select>
-    <select id="selectIdByESI" resultType="java.lang.Integer">
-        select id from Paper where esi=#{ESI}
-    </select>
-    <select id="selectIdByJournal" resultType="java.lang.Integer">
-        select id from Paper where so=#{Journal}
-    </select>
     <select id="selectIds" resultType="java.lang.Integer">
-        select id from Paper where ${s}
+        select paper_id from RDService.paper where ${s}
     </select>
-    <select id="select" resultType="java.lang.Object">
-        SELECT * FROM Paper WHERE
+    <select id="selectIdsByAuthor" resultType="java.lang.Integer">
+        select paper_id from RDService.paper where au=#{query}
     </select>
-
+    <select id="selectIdsByKeyword" resultType="java.lang.Integer">
+        select paper_id from RDService.paper where de=#{query}
+    </select>
+    <select id="selectIdsByPublishYear" resultType="java.lang.Integer">
+        select paper_id from RDService.paper where py=#{query}
+    </select>
+    <select id="selectIdByTitle" resultType="java.lang.Integer">
+        select paper_id from RDService.paper where tl=#{query}
+    </select>
+    <select id="selectIdsByJournal" resultType="java.lang.Integer">
+        select paper_id from RDService.paper where so=#{query}
+    </select>
+    <select id="selectIdsByWOSCategory" resultType="java.lang.Integer">
+        select paper_id from RDService.paper where wc=#{query}
+    </select>
+    <select id="selectPaperByIdListPage" resultType="com.dlut.ResearchService.entity.dao.Paper"></select>
 
 </mapper>

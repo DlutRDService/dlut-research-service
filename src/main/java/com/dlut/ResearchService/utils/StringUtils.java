@@ -2,6 +2,7 @@ package com.dlut.ResearchService.utils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import com.dlut.ResearchService.entity.constants.Regex;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ public final class StringUtils {
      * @param subStrings 替换列表
      * @param regex 正则
      */
+    @NotNull
     public static String substituteByRegex(String s, List<String> subStrings, String regex){
         StringBuilder sb = new StringBuilder(s);
         Pattern pattern = Pattern.compile(regex);
@@ -73,6 +75,7 @@ public final class StringUtils {
     /**
      * 生成随机数
      */
+    @NotNull
     public static String getRandomNumber(Integer count){
         return RandomStringUtils.random(count, false, true);
     }
@@ -80,7 +83,9 @@ public final class StringUtils {
     /**
      * 判断字符串中是否包含字符
      */
-    public static Boolean containLetter(String s){
+    @NotNull
+    @Contract(pure = true)
+    public static Boolean containLetter(@NotNull String s){
         return s.matches(Regex.CONTAIN_LETTER_REGEX);
     }
 
@@ -90,7 +95,8 @@ public final class StringUtils {
         return matcher.group();
     }
 
-    public static List<Float> stringListToFLoatList(List<String> stringList){
+    @NotNull
+    public static List<Float> stringListToFLoatList(@NotNull List<String> stringList){
         List<Float> floats = new ArrayList<>(stringList.size());
         for (String s : stringList) {
             if (s!=null){
@@ -108,6 +114,16 @@ public final class StringUtils {
             }
         }
         return integers;
+    }
+
+    public static Integer getCharCount(@NotNull String s, char targetChar){
+        int count = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == targetChar) {
+                count++;
+            }
+        }
+        return count;
     }
 
 }

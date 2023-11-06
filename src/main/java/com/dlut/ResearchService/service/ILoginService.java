@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * @author zsl
  * @since 2023-07-12
  */
-public interface ILogService {
+public interface ILoginService {
 
     Result signByAccount(HttpSession session, String email, String password);
 

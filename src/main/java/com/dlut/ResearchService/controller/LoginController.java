@@ -3,7 +3,7 @@ package com.dlut.ResearchService.controller;
 import com.dlut.ResearchService.component.ResultBuilder;
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.service.impl.EmailCodeServiceImpl;
-import com.dlut.ResearchService.service.impl.LogServiceImpl;
+import com.dlut.ResearchService.service.impl.LoginServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -23,7 +23,7 @@ public class LoginController {
     @Resource
     private EmailCodeServiceImpl emailCodeService;
     @Resource
-    private LogServiceImpl logService;
+    private LoginServiceImpl logService;
     @Resource
     private ResultBuilder resultBuilder;
 

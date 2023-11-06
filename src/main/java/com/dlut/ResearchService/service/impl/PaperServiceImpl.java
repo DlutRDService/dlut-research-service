@@ -12,6 +12,7 @@ import com.dlut.ResearchService.mapper.PaperMapper;
 import com.dlut.ResearchService.service.IPaperService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
+import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,21 @@ public class PaperServiceImpl implements IPaperService {
      * @return 检索id列表
      */
     @Override
-    public Set<Integer> selectByQuery(String query){
-        return paperMapper.selectIds(query);
+    public Set<Integer> selectByQuery(@NotNull String query){
+        String subQuery = query.substring(2);
+        switch (query.substring(0,2)){
+            case "au": return paperMapper.selectIdsByAuthor(subQuery);
+            case "de": return paperMapper.selectIdsByKeyword(subQuery);
+            case "py": return paperMapper.selectIdsByPublishYear(Integer.parseInt(subQuery));
+            case "tl": return paperMapper.selectIdByTitle(subQuery);
+            case "so": return paperMapper.selectIdsByJournal(subQuery);
+            case "wc": return paperMapper.selectIdsByWOSCategory(subQuery);
+            default  : return null;
+        }
+    }
+    @Override
+    public List<Paper> selectPapersByIdList(List<Integer> ids){
+        return paperMapper.selectPaperByIdList(ids);
     }
 
     /**
@@ -64,7 +78,25 @@ public class PaperServiceImpl implements IPaperService {
         if (!queryField.matches(Regex.FORMAT_START_QUERY)) {
             return resultBuilder.build(StatusCode.STATUS_CODE_400, EXPRESSION_ERROR);
         }
+        List<Integer> ids;
+        String idString;
+        String resultListKey = "resultList:" + session.getId();
         TreeNode node;
+        // 单一检索式直接检索
+        if (StringUtils.getCharCount(queryField, '=') == 1){
+            if(queryField.startsWith("ts")) {
+                ids = new ArrayList<>(webClientService.searchByStringVector(queryField));
+            }else {
+                ids = new ArrayList<>(selectByQuery(queryField));
+            }
+            idString = ids.toString();
+            redisService.set(resultListKey, idString);
+            return resultBuilder.build(
+                    StatusCode.STATUS_CODE_200,
+                    "",
+                    paperMapper.selectPaperByIdListPage(ids, 0, 20)
+            );
+        }
         if (queryField.matches("")) {
             // 将字符串转化为中缀字符串
             List<String> infixString = QueryUtils.queryToInfixString(queryField);
@@ -74,13 +106,11 @@ public class PaperServiceImpl implements IPaperService {
             node = changeNodeValueToSubResultSet(node);
             // 进行集合运算
             Set<Integer> searchResult = QueryUtils.getEvaluateNode(node);
-            List<Integer> ids = new ArrayList<>(searchResult);
-            String idString = ids.toString();
-            String resultListKey = "resultList:" + session.getId();
+            ids = new ArrayList<>(searchResult);
+            idString = ids.toString();
             redisService.set(resultListKey, idString);
-            // TODO Mapper层的逻辑还没写
             return resultBuilder.build(
-                    StatusCode.STATUS_CODE_200, "", paperMapper.selectPaperByIdList(ids, 0, 20)
+                    StatusCode.STATUS_CODE_200, "", paperMapper.selectPaperByIdListPage(ids, 0, 20)
             );
         }
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "", null);
@@ -99,11 +129,10 @@ public class PaperServiceImpl implements IPaperService {
                 changeNodeValueToSubResultSet(node.left);
                 changeNodeValueToSubResultSet(node.right);
             default:
-                if (node.value.toString().matches(Regex.TS_FORMAT)){
-                    //TODO 执行向量查询
-                    node.value = (node.value.toString());
+                if (node.value.toString().startsWith("ts")){
+                    node.value = webClientService.searchByStringVector(node.value.toString());
                 } else {
-                    node.value = paperMapper.selectIds((String) node.value);
+                    node.value = selectByQuery((String) node.value);
                 }
         }
         return node;
@@ -111,8 +140,13 @@ public class PaperServiceImpl implements IPaperService {
 
     @Override
     public Result paperInformation(Integer paperId) {
+        HashMap<String, Object> map = new HashMap<>();
         Paper paperInfo = paperMapper.selectPaperById(paperId);
-        return resultBuilder.build(StatusCode.STATUS_CODE_200, "", paperInfo);
+        List<Integer> ids = webClientService.searchByIdVector(paperId);
+        List<Paper> recommendationPaper = paperMapper.selectPaperByIdList(ids);
+        map.put("Paper", paperInfo);
+
+        return resultBuilder.build(StatusCode.STATUS_CODE_200, "查询完毕", map);
     }
 
     @Override
@@ -123,9 +157,10 @@ public class PaperServiceImpl implements IPaperService {
         List<Integer> idList = StringUtils.stringListToIntegerList(stringList);
         return resultBuilder.build(
                 StatusCode.STATUS_CODE_200,
-                "",
-                paperMapper.selectPaperByIdList(idList, pageNum, pageSize)
+                "查询完毕",
+                paperMapper.selectPaperByIdListPage(idList, pageNum, pageSize)
         );
     }
+
 
 }

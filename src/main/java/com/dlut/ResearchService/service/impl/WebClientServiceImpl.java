@@ -7,7 +7,6 @@ import com.dlut.ResearchService.service.IWebClientService;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -31,9 +30,9 @@ public class WebClientServiceImpl implements IWebClientService {
      * @return 返回id列表
      */
     @Override
-    public Result search(String query) {
-        url = "api/search";
-        Set<Integer> response = webClient.get()
+    public Set<Integer> searchByStringVector(String query) {
+        url = "api/searchByTs";
+        return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path(url)
                         .queryParam("param", query)
@@ -42,10 +41,6 @@ public class WebClientServiceImpl implements IWebClientService {
                 .bodyToMono(new ParameterizedTypeReference<Set<Integer>>(){})
                 .onErrorReturn(Collections.emptySet())
                 .block();
-        return resultBuilder.build(
-                StatusCode.STATUS_CODE_200,
-                "请求成功，处理完毕", response
-        );
     }
 
     /**
@@ -61,22 +56,7 @@ public class WebClientServiceImpl implements IWebClientService {
 
     @Override
     public Result updatePaper(String path, @NotNull MultipartFile multipartFile) throws IOException {
-        String url = BASE_URL + "/" + path;
-
-        // 将文件内容转换为字节数组
-        byte[] fileBytes = multipartFile.getBytes();
-
-        // 调用 Flask 程序的接口
-        HttpHeaders headers = new HttpHeaders();
-        // 设置请求头信息
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        // 设置请求体
-        HttpEntity<byte[]> requestEntity = new HttpEntity<>(fileBytes, headers);
-        // 调用接口
-        ResponseEntity<String> response = webClient.exchange(url, HttpMethod.POST, requestEntity, String.class);
-
-        // 返回 Flask 程序的响应
-        return resultBuilder.build(StatusCode.STATUS_CODE_200, response.getBody(), "");
+        return null;
     }
 
     @Override
@@ -88,6 +68,20 @@ public class WebClientServiceImpl implements IWebClientService {
     @Override
     public Result txtProcess(MultipartFile file) {
         return null;
+    }
+
+    @Override
+    public List<Integer> searchByIdVector(Integer paperId) {
+        url = "api/searchByTitleVector";
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(url)
+                        .queryParam("param", paperId)
+                        .build())
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<Integer>>(){})
+                .onErrorReturn(Collections.emptyList())
+                .block();
     }
 }
 

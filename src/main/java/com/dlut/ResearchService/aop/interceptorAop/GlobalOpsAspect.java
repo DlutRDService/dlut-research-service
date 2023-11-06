@@ -13,6 +13,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -52,7 +53,7 @@ public class GlobalOpsAspect {
             throw new BusinessException();
         }
     }
-    private void validateParams(Method m, Object[] arguments){
+    private void validateParams(@NotNull Method m, Object[] arguments){
         Parameter[] parameters = m.getParameters();
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
