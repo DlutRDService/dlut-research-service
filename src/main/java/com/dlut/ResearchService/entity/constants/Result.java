@@ -10,5 +10,4 @@ public class Result {
     private StatusCode statusCode;
     private String msg;
     private Object data;
-
 }

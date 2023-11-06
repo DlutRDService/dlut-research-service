@@ -1,5 +1,8 @@
 package com.dlut.ResearchService.entity.constants;
 
+/**
+ * 状态码
+ */
 public enum StatusCode {
     // 2xx(Success Status Codes):指示请求已经成功接受、理解和处理
     STATUS_CODE_200,  // OK

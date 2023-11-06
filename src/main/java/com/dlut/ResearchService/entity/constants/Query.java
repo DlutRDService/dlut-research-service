@@ -1,5 +1,8 @@
 package com.dlut.ResearchService.entity.constants;
 
+/**
+ * 查询反馈反馈
+ */
 public class Query{
     public static final String EXPRESSION_ERROR = "Check your query to make sure a valid expression are entered";
     public static final String BOOLEAN_OPERATORS_ERROR =

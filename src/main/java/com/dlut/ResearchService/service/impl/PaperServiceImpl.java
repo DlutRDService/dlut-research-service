@@ -12,7 +12,6 @@ import com.dlut.ResearchService.mapper.PaperMapper;
 import com.dlut.ResearchService.service.IPaperService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
-import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import static com.dlut.ResearchService.entity.constants.Query.EXPRESSION_ERROR;
+import static com.dlut.ResearchService.entity.constants.redis.RedisTimePolicy.SEARCH_EXPIRATION_TIME;
 
 @Slf4j
 @Service
@@ -51,6 +51,11 @@ public class PaperServiceImpl implements IPaperService {
             default  : return null;
         }
     }
+
+    /**
+     * 根据id列表查找文献
+     * @param ids 文献id列表
+     */
     @Override
     public List<Paper> selectPapersByIdList(List<Integer> ids){
         return paperMapper.selectPaperByIdList(ids);
@@ -74,7 +79,6 @@ public class PaperServiceImpl implements IPaperService {
         } catch (Exception e) {
             return resultBuilder.build(StatusCode.STATUS_CODE_400, EXPRESSION_ERROR);
         }
-        // 检查索引式是否符合要求,例如"au="，索引字段前不允许含有字母与数字
         if (!queryField.matches(Regex.FORMAT_START_QUERY)) {
             return resultBuilder.build(StatusCode.STATUS_CODE_400, EXPRESSION_ERROR);
         }
@@ -90,14 +94,14 @@ public class PaperServiceImpl implements IPaperService {
                 ids = new ArrayList<>(selectByQuery(queryField));
             }
             idString = ids.toString();
-            redisService.set(resultListKey, idString);
+            redisService.set(resultListKey, idString, SEARCH_EXPIRATION_TIME);
             return resultBuilder.build(
                     StatusCode.STATUS_CODE_200,
                     "",
                     paperMapper.selectPaperByIdListPage(ids, 0, 20)
             );
         }
-        if (queryField.matches("")) {
+        if (queryField.matches("AND|OR|NOT")) {
             // 将字符串转化为中缀字符串
             List<String> infixString = QueryUtils.queryToInfixString(queryField);
             // 将中缀字符串转化为解析树
@@ -108,7 +112,7 @@ public class PaperServiceImpl implements IPaperService {
             Set<Integer> searchResult = QueryUtils.getEvaluateNode(node);
             ids = new ArrayList<>(searchResult);
             idString = ids.toString();
-            redisService.set(resultListKey, idString);
+            redisService.set(resultListKey, idString, SEARCH_EXPIRATION_TIME);
             return resultBuilder.build(
                     StatusCode.STATUS_CODE_200, "", paperMapper.selectPaperByIdListPage(ids, 0, 20)
             );
@@ -145,7 +149,7 @@ public class PaperServiceImpl implements IPaperService {
         List<Integer> ids = webClientService.searchByIdVector(paperId);
         List<Paper> recommendationPaper = paperMapper.selectPaperByIdList(ids);
         map.put("Paper", paperInfo);
-
+        map.put("recommendation", recommendationPaper);
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "查询完毕", map);
     }
 
@@ -161,6 +165,5 @@ public class PaperServiceImpl implements IPaperService {
                 paperMapper.selectPaperByIdListPage(idList, pageNum, pageSize)
         );
     }
-
 
 }

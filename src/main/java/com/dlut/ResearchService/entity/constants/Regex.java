@@ -2,6 +2,9 @@ package com.dlut.ResearchService.entity.constants;
 
 import com.dlut.ResearchService.annotation.Description;
 
+/**
+ * 正则表达式
+ */
 public class Regex {
     @Description(value = "大工邮箱")
     public static final String DLUT_MAIL = ".*@(mail\\.dlut\\.edu\\.cn|dlut\\.edu\\.cn)$";
@@ -11,7 +14,6 @@ public class Regex {
     public static final String FORMAT_QUERY = "[a-z]{2}=.*";
     @Description(value = "", example = "au=")
     public static final String FORMAT_START_QUERY = "( \\([a-z]{2}=.*|[a-z]{2}=.*)";
-    public static final String TS_FORMAT = " *ts *=(.*?)(?=\\)|\\s+(?=AND|OR|NOT)\\b|$)";
     // 判断一个检索式匹配格式
     public static final String JUDGE_ONLY_ONE_CONDITION_WITHOUT_BOOLEAN =
             "^(\\(| )*[a-z]{2} *=((?! and | not | or ).)*$";
