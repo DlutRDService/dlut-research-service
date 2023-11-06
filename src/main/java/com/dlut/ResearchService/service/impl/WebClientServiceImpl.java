@@ -26,11 +26,8 @@ public class WebClientServiceImpl implements IWebClientService {
     @Resource
     private ResultBuilder resultBuilder;
 
-
     /**
      * 根据查询的TS字段进行搜索
-     * @param path flask方法路径
-     * @param queries 传入的查询列表
      * @return 返回id列表
      */
     @Override
@@ -61,23 +58,9 @@ public class WebClientServiceImpl implements IWebClientService {
         return null;
     }
 
-    public <T> List<T> getResultList(String path, String jsonData, Class<T[]> responseType) {
-        url = BASE_URL + "/" + path;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
-
-        T[] responseArray = webClient.exchange(url, HttpMethod.POST, requestEntity, responseType).getBody();
-        if (responseArray != null) {
-            return List.of(responseArray);
-        } else {
-            return Collections.emptyList();
-        }
-    }
 
     @Override
-    public Result updatePaper(String path, MultipartFile multipartFile) throws IOException {
+    public Result updatePaper(String path, @NotNull MultipartFile multipartFile) throws IOException {
         String url = BASE_URL + "/" + path;
 
         // 将文件内容转换为字节数组

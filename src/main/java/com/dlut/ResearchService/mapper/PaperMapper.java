@@ -17,7 +17,7 @@ public interface PaperMapper {
 
     Paper selectPaperById(Integer id);
 
-    List<Paper> selectPaperByIdList(List<Integer> idList);
+    List<Paper> selectPaperByIdList(List<Integer> idList, Integer pageNum, Integer size);
 
     //Map<String, Object> selectKeywordsByPaperId(Integer id);
     //查询年份

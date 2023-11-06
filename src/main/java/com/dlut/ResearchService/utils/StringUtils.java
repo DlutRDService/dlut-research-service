@@ -2,6 +2,7 @@ package com.dlut.ResearchService.utils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import com.dlut.ResearchService.entity.constants.Regex;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,8 @@ public final class StringUtils {
      * @param s 字符串
      * @return 处理结果
      */
-    public static String subChineseChars(String s){
+    @NotNull
+    public static String replaceChineseChars(String s){
         // 替换常见中文字符
         s = s.replace('（', ')');
         s = s.replace('）', '(');
@@ -36,7 +38,8 @@ public final class StringUtils {
      * @param s 字符串
      * @param regex 正则表达式
      */
-    public static List<String> getMatchStrings(String s, String regex){
+    @NotNull
+    public static List<String> getMatchStringList(String s, String regex){
         ArrayList<String> capture = new ArrayList<>();
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(s);
@@ -48,7 +51,7 @@ public final class StringUtils {
     }
 
     /**
-     * 给出一个字符串与字符列表，用正则表达式进行匹配，将符合内容的结果替换为字符列表中的内容，前提是内容要匹配
+     * 给出一个字符串与字符列表，用正则表达式进行匹配，将符合内容的结果一一替换为字符列表中的内容
      * @param s 字符串
      * @param subStrings 替换列表
      * @param regex 正则
@@ -91,13 +94,20 @@ public final class StringUtils {
         List<Float> floats = new ArrayList<>(stringList.size());
         for (String s : stringList) {
             if (s!=null){
-                floats.add(stringToFloat(s));
+                floats.add(Float.parseFloat(s));
             }
         }
         return floats;
     }
-
-    public static Float stringToFloat(String s){
-        return Float.parseFloat(s);
+    @NotNull
+    public static List<Integer> stringListToIntegerList(@NotNull List<String> stringList){
+        List<Integer> integers = new ArrayList<>(stringList.size());
+        for (String s : stringList) {
+            if (s != null) {
+                integers.add(Integer.parseInt(s));
+            }
+        }
+        return integers;
     }
+
 }

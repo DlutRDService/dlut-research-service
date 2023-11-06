@@ -9,21 +9,27 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QueryUtils {
-    public static List<String> queryToInfixString(String queryField){
-        ArrayList<String> treeList = new ArrayList<>();
-        treeList.add("(");
-        treeList.add("AND");
-        Pattern pattern = Pattern.compile(Regex.MATCH_EACH_FIELD_OR_OPERATOR_OR_BRACKET);
-        Matcher matcher = pattern.matcher(queryField);
-        while (matcher.find()){
-            // 匹配括号或者逻辑表达式
-            if (matcher.group(0).matches(Regex.)){
-                treeList.add(matcher.group(0));
-                continue;
-            }
-            //
-            if (matcher.group(0).matches())
 
+    /**
+     * 去掉"("前后的多余的空格，改为" ( "，去掉"="前后多余的空格，改为"="
+     */
+    @NotNull
+    public static String trimWhitespace(String s){
+        if (s.matches("\\(") || s.matches("\\)") || s.matches("=")){
+            s = s.replaceAll(" *\\( *", "(");
+            s = s.replaceAll(" *\\) *", "(");
+            s = s.replaceAll(" *= *", "=");
+        }
+        return s;
+    }
+    @NotNull
+    public static List<String> queryToInfixString(String s){
+        List<String> treeList = new ArrayList<>();
+        Pattern pattern = Pattern.compile(Regex.MATCH_EACH_FIELD_OR_OPERATOR_OR_BRACKET);
+        Matcher matcher = pattern.matcher(s);
+        treeList.add("(");
+        while (matcher.find()){
+            treeList.add(matcher.group(0));
         }
         treeList.add(")");
         return treeList;
@@ -38,8 +44,14 @@ public class QueryUtils {
                 TreeNode subTree = null;
                 while (!stack.isEmpty() && !stack.peek().value.equals("(")) {
                     TreeNode node = stack.pop();
-                    if (subTree != null) {
+                    if (subTree != null
+                            &&(node.value.equals("AND")
+                            || node.value.equals("NOT")
+                            || node.value.equals("OR"))
+                            && node.left == null && node.right == null
+                    ) {
                         node.right = subTree;
+                        node.left = stack.pop();
                     }
                     subTree = node;
                 }
@@ -75,7 +87,6 @@ public class QueryUtils {
         return result;
     }
 
-
     /**
      * 匹配相关字符，并将其大写
      */
@@ -89,6 +100,5 @@ public class QueryUtils {
         }
         return sb.toString();
     }
-
 
 }

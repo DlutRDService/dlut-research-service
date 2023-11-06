@@ -1,36 +1,17 @@
 package com.dlut.ResearchService.controller.queryController;
 
-import com.alibaba.fastjson.JSONArray;
-import com.dlut.ResearchService.entity.dao.Paper;
-import com.dlut.ResearchService.utils.RedisUtils;
-import com.dlut.ResearchService.utils.ScriptTriggerUtils;
-import com.dlut.ResearchService.utils.StringUtils;
-import com.dlut.ResearchService.component.ResultBuilder;
-import com.dlut.ResearchService.entity.constants.redis.RedisKey;
-import com.dlut.ResearchService.entity.constants.StatusCode;
-import com.dlut.ResearchService.service.impl.MilvusServiceImpl;
 import com.dlut.ResearchService.service.impl.PaperServiceImpl;
 import com.dlut.ResearchService.entity.constants.Result;
-import io.milvus.grpc.SearchResults;
-import io.milvus.param.R;
 import jakarta.annotation.Resource;
 import com.dlut.ResearchService.annotation.log;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
 
 @RestController
 @RequestMapping("/paper")
 public class PaperController {
     @Resource
     private PaperServiceImpl paperService;
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
-    @Resource
-    private MilvusServiceImpl milvusService;
-    @Resource
-    private ResultBuilder resultBuilder;
 
     /**
      * 高级检索功能
@@ -38,40 +19,32 @@ public class PaperController {
      */
     @log
     @GetMapping("/advanced-search")
-    public Result advancedSearch(@RequestParam String queryField) {
-        return paperService.advancedQuery(queryField);
+    public Result advancedSearch(HttpSession session, @RequestParam String queryField) {
+        return paperService.advancedQuery(session, queryField);
     }
 
+    /**
+     * 分页查询
+     * @param pageNum 页码
+     * @param pageSize 页面内容大小
+     * @return 当前页码内信息
+     */
+    @log
+    @GetMapping("/advanced-search/page")
+    public Result advancedSearchLimit(HttpSession session,
+                                      @RequestParam() Integer pageNum,
+                                      @RequestParam() Integer pageSize){
+        return paperService.advancedQueryLimit(session, pageNum, pageSize);
+    }
+
+    /**
+     * 查看文章具体信息
+     * @param paperId 论文id
+     * @return 返回文章信息，包括推荐信息，关系图示信息。
+     */
     @GetMapping("full-record/{paperId}")
     public Result paperInformation(@PathVariable Integer paperId) {
-//        ArrayList<Integer> idList = new ArrayList<>();
-//        idList.add(paperId);
-//        RedisUtils<List<Float>> redisUtils = new RedisUtils<>();
-//        List<Float> vector = redisUtils.getHashValue(RedisKey.REDIS_KEY_TEMP_PAPER_VECTOR, String.valueOf(paperId));
-//        R<SearchResults> result = milvusService.queryBySimilarity(vector, 3, "", "",
-//                "",
-//               "");
-//        List<Long> resultIds = result.getData().getResults().getIds().getIntId().getDataList();
-//        List<Integer> resultIdList = JSONArray.parseArray(resultIds.toString(), Integer.class);
-//        idList.addAll(resultIdList);
         return paperService.paperInformation(paperId);
-    }
-
-    public Result recommendation(String ts) {
-        ScriptTriggerUtils.execute("vectorAndImportRedis.py", ts);
-        List<Float> queryVector = null;
-        // 获取该向量值
-        List<String> value = stringRedisTemplate.opsForList().range(RedisKey.REDIS_KEY_TEMP_QUERY_VECTOR, 0, -1);
-        if (value != null) {
-            queryVector = StringUtils.stringListToFLoatList(value);
-        }
-        R<SearchResults> result = milvusService.queryBySimilarity(queryVector, 3, "", "",
-                "",
-                "");
-        List<Long> ids = result.getData().getResults().getIds().getIntId().getDataList();
-        List<Integer> idList = JSONArray.parseArray(ids.toString(), Integer.class);
-        List<Paper> paperDtos = paperService.selectPapersByIdList(idList);
-        return resultBuilder.build(StatusCode.STATUS_CODE_400, "", paperDtos);
     }
 
 }
