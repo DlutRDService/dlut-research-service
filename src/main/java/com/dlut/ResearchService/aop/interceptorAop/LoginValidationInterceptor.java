@@ -1,11 +1,13 @@
 package com.dlut.ResearchService.aop.interceptorAop;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Slf4j
 @Aspect
@@ -18,13 +20,28 @@ public class LoginValidationInterceptor {
     }
     @Around("loginValidationPointcut()")
     public Object aroundMethodExecution(ProceedingJoinPoint point) throws Throwable {
-        // 在目标方法执行前进行登录验证逻辑
-        // 检查用户是否已登录，如果未登录则阻止进一步处理请求
-
-        // 执行目标方法
-
-        // 在目标方法执行后进行处理，如果需要的话
-
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+                                         .currentRequestAttributes()).getRequest();
+        HttpSession session = request.getSession();
+        if(!isUserLoggedIn(session)){
+            throw new UnsupportedOperationException("用户未登陆或会话已过期");
+        }
         return point.proceed();
+    }
+    private boolean isUserLoggedIn(HttpSession session) {
+        if (session == null) {
+            return false;
+        }
+        if (session.getAttribute("account") == null) {
+            return false;
+        }
+        if (session.isNew()
+                || session.getMaxInactiveInterval() <= 0
+                || session.getLastAccessedTime() + session.getMaxInactiveInterval() * 1000
+                   < System.currentTimeMillis()) {
+            return false;
+        }
+
+        return true;
     }
 }

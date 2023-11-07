@@ -59,7 +59,6 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
         }else {
             emailCode = redisService.get(email);
         }
-        // TODO 发送验证码
         sendEmailCode(email, emailCode);
     }
     /**
@@ -107,7 +106,7 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
      * 检查图片验证码是否正确
      * @param captcha 图片验证码
      */
-    public void checkCaptcha(HttpSession session, String captcha){
+    public void checkCaptcha(@NotNull HttpSession session, @NotNull String captcha){
         try{
             if (!captcha.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CAPTCHA))){
                 throw new BusinessException("图片验证码不正确，请刷新后重新输入");

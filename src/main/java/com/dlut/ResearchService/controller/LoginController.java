@@ -23,7 +23,7 @@ public class LoginController {
     @Resource
     private EmailCodeServiceImpl emailCodeService;
     @Resource
-    private LoginServiceImpl logService;
+    private LoginServiceImpl loginService;
     @Resource
     private ResultBuilder resultBuilder;
 
@@ -34,12 +34,13 @@ public class LoginController {
      * @param password 密码
      * @param captcha 图片验证码
      */
-    @GlobalInterceptor
     @PostMapping("sign-in/account")
-    public Result signByAccount(@NotNull HttpSession session, @RequestParam String emailOrAccount,
+    public Result signByAccount(HttpSession session,
+                                @RequestParam String emailOrAccount,
                                 @RequestParam String password, @NotNull @RequestParam String captcha) {
+
         emailCodeService.checkCaptcha(session, captcha);
-        return logService.signByAccount(session, emailOrAccount, password);
+        return loginService.signByAccount(session, emailOrAccount, password);
     }
 
     /**
@@ -52,7 +53,7 @@ public class LoginController {
     public Result signByEmailCode(@NotNull HttpSession session, @RequestParam String email, @RequestParam String emailCode,
                                   @NotNull @RequestParam String captcha){
         emailCodeService.checkCaptcha(session, captcha);
-        return logService.signByEmailCodeOrRegistration(session, email, emailCode);
+        return loginService.signByEmailCodeOrRegistration(session, email, emailCode);
     }
 
     /**
@@ -61,11 +62,11 @@ public class LoginController {
      * @param emailCode 邮箱验证码
      * @param captcha 图片验证码
      */
-    @GlobalInterceptor
+
     @PostMapping("sign-up")
     public Result registration(HttpSession session, String email, String emailCode, String captcha){
         emailCodeService.checkCaptcha(session, captcha);
-        return logService.signByEmailCodeOrRegistration(session, email, emailCode);
+        return loginService.signByEmailCodeOrRegistration(session, email, emailCode);
     }
 
     /**
@@ -74,7 +75,7 @@ public class LoginController {
      */
     @PostMapping("setAccountAndPassword")
     public Result setPassword(HttpSession session, @RequestParam String password, Integer account){
-        return logService.updatePassword(session, password, account);
+        return loginService.updatePassword(session, password, account);
     }
 
     /**

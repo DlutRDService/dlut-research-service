@@ -25,14 +25,10 @@ public class RedisServiceImpl implements IRedisService {
     public void set(String key, String value) {
 
     }
-
     @Override
     public void set(String key, String value, Integer expirationTime){
-        boolean lockAcquired = acquireLock(LOCK_KEY_PREFIX, CAPTCHA_LOCK_EXPIRATION_TIME);
-        if (lockAcquired) {
-            stringRedisTemplate.opsForValue().set(key, value);
-            stringRedisTemplate.expire(key, expirationTime, TimeUnit.SECONDS);
-        }
+        stringRedisTemplate.opsForValue().set(key, value);
+        stringRedisTemplate.expire(key, expirationTime, TimeUnit.SECONDS);
     }
     @Override
     public String get(String key){

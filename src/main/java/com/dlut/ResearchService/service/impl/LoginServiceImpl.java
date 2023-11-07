@@ -40,7 +40,7 @@ public class LoginServiceImpl implements ILoginService {
      * @return 用户存在且密码正确返回成功
      */
     @Override
-    public Result signByAccount(HttpSession session, String email, String password) {
+    public Result signByAccount(@NotNull HttpSession session, String email, String password) {
         session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
         Integer userId = userInfoMapper.selectByEmail(email);
         if (userId == null){
@@ -65,7 +65,7 @@ public class LoginServiceImpl implements ILoginService {
      * @param emailCode 验证码
      */
     @Override
-    public Result signByEmailCodeOrRegistration(HttpSession session, String email, String emailCode) {
+    public Result signByEmailCodeOrRegistration(@NotNull HttpSession session, String email, String emailCode) {
         session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
         Result result  = verify(email, emailCode);
         if (result.getData() == null){
@@ -121,7 +121,6 @@ public class LoginServiceImpl implements ILoginService {
                     StatusCode.STATUS_CODE_200,
                     "操作成功", false);
         }
-
     }
 
     /**
