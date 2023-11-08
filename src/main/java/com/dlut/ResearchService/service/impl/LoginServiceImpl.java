@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * @author zsl
@@ -31,7 +32,7 @@ public class LoginServiceImpl implements ILoginService {
     private RedisServiceImpl redisService;
     @Resource
     private ResultBuilder resultBuilder;
-    private static final int SESSION_TIMEOUT_SECONDS = 1200;
+
 
     /**
      * 登陆，使用账号密码。
@@ -41,7 +42,6 @@ public class LoginServiceImpl implements ILoginService {
      */
     @Override
     public Result signByAccount(@NotNull HttpSession session, String email, String password) {
-        session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
         Integer userId = userInfoMapper.selectByEmail(email);
         if (userId == null){
             return resultBuilder.build(StatusCode.STATUS_CODE_400, "用户不存在，请检查输入的邮箱与密码或注册新用户");
@@ -52,6 +52,8 @@ public class LoginServiceImpl implements ILoginService {
         if (userInfoMapper.selectByEmailAndPassword(email, password) == null){
             return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码错误，请重新输入");
         }
+        String sessionId = UUID.randomUUID().toString();
+        session.setAttribute("sessionID", sessionId);
         session.setAttribute("email", email);
         session.setAttribute("password", password);
         session.setAttribute("userId", userId);
@@ -66,7 +68,6 @@ public class LoginServiceImpl implements ILoginService {
      */
     @Override
     public Result signByEmailCodeOrRegistration(@NotNull HttpSession session, String email, String emailCode) {
-        session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
         Result result  = verify(email, emailCode);
         if (result.getData() == null){
             return result;
@@ -76,13 +77,25 @@ public class LoginServiceImpl implements ILoginService {
             }
             session.setAttribute("email", email);
             session.setAttribute("password", result.getData());
+            String sessionId = UUID.randomUUID().toString();
+            session.setAttribute("sessionID", sessionId);
             return resultBuilder.build(StatusCode.STATUS_CODE_200, "登陆成功");
         }else {
             session.setAttribute("email", email);
             session.setAttribute("password", null);
+            String sessionId = UUID.randomUUID().toString();
+            session.setAttribute("sessionID", sessionId);
             return resultBuilder.build(StatusCode.STATUS_CODE_200, "注册成功，请设置密码");
         }
     }
+
+    /**
+     * 修改密码，如果新注册用户则是设置密码
+     * @param session 会话
+     * @param newPassword 新密码
+     * @param account 账号
+     * @return 密码修改成功返回成功
+     */
     @Override
     public Result updatePassword(@NotNull HttpSession session, String newPassword, Integer account) {
         String email = (String) session.getAttribute("email");

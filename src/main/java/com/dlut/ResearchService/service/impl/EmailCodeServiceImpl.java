@@ -26,7 +26,6 @@ import static com.dlut.ResearchService.entity.constants.redis.RedisKey.LOCK_KEY_
 import static com.dlut.ResearchService.entity.constants.redis.RedisTimePolicy.CAPTCHA_EXPIRATION_TIME;
 import static com.dlut.ResearchService.entity.constants.redis.RedisTimePolicy.CAPTCHA_LOCK_EXPIRATION_TIME;
 
-
 /**
  * @author zsl
  * @since 2023-07-12

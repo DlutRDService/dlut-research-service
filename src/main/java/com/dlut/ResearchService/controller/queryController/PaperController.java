@@ -7,6 +7,10 @@ import com.dlut.ResearchService.annotation.log;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * @author zsl
+ * @since 2023/06/23
+ */
 @RestController
 @RequestMapping("/paper")
 public class PaperController {
