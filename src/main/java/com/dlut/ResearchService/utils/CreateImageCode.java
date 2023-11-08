@@ -11,10 +11,10 @@ import java.io.OutputStream;
 import java.util.Random;
 
 public class CreateImageCode {
-    private int height = 40;
-    private int width = 160;
-    private int code_count = 5;
-    private int line_count = 20;
+    private final int height;
+    private final int width;
+    private final int code_count;
+    private final int line_count;
     private String code = null;
     private BufferedImage bufferedImage;
     Random random = new Random();
@@ -28,8 +28,8 @@ public class CreateImageCode {
     }
     public void createImage(){
 
-        int fontWidth = width / code_count;  // 字体宽度
-        int fontHeight = height - 5; // 字体长度
+        int fontWidth = width / code_count;
+        int fontHeight = height - 5;
         int codeY = height - 8;
 
         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);

@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,6 +98,7 @@ public class LoginServiceImpl implements ILoginService {
      * @return 密码修改成功返回成功
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result updatePassword(@NotNull HttpSession session, String newPassword, Integer account) {
         String email = (String) session.getAttribute("email");
         String oldPassword = (String) session.getAttribute("password");
@@ -114,7 +116,7 @@ public class LoginServiceImpl implements ILoginService {
      * @param email 邮箱
      * @param emailCode 验证码
      */
-    public Result verify(@NotNull String email, String emailCode){
+    private Result verify(@NotNull String email, String emailCode){
         if (!email.matches(Regex.DLUT_MAIL)){
             return resultBuilder.build(
                     StatusCode.STATUS_CODE_400,
@@ -141,6 +143,7 @@ public class LoginServiceImpl implements ILoginService {
      * @param password 密码
      * @param email    邮箱
      */
+    @Transactional(rollbackFor = Exception.class)
     public void insert(String password, String email, Integer account) {
         byte[] imageData = new byte[0];
         try {
@@ -166,6 +169,7 @@ public class LoginServiceImpl implements ILoginService {
      * @param userId 用户Id
      * @param userInfo 用户信息列表
      */
+    @Transactional(rollbackFor = Exception.class)
     public Result modifyUseInfo(Integer userId, UserInfo userInfo){
         if (userId == null) {
             return resultBuilder.build(StatusCode.STATUS_CODE_500, "拒绝访问");

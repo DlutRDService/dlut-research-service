@@ -5,6 +5,7 @@ import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.service.INeo4jService;
 import jakarta.annotation.Resource;
+import org.neo4j.driver.Driver;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,7 +13,8 @@ import java.util.List;
 public class Neo4jServiceImpl implements INeo4jService {
     @Resource
     private ResultBuilder resultBuilder;
-
+    @Resource
+    private Driver driver;
     @Override
     public Result getCoAuthorIds(Integer author_id) {
         List<Integer> data = null;
@@ -21,6 +23,7 @@ public class Neo4jServiceImpl implements INeo4jService {
 
     @Override
     public Result queryRelatedGraph(Integer id) {
+        driver.getClass();
         return null;
     }
 

@@ -41,14 +41,14 @@ public final class StringUtils {
      */
     @NotNull
     public static List<String> getMatchStringList(String s, String regex){
-        ArrayList<String> capture = new ArrayList<>();
+        ArrayList<String> captureList = new ArrayList<>();
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(s);
         if (matcher.find()){
             String capturedGroup = matcher.group(1);
-            capture.add(capturedGroup);
+            captureList.add(capturedGroup);
         }
-        return capture;
+        return captureList;
     }
 
     /**
@@ -89,12 +89,23 @@ public final class StringUtils {
         return s.matches(Regex.CONTAIN_LETTER_REGEX);
     }
 
+    /**
+     * 得到匹配内容
+     * @param s 字符串
+     * @param regex 正则表达式
+     * @return 匹配内容
+     */
     public static String getRegexMatchContent(String s, String regex){
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(s);
         return matcher.group();
     }
 
+    /**
+     * String列表转Float列表
+     * @param stringList 字符串列表
+     * @return Float列表
+     */
     @NotNull
     public static List<Float> stringListToFLoatList(@NotNull List<String> stringList){
         List<Float> floats = new ArrayList<>(stringList.size());
@@ -105,6 +116,12 @@ public final class StringUtils {
         }
         return floats;
     }
+
+    /**
+     * String列表转Integer列表
+     * @param stringList 字符串列表
+     * @return Integer列表
+     */
     @NotNull
     public static List<Integer> stringListToIntegerList(@NotNull List<String> stringList){
         List<Integer> integers = new ArrayList<>(stringList.size());
@@ -116,6 +133,12 @@ public final class StringUtils {
         return integers;
     }
 
+    /**
+     * 统计目标字符数
+     * @param s 字符串
+     * @param targetChar 目标字符
+     * @return 字符串中包含的字符数量
+     */
     public static Integer getCharCount(@NotNull String s, char targetChar){
         int count = 0;
         for (int i = 0; i < s.length(); i++) {

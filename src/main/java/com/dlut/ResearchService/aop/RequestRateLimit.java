@@ -22,11 +22,11 @@ public class RequestRateLimit {
     }
     @Before("requestInterceptor()")
     public void interceptorDo() throws Throwable {
-        // 获取当前请求的HttpServletRequest对象
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder
                 .getRequestAttributes())).getRequest();
         HttpSession session = request.getSession();
         if (!isAccessLimit(session)){
+            //TODO 存日志与抛日常的逻辑
             log.error("访问过于频繁，稍后再试");
             throw new Exception("访问过于频繁，稍后再试");
         }

@@ -16,7 +16,8 @@ public interface IPaperService{
 
     List<Paper> selectPapersByIdList(List<Integer> ids);
 
-    Result advancedQuery(HttpSession session, String queryField);
+
+    Result advancedResearch(HttpSession session, String queryField);
 
     Result paperInformation(Integer paperId);
 

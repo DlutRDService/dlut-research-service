@@ -4,10 +4,6 @@ import com.dlut.ResearchService.service.IKeywordsService;
 import org.springframework.stereotype.Service;
 
 /**
- * <p>
- *  服务实现类
- * </p>
- *
  * @author zsl
  * @since 2023-06-03
  */

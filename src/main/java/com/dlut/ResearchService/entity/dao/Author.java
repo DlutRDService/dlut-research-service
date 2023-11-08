@@ -9,31 +9,31 @@ import lombok.Data;
  */
 @Data
 public class Author {
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "作者ID")
     private Integer author_id;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "作者姓名")
     private String author_name;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "作者国别")
     private String author_country;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "研究领域")
     private String researchKeywords;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "作者机构")
     private String author_organization;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "每年发文")
     private String paperPeerYear;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "H指数")
     private Integer H;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "发文数量")
     private Integer paperNums;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "是否认证")
     private Integer authenticated;
 
 }

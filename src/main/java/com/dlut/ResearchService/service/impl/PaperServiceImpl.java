@@ -67,7 +67,7 @@ public class PaperServiceImpl implements IPaperService {
      * @return 查询结果列表Set
      */
     @Override
-    public Result advancedQuery(HttpSession session, String queryField) {
+    public Result advancedResearch(HttpSession session, String queryField) {
         if (!StringUtils.containLetter(queryField) || !queryField.contains("=")) {
             return resultBuilder.build(StatusCode.STATUS_CODE_400, EXPRESSION_ERROR);
         }

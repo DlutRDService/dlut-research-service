@@ -12,7 +12,7 @@ public class CodeGenerator {
         generate();
     }
     private static void generate(){
-        FastAutoGenerator.create("jdbc:mysql://localhost:3306/AcademicKG?serverTimezone=GMT%2b8&allowMultiQueries=true",
+        FastAutoGenerator.create("jdbc:mysql://localhost:3306/RDService?serverTimezone=GMT%2b8&allowMultiQueries=true",
                         "zsl", "Lish145210@")
                 .globalConfig(builder -> {
                     builder.author("zsl") // 设置作者
@@ -28,9 +28,9 @@ public class CodeGenerator {
                     return typeRegistry.getColumnType(metaInfo);
                 }))
                 .packageConfig(builder -> {
-                    builder.parent("com.example.academickg") // 设置父包名
+                    builder.parent("com.dlut.ResearchService") // 设置父包名
                             .moduleName("") // 设置父包模块名
-                            .pathInfo(Collections.singletonMap(OutputFile.xml, "/home/zsl/IdeaProjects/AcademicKG/src/main/java/com/example/academickg/mapper")); // 设置mapperXml生成路径
+                            .pathInfo(Collections.singletonMap(OutputFile.xml, "/home/zsl/IdeaProjects/AcademicKG/src/main/resources/mapper")); // 设置mapperXml生成路径
                 })
                 .strategyConfig(builder -> builder.addInclude("email_code") // 设置需要生成的表名
                         .addTablePrefix("t_", "c_") // 设置过滤表前缀

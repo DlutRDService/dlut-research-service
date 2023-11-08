@@ -1,8 +1,7 @@
 package com.dlut.ResearchService.controller.queryController;
 
-import com.dlut.ResearchService.annotation.log;
 import com.dlut.ResearchService.entity.constants.Result;
-import com.dlut.ResearchService.entity.dto.AuthorDto;
+import com.dlut.ResearchService.entity.dao.Author;
 import com.dlut.ResearchService.service.impl.AuthorServiceImpl;
 import com.dlut.ResearchService.service.impl.Neo4jServiceImpl;
 import jakarta.annotation.Resource;
@@ -44,8 +43,8 @@ public class AuthorController {
     private Neo4jServiceImpl neo4jService;
 
     @PostMapping("authorInfo")
-    public Result authorInfo1(@RequestParam AuthorDto author){
-        return authorService.getAuthorInfo(author);
+    public Result authorInfo1(@RequestParam Author author){
+        return null;
     }
     @PostMapping("authorInfo/co-author")
     public Result coAuthor(Integer author_id){
@@ -54,12 +53,8 @@ public class AuthorController {
         // 看看Neo4j的查询结果，如果可以直接是Json三元组，那么直接返回即可，否则得转成Json数据传给前端
         Object a = neo4jService.queryRelatedGraph(author_id);
         return authorService.getCoAuthorRelatedGraph((Integer) a);
-
     }
-
-
     @PostMapping("text")
-    @log
     public Result authorInfo(@RequestParam Integer id){
         return authorService.getAuthorInfoById(id);
     }

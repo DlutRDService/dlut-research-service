@@ -5,7 +5,6 @@ import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 @Getter
-@Component
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EmailDto {
     private final String registerMailTitle = "邮箱验证码";

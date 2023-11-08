@@ -42,3 +42,9 @@ flask:
 redis:
   host: 127.0.0.1
   port: 6379
+
+# neo4j配置
+neo4j:
+  url: bolt://127.0.0.1:7687
+  username: AI
+  password: dlutaiservice

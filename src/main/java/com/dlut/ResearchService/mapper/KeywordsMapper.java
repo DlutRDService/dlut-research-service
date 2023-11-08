@@ -5,10 +5,6 @@ import com.dlut.ResearchService.entity.dao.Keywords;
 import java.io.Serializable;
 
 /**
- * <p>
- *  Mapper 接口
- * </p>
- *
  * @author zsl
  * @since 2023-06-03
  */

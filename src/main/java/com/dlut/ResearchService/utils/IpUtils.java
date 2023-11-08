@@ -13,7 +13,6 @@ public class IpUtils {
     private static final String LOCALHOST_IPV6 = "0:0:0:0:0:0:0:1";
     private static final String SEPARATOR = ",";
 
-    // 根据 HttpServletRequest 获取 IP
     public static String getIpAddr(HttpServletRequest request) {
         if (request == null) {
             return "unknown";
@@ -34,7 +33,6 @@ public class IpUtils {
         if (ip == null || ip.isEmpty() || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
             if (LOCALHOST_IP.equalsIgnoreCase(ip) || LOCALHOST_IPV6.equalsIgnoreCase(ip)) {
-                // 根据网卡取本机配置的 IP
                 InetAddress iNet = null;
                 try {
                     iNet = InetAddress.getLocalHost();
@@ -45,7 +43,6 @@ public class IpUtils {
                     ip = iNet.getHostAddress();
             }
         }
-        // 对于通过多个代理的情况，分割出第一个 IP
         if (ip != null && ip.length() > 15) {
             if (ip.indexOf(SEPARATOR) > 0) {
                 ip = ip.substring(0, ip.indexOf(SEPARATOR));

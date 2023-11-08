@@ -9,12 +9,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QueryUtils {
-
-    /**
-     * 去掉"("前后的多余的空格，改为" ( "，去掉"="前后多余的空格，改为"="
-     */
     @NotNull
-    public static String trimWhitespace(String s){
+    public static String trimWhitespace(@NotNull String s){
         if (s.matches("\\(") || s.matches("\\)") || s.matches("=")){
             s = s.replaceAll(" *\\( *", "(");
             s = s.replaceAll(" *\\) *", "(");
@@ -22,6 +18,12 @@ public class QueryUtils {
         }
         return s;
     }
+
+    /**
+     * 字符串转化为中缀表达式
+     * @param s 字符串
+     * @return 中缀表达式
+     */
     @NotNull
     public static List<String> queryToInfixString(String s){
         List<String> treeList = new ArrayList<>();
@@ -35,6 +37,11 @@ public class QueryUtils {
         return treeList;
     }
 
+    /**
+     * 中缀表达式转解析树
+     * @param tokens 中缀表达式列表
+     * @return 解析树
+     */
     public static TreeNode infixStringToTreeNode(@NotNull List<String> tokens){
         Stack<TreeNode> stack = new Stack<>();
         for (String token : tokens) {
@@ -67,6 +74,7 @@ public class QueryUtils {
         // 最后栈中剩下的节点就是根节点
         return stack.pop();
     }
+
     /**
      * 处理解析树
      * @param node 解析树
@@ -76,20 +84,21 @@ public class QueryUtils {
         if (node == null) {
             return null;
         }
-        Set<Integer> result = new HashSet<>(getEvaluateNode(node.left));
+        Set<Integer> integers = new HashSet<>(getEvaluateNode(node.left));
         switch (node.value.toString()) {
-            case "AND" -> result.retainAll(getEvaluateNode(node.right));
-            case "OR" -> result.addAll(getEvaluateNode(node.right));
-            case "NOT" -> result.removeAll(getEvaluateNode(node.right));
+            case "AND" -> integers.retainAll(getEvaluateNode(node.right));
+            case "OR" -> integers.addAll(getEvaluateNode(node.right));
+            case "NOT" -> integers.removeAll(getEvaluateNode(node.right));
             default -> {
             }
         }
-        return result;
+        return integers;
     }
 
     /**
      * 匹配相关字符，并将其大写
      */
+    @NotNull
     public static String matchAndUpper(String s, String regex){
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(s);

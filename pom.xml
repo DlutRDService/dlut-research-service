@@ -53,12 +53,6 @@
             <version>1.9.19</version>
             <scope>runtime</scope>
         </dependency>
-        <!-- 集成redis -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-data-redis</artifactId>-->
-<!--            <version>3.1.0</version>-->
-<!--        </dependency>-->
         <!-- MybatisPlus代码生成器 -->
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -117,25 +111,31 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-<!--   邮箱     -->
+        <!--   邮箱     -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>2.0.1</version>
         </dependency>
-<!--   Milvus     -->
+        <!--   Milvus     -->
         <dependency>
             <groupId>io.milvus</groupId>
             <artifactId>milvus-sdk-java</artifactId>
             <version>2.3.1</version>
         </dependency>
-<!--   rpc     -->
+        <!-- neo4j    -->
+        <dependency>
+            <groupId>org.neo4j.driver</groupId>
+            <artifactId>neo4j-java-driver</artifactId>
+            <version>5.12.0</version>
+        </dependency>
+        <!--   rpc     -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
             <version>2.6.12</version>
         </dependency>
-<!--    python    -->
+        <!--    python    -->
         <dependency>
             <groupId>org.python</groupId>
             <artifactId>jython-standalone</artifactId>

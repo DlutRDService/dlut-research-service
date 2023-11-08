@@ -65,7 +65,7 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
      * @param toEmail 发送地址
      * @param emailCode 邮箱验证码
      */
-    public void sendEmailCode(String toEmail, String emailCode){
+    private void sendEmailCode(String toEmail, String emailCode){
         try{
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -88,6 +88,7 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
     /**
      * 生成图片验证码
      */
+    @Override
     public void getCaptcha(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException {
         CreateImageCode vCode = new CreateImageCode(130,38,5,10);
         response.setHeader("Pragma", "no-cache");
@@ -105,6 +106,7 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
      * 检查图片验证码是否正确
      * @param captcha 图片验证码
      */
+    @Override
     public void checkCaptcha(@NotNull HttpSession session, @NotNull String captcha){
         try{
             if (!captcha.equalsIgnoreCase((String) session.getAttribute(EmailConstants.CAPTCHA))){

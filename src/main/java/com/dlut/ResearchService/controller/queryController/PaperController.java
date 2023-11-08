@@ -24,7 +24,7 @@ public class PaperController {
     @log
     @GetMapping("/advanced-search")
     public Result advancedSearch(HttpSession session, @RequestParam String queryField) {
-        return paperService.advancedQuery(session, queryField);
+        return paperService.advancedResearch(session, queryField);
     }
 
     /**

@@ -1,99 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dlut.ResearchService.mapper.PaperMapper">
-<!--  插入新纪录   -->
-    <insert id="saveBatch" parameterType="java.util.List">
-        insert into paper(paper_id, tl, au, de, so, py, wc, esi, tc, nr, ab) values
-        <foreach collection="list" index="index" item="item" separator=",">
-            (#{item.paper_id}, #{item.tl},#{item.au},#{item.de},#{item.so},#{item.py},#{item.nr}
-            #{item.wc}, #{item.tc}, #{item.esi}, #{item.ab})
-        </foreach>
-    </insert>
-<!--查询年份列表-->
-    <select id="selectYearList" parameterType="java.util.List" resultType="map">
-        SELECT py, COUNT(*) as yearCount from Paper
-        Where paper.paper_id in #{idList}
-        GROUP BY py ORDER BY py;
-    </select>
-<!--  PaperMap联合查询作者与关键词  -->
-    <resultMap id="paperMap" type="com.dlut.ResearchService.entity.dao.Paper">
-        <result column="paper_id" jdbcType="INTEGER" property="paper_id"/>
-        <result column="tl" jdbcType="VARCHAR" property="tl" />
-        <result column="py" jdbcType="INTEGER" property="py" />
-        <result column="so" jdbcType="VARCHAR" property="so" />
-        <collection
-                column="author_id" property="au"
-                ofType="String" select="selectAuthorsById">
-        </collection>
-        <collection
-                column="keyword_id" property="de"
-                ofType="String" select="selectKeywordsById">
-        </collection>
-    </resultMap>
-    <resultMap id="authorMap" type="com.dlut.ResearchService.entity.dto.AuthorDto">
-        <result column="author_name" jdbcType="VARCHAR" property="name"/>
-        <result column="author_org" jdbcType="VARCHAR" property="organization"/>
-        <result column="author_country" jdbcType="VARCHAR" property="country"/>
-    </resultMap>
-    <!-- 按照ID查询Paper全部内容  -->
-    <select id="selectPaperById" resultMap="paperMap">
+    <!--  按照id查询paper的全部内容  -->
+    <select id="selectPaperById" resultType="com.dlut.ResearchService.entity.dao.Paper">
         select tl, au, de, so, py, wc, esi, tc, nc, ab from paper where paper_id = #{paperId}
     </select>
     <!--  按照id列表查询paper的全部内容  -->
-    <select id="selectPaperByIds" resultMap="paperMap">
-        select * from paper
+    <select id="selectPaperByIdList" resultType="com.dlut.ResearchService.entity.dao.Paper" parameterType="list">
+        select tl, au, de, so, py, wc, esi, tc, nc, ab from paper
         where paper_id in
         <foreach collection="list" open="(" close=")" item="id" separator="," >
             #{id}
         </foreach>
     </select>
-    <!-- 查询Paper的Authors内容  -->
-    <select id="selectAuthorsById" resultMap="authorMap">
-        SELECT Author.Name as name, Author.Organization as organization,
-               Author.Country as country
-        FROM paper_author
-                 LEFT JOIN Author on Author.id=paper_author.Author_id
-                 LEFT JOIN Paper on Paper.id=paper_author.Paper_id
-        where Paper.id = #{id};
-    </select>
-    <!-- 查询Paper的Keywords内容 -->
-    <select id="selectKeywordsById" resultType="String">
-        SELECT Keywords.`Name` as Keyword
-        FROM paper_keywords
-                 LEFT JOIN Keywords on Keywords.id=paper_keywords.Keyword_id
-                 LEFT JOIN Paper on Paper.id=paper_keywords.Paper_id
-        where Paper.id = #{id};
-    </select>
-<!-- 按ID列表查询Paper内容  -->
-    <select id="selectPaperByIdList" parameterType="list" resultMap="paperMap" resultType="com.dlut.ResearchService.entity.dao.Paper">
-        select * from Paper
-        where id in
-        <foreach collection="list" open="(" close=")" item="id" separator="," >
-            #{id}
-        </foreach>
-    </select>
-
+    <!--  按照查询条件查询paper的id  -->
     <select id="selectIds" resultType="java.lang.Integer">
         select paper_id from RDService.paper where ${s}
     </select>
+    <!--  按照作者查询paper的id  -->
     <select id="selectIdsByAuthor" resultType="java.lang.Integer">
         select paper_id from RDService.paper where au=#{query}
     </select>
+    <!--  按照关键字查询paper的id  -->
     <select id="selectIdsByKeyword" resultType="java.lang.Integer">
         select paper_id from RDService.paper where de=#{query}
     </select>
+    <!--  按照发表年份查询paper的id  -->
     <select id="selectIdsByPublishYear" resultType="java.lang.Integer">
         select paper_id from RDService.paper where py=#{query}
     </select>
+    <!--  按照标题查询paper的id  -->
     <select id="selectIdByTitle" resultType="java.lang.Integer">
         select paper_id from RDService.paper where tl=#{query}
     </select>
+    <!--  按照期刊查询paper的id  -->
     <select id="selectIdsByJournal" resultType="java.lang.Integer">
         select paper_id from RDService.paper where so=#{query}
     </select>
+    <!--  按照WOS分类查询paper的id  -->
     <select id="selectIdsByWOSCategory" resultType="java.lang.Integer">
         select paper_id from RDService.paper where wc=#{query}
     </select>
-    <select id="selectPaperByIdListPage" resultType="com.dlut.ResearchService.entity.dao.Paper"></select>
+    <!--  按照id列表分页查询paper的全部内容  -->
+    <select id="selectPaperByIdListPage" resultType="com.dlut.ResearchService.entity.dao.Paper">
+        select paper_id
+        from RDService.paper
+        where paper_id in
+        <foreach collection="list" open="(" close=")" item="id" separator="," >
+             #{id}
+        </foreach>;
+    </select>
 
+    <!--  插入新纪录   -->
+<!--    <insert id="saveBatch" parameterType="java.util.List">-->
+<!--        insert into paper(paper_id, tl, au, de, so, py, wc, esi, tc, nr, ab) values-->
+<!--        <foreach collection="list" index="index" item="item" separator=",">-->
+<!--            (#{item.paper_id}, #{item.tl},#{item.au},#{item.de},#{item.so},#{item.py},#{item.nr}-->
+<!--            #{item.wc}, #{item.tc}, #{item.esi}, #{item.ab})-->
+<!--        </foreach>-->
+<!--    </insert>-->
+<!--&lt;!&ndash;  PaperMap联合查询作者与关键词  &ndash;&gt;-->
+<!--    <resultMap id="paperMap" type="com.dlut.ResearchService.entity.dao.Paper">-->
+<!--        <result column="paper_id" jdbcType="INTEGER" property="paper_id"/>-->
+<!--        <result column="tl" jdbcType="VARCHAR" property="tl" />-->
+<!--        <result column="py" jdbcType="INTEGER" property="py" />-->
+<!--        <result column="so" jdbcType="VARCHAR" property="so" />-->
+<!--        <collection-->
+<!--                column="author_id" property="au"-->
+<!--                ofType="String" select="selectAuthorsById">-->
+<!--        </collection>-->
+<!--        <collection-->
+<!--                column="keyword_id" property="de"-->
+<!--                ofType="String" select="selectKeywordsById">-->
+<!--        </collection>-->
+<!--    </resultMap>-->
+<!--    <resultMap id="authorMap" type="com.dlut.ResearchService.entity.dto.AuthorDto">-->
+<!--        <result column="author_name" jdbcType="VARCHAR" property="name"/>-->
+<!--        <result column="author_org" jdbcType="VARCHAR" property="organization"/>-->
+<!--        <result column="author_country" jdbcType="VARCHAR" property="country"/>-->
+<!--    </resultMap>-->
+<!--    &lt;!&ndash; 按照ID查询Paper全部内容  &ndash;&gt;-->
+
+<!--    &lt;!&ndash; 查询Paper的Authors内容  &ndash;&gt;-->
+<!--    <select id="selectAuthorsById" resultMap="authorMap">-->
+<!--        SELECT Author.Name as name, Author.Organization as organization,-->
+<!--               Author.Country as country-->
+<!--        FROM paper_author-->
+<!--                 LEFT JOIN Author on Author.id=paper_author.Author_id-->
+<!--                 LEFT JOIN Paper on Paper.id=paper_author.Paper_id-->
+<!--        where Paper.id = #{id};-->
+<!--    </select>-->
+<!--    &lt;!&ndash; 查询Paper的Keywords内容 &ndash;&gt;-->
+<!--    <select id="selectKeywordsById" resultType="String">-->
+<!--        SELECT Keywords.`Name` as Keyword-->
+<!--        FROM paper_keywords-->
+<!--                 LEFT JOIN Keywords on Keywords.id=paper_keywords.Keyword_id-->
+<!--                 LEFT JOIN Paper on Paper.id=paper_keywords.Paper_id-->
+<!--        where Paper.id = #{id};-->
+<!--    </select>-->
 </mapper>

@@ -1,6 +1,6 @@
 package com.dlut.ResearchService.mapper;
 
-import com.dlut.ResearchService.entity.dto.AuthorDto;
+import com.dlut.ResearchService.entity.dao.Author;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import java.util.List;
  * @since 2023-06-03
  */
 public interface AuthorMapper {
-    AuthorDto selectAuthorInfoById(Integer authorId);
+    Author selectAuthorInfoById(Integer authorId);
     List<String> getCoAuthor(List<Integer> authorIds);
 
 }
