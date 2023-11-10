@@ -19,7 +19,10 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Base64;
 import java.util.Date;
 
 import static com.dlut.ResearchService.entity.constants.redis.RedisKey.LOCK_KEY_PREFIX;
@@ -90,16 +93,36 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
      */
     @Override
     public void getCaptcha(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException {
+        long timeDifference = System.currentTimeMillis() - (long) session.getAttribute(EmailConstants.CAPTCHA);
+        if (timeDifference < 1000) {
+            return;
+        }
         CreateImageCode vCode = new CreateImageCode(130,38,5,10);
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);
         response.setContentType("image/jpeg");
+        session.setAttribute(EmailConstants.CAPTCHA, vCode.getCode());
 
-        String code = vCode.getCode();
-        session.setAttribute(EmailConstants.CAPTCHA, code);
+        OutputStream outputStream = response.getOutputStream();
 
-        vCode.write(response.getOutputStream());
+        vCode.write(outputStream);
+        long currentTimeMillis = System.currentTimeMillis();
+        session.setAttribute("captchaCreateTime", currentTimeMillis);
+    }
+
+    @Override
+    public String getCaptcha(@NotNull HttpServletResponse response) throws IOException {
+        CreateImageCode vCode = new CreateImageCode(130,38,5,10);
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setDateHeader("Expires", 0);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        vCode.write(outputStream);
+        byte[] captchaBytes = outputStream.toByteArray();
+
+        return Base64.getEncoder().encodeToString(captchaBytes);
     }
 
     /**

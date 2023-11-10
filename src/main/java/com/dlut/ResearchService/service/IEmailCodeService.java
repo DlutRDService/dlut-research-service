@@ -18,5 +18,7 @@ public interface IEmailCodeService{
 
     void getCaptcha(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException;
 
+    String getCaptcha(@NotNull HttpServletResponse response) throws IOException;
+
     void checkCaptcha(@NotNull HttpSession session, @NotNull String captcha);
 }

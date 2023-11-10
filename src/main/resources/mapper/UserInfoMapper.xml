@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dlut.ResearchService.mapper.UserInfoMapper">
     <insert id="insert" parameterType="com.dlut.ResearchService.entity.dao.UserInfo">
-        INSERT INTO user_info (account, email, password, registrationTime, lastLoginTime, status, avatar)
+        INSERT INTO RDService.sys_user(account, email, password, registration_time, last_login_time, status, avatar)
             values (#{account}, #{email}, #{password}, #{registrationTime}, #{lastLoginTime}, #{status}, #{avatar})
     </insert>
     <update id="updatePassword">
@@ -26,7 +26,7 @@
         select 1 from user_info where account != #{account} and email = #{email}
     </select>
     <select id="isEmailExit" resultType="java.lang.Boolean">
-        SELECT 1 from user_info where email = #{email} limit 1
+        SELECT 1 from sys_user where email = #{email} limit 1
     </select>
     <select id="selectByEmail" resultType="java.lang.Integer">
         SELECT user_id from user_info where email = #{email} limit 1

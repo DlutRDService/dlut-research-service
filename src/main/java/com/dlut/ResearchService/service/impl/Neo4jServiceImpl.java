@@ -26,13 +26,10 @@ public class Neo4jServiceImpl implements INeo4jService {
     }
 
     @Override
-    public Result queryRelatedGraph(Integer id) {
+    public Result queryRelatedGraph(Integer id, String cypher) {
         try (var session = driver.session()) {
             var greeting = session.executeWrite(tx -> {
-                var query = new Query(
-                        "Match (n:Author) Where n.message = $message RETURN n.message + ', from node ' + id(n)",
-                        parameters("message", "2")
-                );
+                var query = new Query(cypher);
                 var result = tx.run(query);
                 return result.single().get(0).asString();
             });

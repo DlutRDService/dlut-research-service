@@ -10,7 +10,7 @@ import org.neo4j.driver.GraphDatabase;
 
 @Configuration
 public class Neo4jConfig {
-    @Value("${neo4j.url:#{\"bolt://127.0.0.1:7687\"}}")
+    @Value("${neo4j.url:#{\"blot://localhost:7687\"}}")
     private String url;  // 所在服务器地址
     @Value("${neo4j.username:#{\"AI\"}}")
     private String user;  // 用户名

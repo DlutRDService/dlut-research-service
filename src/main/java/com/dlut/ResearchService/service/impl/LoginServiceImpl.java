@@ -6,6 +6,7 @@ import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.entity.dao.UserInfo;
 import com.dlut.ResearchService.mapper.UserInfoMapper;
+import com.dlut.ResearchService.mapper.NoticeMapper;
 import com.dlut.ResearchService.service.ILoginService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
@@ -33,6 +34,8 @@ public class LoginServiceImpl implements ILoginService {
     private RedisServiceImpl redisService;
     @Resource
     private ResultBuilder resultBuilder;
+    @Resource
+    private NoticeMapper noticeMapper;
 
 
     /**
@@ -86,7 +89,7 @@ public class LoginServiceImpl implements ILoginService {
             session.setAttribute("password", null);
             String sessionId = UUID.randomUUID().toString();
             session.setAttribute("sessionID", sessionId);
-            return resultBuilder.build(StatusCode.STATUS_CODE_200, "注册成功，请设置密码");
+            return resultBuilder.build(StatusCode.STATUS_CODE_200, "注册成功，请设置账号密码");
         }
     }
 
@@ -111,6 +114,12 @@ public class LoginServiceImpl implements ILoginService {
         }
         return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码修改失败");
     }
+
+    @Override
+    public String selectPageNotice(Integer page) {
+        return noticeMapper.selectPageNotice(page);
+    }
+
     /**
      * 验证身份，可用于验证码登陆与密码信息修改
      * @param email 邮箱

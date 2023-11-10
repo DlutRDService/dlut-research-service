@@ -15,4 +15,6 @@ public interface ILoginService {
     Result signByEmailCodeOrRegistration(HttpSession session, String email, String captcha);
 
     Result updatePassword(@NotNull HttpSession session, String newPassword, Integer account);
+
+    String selectPageNotice(Integer page);
 }

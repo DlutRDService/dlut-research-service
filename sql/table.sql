@@ -115,6 +115,21 @@ create table organization (
 ) engine=innodb auto_increment=0 comment = '机构表';
 
 -- ----------------------------
+-- 通知表
+-- ----------------------------
+drop table if exists notice;
+create table notice (
+        notice_id        bigint(20)   not null auto_increment    comment '通知id',
+        create_time      datetime     default null               comment '创建时间',
+        create_by        varchar(5)   default null               comment '创建人',
+        title            varchar(100) default null               comment '通知标题',
+        content          varchar(500) default null               comment '通知内容',
+        status           tinyint(1)   default 0                  comment '通知状态（0正常 1停用）',
+        target_page      smallint(2)  default null               comment '通知页面（0登陆页面 1主页面 ）',
+        primary key (notice_id)
+) engine=innodb auto_increment=0 comment = '通知表';
+
+-- ----------------------------
 -- 字典数据表
 -- ----------------------------
 drop table if exists sys_dict_data;

@@ -5,10 +5,9 @@ import com.dlut.ResearchService.entity.dao.Author;
 import com.dlut.ResearchService.service.impl.AuthorServiceImpl;
 import com.dlut.ResearchService.service.impl.Neo4jServiceImpl;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import static org.neo4j.driver.Values.parameters;
 
 /**
  * @author zsl
@@ -46,12 +45,16 @@ public class AuthorController {
     public Result authorInfo1(@RequestParam Author author){
         return null;
     }
-    @PostMapping("authorInfo/co-author")
+    @GetMapping("authorInfo/co-author")
     public Result coAuthor(Integer author_id){
         // 得到作者合作者的关系图，合作关系较高的作者（排序即可，前端进一步处理），呈现出三元组的形式
         // 需要解决查询结果
         // 看看Neo4j的查询结果，如果可以直接是Json三元组，那么直接返回即可，否则得转成Json数据传给前端
-        Object a = neo4jService.queryRelatedGraph(author_id);
+        String cypher = "MATCH (a1:Author)-[:WROTE]->(:Article)<-[:WROTE]-(a2:Author) " +
+                "WHERE a1.name = Author1 AND a1 <> a2 " +
+                "RETURN a2.name AS coAuthor, count(*) AS coAuthorCount " +
+                "ORDER BY coAuthorCount DESC LIMIT 5";
+        Object a = neo4jService.queryRelatedGraph(0, cypher);
         return authorService.getCoAuthorRelatedGraph((Integer) a);
     }
     @PostMapping("text")
