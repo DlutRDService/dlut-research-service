@@ -8,7 +8,9 @@ import com.dlut.ResearchService.entity.dao.UserInfo;
 import com.dlut.ResearchService.mapper.UserInfoMapper;
 import com.dlut.ResearchService.mapper.NoticeMapper;
 import com.dlut.ResearchService.service.ILoginService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -17,8 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -28,6 +32,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class LoginServiceImpl implements ILoginService {
+    private static final int SESSION_TIMEOUT_SECONDS = 1200;
     @Resource
     private UserInfoMapper userInfoMapper;
     @Resource
@@ -37,6 +42,29 @@ public class LoginServiceImpl implements ILoginService {
     @Resource
     private NoticeMapper noticeMapper;
 
+    /**
+     * 登录主页面
+     */
+    @Override
+    public void login(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException {
+        session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
+        HashMap<String, Object> loginPageData = new HashMap<>();
+        String notice = noticeMapper.selectPageNotice(0);
+        // 直接隐藏验证码，在提交的时候再验证
+        // String captcha = emailCodeService.getCaptcha(response);
+
+        // loginPageData.put("captcha", captcha);
+        loginPageData.put("notice", notice);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(loginPageData);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        // 将JSON字符串写入响应的输出流
+        PrintWriter writer = response.getWriter();
+        writer.write(jsonResponse);
+        writer.flush();
+    }
 
     /**
      * 登陆，使用账号密码。
@@ -45,22 +73,20 @@ public class LoginServiceImpl implements ILoginService {
      * @return 用户存在且密码正确返回成功
      */
     @Override
-    public Result signByAccount(@NotNull HttpSession session, String email, String password) {
-        Integer userId = userInfoMapper.selectByEmail(email);
+    public Result signByAccount(@NotNull HttpSession session, String emailOrAccount, String password) {
+        Integer userId = userInfoMapper.selectByEmailOrAccount(emailOrAccount);
         if (userId == null){
             return resultBuilder.build(StatusCode.STATUS_CODE_400, "用户不存在，请检查输入的邮箱与密码或注册新用户");
         }
         if (userInfoMapper.checkStatusById(userId) == 0){
             return resultBuilder.build(StatusCode.STATUS_CODE_400, "登陆失败，用户已登录，若账号异常请修改密码");
         }
-        if (userInfoMapper.selectByEmailAndPassword(email, password) == null){
+        if (userInfoMapper.selectPasswordByEmailOrAccount(emailOrAccount, password) == null){
             return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码错误，请重新输入");
         }
         String sessionId = UUID.randomUUID().toString();
         session.setAttribute("sessionID", sessionId);
-        session.setAttribute("email", email);
-        session.setAttribute("password", password);
-        session.setAttribute("userId", userId);
+        session.setAttribute("email", emailOrAccount);
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "登陆成功");
     }
 
@@ -80,13 +106,11 @@ public class LoginServiceImpl implements ILoginService {
                 return resultBuilder.build(StatusCode.STATUS_CODE_400, "登陆失败，用户已登录，若账号异常请修改密码");
             }
             session.setAttribute("email", email);
-            session.setAttribute("password", result.getData());
             String sessionId = UUID.randomUUID().toString();
             session.setAttribute("sessionID", sessionId);
             return resultBuilder.build(StatusCode.STATUS_CODE_200, "登陆成功");
         }else {
             session.setAttribute("email", email);
-            session.setAttribute("password", null);
             String sessionId = UUID.randomUUID().toString();
             session.setAttribute("sessionID", sessionId);
             return resultBuilder.build(StatusCode.STATUS_CODE_200, "注册成功，请设置账号密码");
@@ -94,33 +118,41 @@ public class LoginServiceImpl implements ILoginService {
     }
 
     /**
-     * 修改密码，如果新注册用户则是设置密码
+     * 修改密码
      * @param session 会话
      * @param newPassword 新密码
-     * @param account 账号
      * @return 密码修改成功返回成功
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result updatePassword(@NotNull HttpSession session, String newPassword, Integer account) {
-        String email = (String) session.getAttribute("email");
-        String oldPassword = (String) session.getAttribute("password");
-        if (oldPassword == null){
-            insert(newPassword, email, account);
-            return resultBuilder.build(StatusCode.STATUS_CODE_200, "密码设置成功");
-        }
-        if (userInfoMapper.updatePassword(oldPassword, email)){
-            return resultBuilder.build(StatusCode.STATUS_CODE_200, "密码修改成功");
+    public Result updatePassword(@NotNull HttpSession session, String newPassword, String oldPassword) {
+        if (session.getAttribute("email") instanceof Integer account){
+            if (userInfoMapper.updatePasswordByAccount(account, newPassword, oldPassword)){
+                return resultBuilder.build(StatusCode.STATUS_CODE_200, "密码修改成功");
+            }
+        } else if (session.getAttribute("email") instanceof String email){
+            if (userInfoMapper.updatePasswordByEmail(email, newPassword, oldPassword)){
+                return resultBuilder.build(StatusCode.STATUS_CODE_200, "密码修改成功");
+            }
         }
         return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码修改失败");
     }
-
     @Override
-    public String selectPageNotice(Integer page) {
-        return noticeMapper.selectPageNotice(page);
+    @Transactional(rollbackFor = Exception.class)
+    public Result setPassword(@NotNull HttpSession session, Integer account, String password) {
+        try{
+            if (session.getAttribute("email") instanceof String email) {
+                insert(password, email, account);
+                return resultBuilder.build(StatusCode.STATUS_CODE_200, "设置成功");
+            } else {
+                return resultBuilder.build(StatusCode.STATUS_CODE_400, "设置失败");
+            }
+        } catch (Exception e){
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, "设置失败");
+        }
     }
 
-    /**
+   /**
      * 验证身份，可用于验证码登陆与密码信息修改
      * @param email 邮箱
      * @param emailCode 验证码
@@ -154,17 +186,17 @@ public class LoginServiceImpl implements ILoginService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void insert(String password, String email, Integer account) {
-        byte[] imageData = new byte[0];
+        UserInfo userInfo = new UserInfo();
         try {
             File file = new File("../../../default_avatar.png");
-            imageData = Files.readAllBytes(file.toPath());
+            byte[] imageData = Files.readAllBytes(file.toPath());
+            userInfo.setAvatar(imageData);
         } catch (IOException e) {
             log.error("初始头像加载错误");
+            userInfo.setAvatar(null);
         }
-        UserInfo userInfo = new UserInfo();
         userInfo.setAccount(account);
         userInfo.setEmail(email);
-        userInfo.setAvatar(imageData);
         userInfo.setRegistrationTime(LocalDateTime.now());
         userInfo.setLastLoginTime(LocalDateTime.now());
         userInfo.setStatus(true);

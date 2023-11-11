@@ -1,8 +1,12 @@
 package com.dlut.ResearchService.service;
 
 import com.dlut.ResearchService.entity.constants.Result;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
 
 /**
  * @author zsl
@@ -10,11 +14,16 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface ILoginService {
 
+    void login(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException;
+
     Result signByAccount(HttpSession session, String email, String password);
 
     Result signByEmailCodeOrRegistration(HttpSession session, String email, String captcha);
 
-    Result updatePassword(@NotNull HttpSession session, String newPassword, Integer account);
+    @Transactional(rollbackFor = Exception.class)
+    Result updatePassword(@NotNull HttpSession session, String newPassword, String oldPassword);
 
-    String selectPageNotice(Integer page);
+    @Transactional(rollbackFor = Exception.class)
+    Result setPassword(HttpSession session, Integer account, String password);
+
 }

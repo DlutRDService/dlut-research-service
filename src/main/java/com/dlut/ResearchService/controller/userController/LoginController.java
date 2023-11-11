@@ -1,3 +1,11 @@
+/*
+ * 登录控制器，整个控制器不在校验登录拦截器的拦截范围内，控制器接口方法限制1s内最多访问2次。
+ * 登录页面展示通知信息与登录栏。
+ * 两种登录方式：邮箱验证码登录与账号密码登录。
+ * 账号密码登录，输入账号密码后弹出验证码弹窗，输入验证码后校验登录。
+ * 邮箱验证码登录，输入邮箱后，获取邮箱验证码，输入验证码后校验登录。
+ * 第一次登录的用户采用邮箱登录后，会自动注册，注册结束后弹出设置账号密码弹窗。
+ */
 package com.dlut.ResearchService.controller.userController;
 
 import com.dlut.ResearchService.annotation.RequestRateLimit;
@@ -6,22 +14,17 @@ import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.service.impl.EmailCodeServiceImpl;
 import com.dlut.ResearchService.service.impl.LoginServiceImpl;
 import com.dlut.ResearchService.entity.constants.StatusCode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("login")
 public class LoginController {
-    private static final int SESSION_TIMEOUT_SECONDS = 1200;
     @Resource
     private EmailCodeServiceImpl emailCodeService;
     @Resource
@@ -32,25 +35,21 @@ public class LoginController {
     @RequestRateLimit
     @RequestMapping
     public void login(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException {
-        session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
-        HashMap<String, Object> loginPageData = new HashMap<>();
-//        直接隐藏验证码得了，在提交的时候再验证
-//        String captcha = emailCodeService.getCaptcha(response);
-        String notice = loginService.selectPageNotice(0);
-
-//        loginPageData.put("captcha", captcha);
-        loginPageData.put("notice", notice);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonResponse = objectMapper.writeValueAsString(loginPageData);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        // 将JSON字符串写入响应的输出流
-        PrintWriter writer = response.getWriter();
-        writer.write(jsonResponse);
-        writer.flush();
+        try {
+            loginService.login(response, session);
+        }catch (Exception e){
+            throw new IOException("校验参数错误");
+        }
     }
 
+    /**
+     * 使用账号密码登录时获取验证码进行验证码校验，验证码刷新限制1s内最多1次。
+     * @param response 响应
+     * @param session 会话
+     * @param emailOrAccount 邮箱或账号
+     * @param password 密码
+     * @throws IOException 读写异常
+     */
     @RequestRateLimit
     @PostMapping("sign-in/getCaptcha")
     public void signByAccount(HttpServletResponse response, HttpSession session,
@@ -87,7 +86,7 @@ public class LoginController {
                                   @RequestParam String emailCode){
         return loginService.signByEmailCodeOrRegistration(session, email, emailCode);
     }
-    // TODO 注册完毕设置账号，密码
+
     /**
      * 用户注册
      * @param email 注册邮箱
@@ -107,22 +106,11 @@ public class LoginController {
      */
     @RequestRateLimit
     @PostMapping("setAccountAndPassword")
-    public Result setPassword(HttpSession session,
+    public Result setPassword(@NotNull HttpSession session,
                               @RequestParam String password,
                               @RequestParam Integer account){
-        return loginService.updatePassword(session, password, account);
+        return loginService.setPassword(session, account, password);
     }
-
-//     风险太大，考虑关闭
-//    /**
-//     * 生成验证码
-//     */
-//    @RequestRateLimit
-//    @PostMapping("getCaptcha")
-//    public void getCaptcha(HttpServletResponse response, HttpSession session) throws
-//            IOException {
-//        emailCodeService.getCaptcha(response, session);
-//    }
 
     /**
      * 发送邮件验证码
@@ -134,4 +122,14 @@ public class LoginController {
         emailCodeService.sendEmailCode(email);
         return resultBuilder.build(StatusCode.STATUS_CODE_200,"验证码已发送", null);
     }
+    //     风险太大，考虑关闭
+//    /**
+//     * 生成验证码
+//     */
+//    @RequestRateLimit
+//    @PostMapping("getCaptcha")
+//    public void getCaptcha(HttpServletResponse response, HttpSession session) throws
+//            IOException {
+//        emailCodeService.getCaptcha(response, session);
+//    }
 }

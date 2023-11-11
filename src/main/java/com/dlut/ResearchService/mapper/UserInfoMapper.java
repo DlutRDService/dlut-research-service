@@ -8,13 +8,13 @@ import com.dlut.ResearchService.entity.dao.UserInfo;
  */
 public interface UserInfoMapper{
 
-    Integer selectByEmailAndPassword(String email, String password);
+    Integer selectPasswordByEmailOrAccount(String email, String password);
 
-    Boolean updatePassword(String password, String email);
-
+    Boolean updatePasswordByAccount(Integer account, String newPassword, String oldPassword);
+    Boolean updatePasswordByEmail(String email, String newPassword, String oldPassword);
     Boolean isEmailExit(String email);
 
-    Integer selectByEmail(String email);
+    Integer selectByEmailOrAccount(String emailOrAccount);
 
     String selectPasswordByEmail(String email);
     Boolean insert(UserInfo userInfo);

@@ -5,21 +5,29 @@
         INSERT INTO RDService.sys_user(account, email, password, registration_time, last_login_time, status, avatar)
             values (#{account}, #{email}, #{password}, #{registrationTime}, #{lastLoginTime}, #{status}, #{avatar})
     </insert>
-    <update id="updatePassword">
+    <update id="updatePasswordByAccount">
         update user_info
-        set password = #{password}
-        where email = #{email}
+        set password = #{newPassword}
+        where account = #{account}
+        and password = #{oldPassword}
     </update>
     <update id="update">
         update user_info
         set password = #{password}, avatar = #{avatar}, nickName = #{nickName},
     </update>
+    <update id="updatePasswordByEmail">
+        update user_info
+        set password = #{newPassword}
+        where email = #{email}
+        and password = #{oldPassword}
+    </update>
 
-    <select id="selectByEmailAndPassword" resultType="java.lang.Integer">
+    <select id="selectPasswordByEmailOrAccount" resultType="java.lang.Integer">
         SELECT 1
         from user_info
-        where email = #{email}
-          and password = #{password}
+        where email = #{emailOrAccount}
+           OR account = #{emailOrAccount}
+                  AND password = #{password}
         limit 1
     </select>
     <select id="selectByAccountAndEmail" resultType="java.lang.Integer">
@@ -28,8 +36,11 @@
     <select id="isEmailExit" resultType="java.lang.Boolean">
         SELECT 1 from sys_user where email = #{email} limit 1
     </select>
-    <select id="selectByEmail" resultType="java.lang.Integer">
-        SELECT user_id from user_info where email = #{email} limit 1
+    <select id="selectByEmailOrAccount" resultType="java.lang.Integer">
+        SELECT user_id
+        from user_info
+        where email = #{emailOrAccount} OR account = #{emailOrAccount}
+        limit 1
     </select>
     <select id="selectPasswordByEmail" resultType="java.lang.String">
         SELECT password from user_info where email = #{email}

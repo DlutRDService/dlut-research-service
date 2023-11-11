@@ -5,6 +5,7 @@ import com.dlut.ResearchService.entity.dao.UserInfo;
 import com.dlut.ResearchService.service.impl.LoginServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +24,9 @@ public class AccountController {
     public Result modifyUseInfo(HttpSession session, @RequestBody UserInfo userInfo){
         return logService.modifyUseInfo((Integer) session.getAttribute("userId"), userInfo);
     }
-    @PostMapping("/setting")
-    public Result setting(){
-        return null;
+    @PostMapping("updatePassword")
+    public Result updatePassword(@NotNull HttpSession session, String newPassword, String oldPassword){
+
+        return logService.updatePassword(session, newPassword, oldPassword);
     }
 }

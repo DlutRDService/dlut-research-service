@@ -2,6 +2,7 @@ package com.dlut.ResearchService.service.impl;
 
 import com.dlut.ResearchService.config.AppConfig;
 import com.dlut.ResearchService.entity.dto.EmailDto;
+import com.dlut.ResearchService.exception.AccessException;
 import com.dlut.ResearchService.exception.BusinessException;
 import com.dlut.ResearchService.utils.CreateImageCode;
 import com.dlut.ResearchService.utils.StringUtils;
@@ -93,24 +94,34 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
      */
     @Override
     public void getCaptcha(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException {
-        long timeDifference = System.currentTimeMillis() - (long) session.getAttribute(EmailConstants.CAPTCHA);
-        if (timeDifference < 1000) {
-            return;
+        // 判断是否在1000ms内发送验证码，
+        if (session.getAttribute("captchaCreateTime") != null) {
+            long timeDifference = System.currentTimeMillis() - (long) session.getAttribute("captchaCreateTime");
+            if (timeDifference < 1000) {
+                throw new AccessException("刷新过快");
+            }
         }
-        CreateImageCode vCode = new CreateImageCode(130,38,5,10);
+
+        // 生成验证码
+        CreateImageCode vCode = new CreateImageCode(130, 38, 5, 10);
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);
         response.setContentType("image/jpeg");
-        session.setAttribute(EmailConstants.CAPTCHA, vCode.getCode());
 
+        // 写入响应流
         OutputStream outputStream = response.getOutputStream();
-
         vCode.write(outputStream);
-        long currentTimeMillis = System.currentTimeMillis();
-        session.setAttribute("captchaCreateTime", currentTimeMillis);
+
+        // 将验证码与生成时间放入session
+        session.setAttribute(EmailConstants.CAPTCHA, vCode.getCode());
+        session.setAttribute("captchaCreateTime", System.currentTimeMillis());
+
     }
 
+    /**
+     * 暂时弃用
+     */
     @Override
     public String getCaptcha(@NotNull HttpServletResponse response) throws IOException {
         CreateImageCode vCode = new CreateImageCode(130,38,5,10);
