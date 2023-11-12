@@ -51,9 +51,7 @@ public class LoginServiceImpl implements ILoginService {
         HashMap<String, Object> loginPageData = new HashMap<>();
         String notice = noticeMapper.selectPageNotice(0);
         // 直接隐藏验证码，在提交的时候再验证
-        // String captcha = emailCodeService.getCaptcha(response);
 
-        // loginPageData.put("captcha", captcha);
         loginPageData.put("notice", notice);
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonResponse = objectMapper.writeValueAsString(loginPageData);
@@ -118,25 +116,11 @@ public class LoginServiceImpl implements ILoginService {
     }
 
     /**
-     * 修改密码
+     * 注册用户设置账号密码
      * @param session 会话
-     * @param newPassword 新密码
-     * @return 密码修改成功返回成功
+     * @param account 账号
+     * @param password 密码
      */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Result updatePassword(@NotNull HttpSession session, String newPassword, String oldPassword) {
-        if (session.getAttribute("email") instanceof Integer account){
-            if (userInfoMapper.updatePasswordByAccount(account, newPassword, oldPassword)){
-                return resultBuilder.build(StatusCode.STATUS_CODE_200, "密码修改成功");
-            }
-        } else if (session.getAttribute("email") instanceof String email){
-            if (userInfoMapper.updatePasswordByEmail(email, newPassword, oldPassword)){
-                return resultBuilder.build(StatusCode.STATUS_CODE_200, "密码修改成功");
-            }
-        }
-        return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码修改失败");
-    }
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result setPassword(@NotNull HttpSession session, Integer account, String password) {
@@ -152,7 +136,7 @@ public class LoginServiceImpl implements ILoginService {
         }
     }
 
-   /**
+    /**
      * 验证身份，可用于验证码登陆与密码信息修改
      * @param email 邮箱
      * @param emailCode 验证码
@@ -205,20 +189,10 @@ public class LoginServiceImpl implements ILoginService {
         log.info("新用户：" + email + "，添加成功");
     }
 
-    /**
-     * 修改用户信息
-     * @param userId 用户Id
-     * @param userInfo 用户信息列表
-     */
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result modifyUseInfo(Integer userId, UserInfo userInfo){
-        if (userId == null) {
-            return resultBuilder.build(StatusCode.STATUS_CODE_500, "拒绝访问");
-        }
-        if (userInfoMapper.update(userInfo)){
-            return resultBuilder.build(StatusCode.STATUS_CODE_200, "修改成功");
-        }else{
-            return resultBuilder.build(StatusCode.STATUS_CODE_400, "修改失败");
-        }
+    public Result recoveryPassword(HttpSession session, String email, String emailCode){
+        return null;
     }
+
 }

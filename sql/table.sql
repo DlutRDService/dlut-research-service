@@ -45,6 +45,7 @@ create table sys_user (
         registration_time datetime                                   comment '创建时间',
         last_login_time   datetime                                   comment '最后登陆时间',
         login_ip          varchar(128)    default ''                 comment '最后登陆IP',
+        last_update_time  datetime                                   comment '上次修改时间',
         remark            varchar(500)    default null               comment '备注内容',
         primary key (user_id),
         key idx_user_account (account),

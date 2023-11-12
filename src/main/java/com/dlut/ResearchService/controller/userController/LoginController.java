@@ -38,7 +38,7 @@ public class LoginController {
         try {
             loginService.login(response, session);
         }catch (Exception e){
-            throw new IOException("校验参数错误");
+            throw new IOException(e.getMessage());
         }
     }
 
@@ -99,7 +99,7 @@ public class LoginController {
                                @RequestParam String emailCode){
         return loginService.signByEmailCodeOrRegistration(session, email, emailCode);
     }
-    // TODO 这里加一个新用户判断
+
     /**
      * 设置密码，密码设置成功后修改或导入数据库
      * @param password 密码
@@ -121,6 +121,12 @@ public class LoginController {
     public Result sendEmailCode(String email){
         emailCodeService.sendEmailCode(email);
         return resultBuilder.build(StatusCode.STATUS_CODE_200,"验证码已发送", null);
+    }
+
+    @RequestRateLimit
+    @PostMapping("recoveryPassword")
+    public Result recoveryPassword(HttpSession session, String email, String emailCode){
+        return loginService.recoveryPassword(session, email, emailCode);
     }
     //     风险太大，考虑关闭
 //    /**

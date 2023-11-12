@@ -38,6 +38,7 @@ public class WebClientServiceImpl implements IWebClientService {
                         .queryParam("param", query)
                         .build())
                 .retrieve()
+                // TODO 查询返回结果类型
                 .bodyToMono(new ParameterizedTypeReference<Set<Integer>>(){})
                 .onErrorReturn(Collections.emptySet())
                 .block();

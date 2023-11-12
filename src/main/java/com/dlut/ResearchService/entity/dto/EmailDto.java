@@ -2,7 +2,6 @@ package com.dlut.ResearchService.entity.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
-import org.springframework.stereotype.Component;
 
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)

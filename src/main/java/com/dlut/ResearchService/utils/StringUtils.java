@@ -1,5 +1,6 @@
 package com.dlut.ResearchService.utils;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.RandomStringUtils;
 import com.dlut.ResearchService.entity.constants.Regex;
 import org.jetbrains.annotations.Contract;
@@ -149,4 +150,7 @@ public final class StringUtils {
         return count;
     }
 
+    public static List<String> stringJsonToList(@NotNull String s){
+         return JSON.parseArray(s, String.class);
+    }
 }

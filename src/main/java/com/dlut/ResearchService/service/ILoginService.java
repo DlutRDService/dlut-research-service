@@ -21,9 +21,8 @@ public interface ILoginService {
     Result signByEmailCodeOrRegistration(HttpSession session, String email, String captcha);
 
     @Transactional(rollbackFor = Exception.class)
-    Result updatePassword(@NotNull HttpSession session, String newPassword, String oldPassword);
-
-    @Transactional(rollbackFor = Exception.class)
     Result setPassword(HttpSession session, Integer account, String password);
 
+    @Transactional(rollbackFor = Exception.class)
+    Result recoveryPassword(HttpSession session, String email, String emailCode);
 }

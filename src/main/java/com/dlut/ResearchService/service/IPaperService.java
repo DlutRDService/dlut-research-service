@@ -19,6 +19,9 @@ public interface IPaperService{
 
     Result advancedResearch(HttpSession session, String queryField);
 
+
+    Result advanceResearchByQueryList(HttpSession session, List<String> queries);
+
     Result paperInformation(Integer paperId);
 
 

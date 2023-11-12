@@ -104,22 +104,32 @@ public class PaperServiceImpl implements IPaperService {
         if (queryField.matches("AND|OR|NOT")) {
             // 将字符串转化为中缀字符串
             List<String> infixString = QueryUtils.queryToInfixString(queryField);
-            // 将中缀字符串转化为解析树
-            node = QueryUtils.infixStringToTreeNode(infixString);
-            // 将解析树节点的子查询，转化为查询列表
-            node = changeNodeValueToSubResultSet(node);
-            // 进行集合运算
-            Set<Integer> searchResult = QueryUtils.getEvaluateNode(node);
-            ids = new ArrayList<>(searchResult);
-            idString = ids.toString();
-            redisService.set(resultListKey, idString, SEARCH_EXPIRATION_TIME);
-            return resultBuilder.build(
-                    StatusCode.STATUS_CODE_200, "", paperMapper.selectPaperByIdListPage(ids, 0, 20)
-            );
+            advanceResearchByQueryList(session, infixString);
         }
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "", null);
     }
 
+    /**
+     * 查询中缀字符表达式结果
+     * @param session 会话
+     * @param queries 查询列表
+     */
+    @Override
+    public Result advanceResearchByQueryList(@NotNull HttpSession session, List<String> queries){
+        String resultListKey = "resultList:" + session.getId();
+        // 将中缀字符串转化为解析树
+        TreeNode node = QueryUtils.infixStringToTreeNode(queries);
+        // 将解析树节点的子查询，转化为查询列表
+        node = changeNodeValueToSubResultSet(node);
+        // 进行集合运算
+        Set<Integer> searchResult = QueryUtils.getEvaluateNode(node);
+        List<Integer> ids = new ArrayList<>(searchResult);
+        String idString = ids.toString();
+        redisService.set(resultListKey, idString, SEARCH_EXPIRATION_TIME);
+        return resultBuilder.build(
+                StatusCode.STATUS_CODE_200, "", paperMapper.selectPaperByIdListPage(ids, 0, 20)
+        );
+    }
 
     public TreeNode changeNodeValueToSubResultSet(@NotNull TreeNode node) {
         switch (node.value.toString()) {

@@ -28,10 +28,10 @@ public class Neo4jServiceImpl implements INeo4jService {
     @Override
     public Result queryRelatedGraph(Integer id, String cypher) {
         try (var session = driver.session()) {
-            var greeting = session.executeWrite(tx -> {
+            var greeting = session.executeRead(tx -> {
                 var query = new Query(cypher);
-                var result = tx.run(query);
-                return result.single().get(0).asString();
+                // TODO 搞一下返回的查询结果类型
+                return tx.run(query).stream().toList();
             });
             System.out.println(greeting);
         }

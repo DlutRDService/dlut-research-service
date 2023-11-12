@@ -51,7 +51,7 @@ public class AuthorController {
         // 需要解决查询结果
         // 看看Neo4j的查询结果，如果可以直接是Json三元组，那么直接返回即可，否则得转成Json数据传给前端
         String cypher = "MATCH (a1:Author)-[:WROTE]->(:Article)<-[:WROTE]-(a2:Author) " +
-                "WHERE a1.name = Author1 AND a1 <> a2 " +
+                "WHERE a1.name = 'Author 1' AND a1 <> a2 " +
                 "RETURN a2.name AS coAuthor, count(*) AS coAuthorCount " +
                 "ORDER BY coAuthorCount DESC LIMIT 5";
         Object a = neo4jService.queryRelatedGraph(0, cypher);

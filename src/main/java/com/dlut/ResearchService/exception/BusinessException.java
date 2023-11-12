@@ -7,7 +7,6 @@ import java.io.Serial;
 public class BusinessException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
      * 异常对应返回玛
