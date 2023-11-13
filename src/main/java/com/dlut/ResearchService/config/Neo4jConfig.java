@@ -12,7 +12,7 @@ import org.neo4j.driver.GraphDatabase;
 public class Neo4jConfig {
     @Value("${neo4j.url:#{\"blot://127.0.0.1:7687\"}}")
     private String url;  // 所在服务器地址
-    @Value("${neo4j.username:#{\"AI\"}}")
+    @Value("${neo4j.username:#{\"neo4j\"}}")
     private String user;  // 用户名
     @Value("${neo4j.password:#{\"dlutaiservice\"}}")
     private String password;  //密码

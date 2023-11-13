@@ -31,7 +31,7 @@ public class WebClientServiceImpl implements IWebClientService {
      */
     @Override
     public Set<Integer> searchByStringVector(String query) {
-        url = "api/searchByTs";
+        url = "/api/milvus/search";
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path(url)

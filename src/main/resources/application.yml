@@ -46,5 +46,5 @@ redis:
 # neo4j配置
 neo4j:
   url: bolt://localhost:7687
-  username: AI
+  username: neo4j
   password: dlutaiservice

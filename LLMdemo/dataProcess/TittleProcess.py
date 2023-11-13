@@ -15,7 +15,6 @@ def get_titles(filepath=None):
         raise ValueError('Please enter a valid path')
     paths = []
     num = 0
-    ## 如果是文件路径
     if os.path.isdir(filepath):
         for (dir_path, dirname, filenames) in os.walk(filepath):
             if filenames is None:

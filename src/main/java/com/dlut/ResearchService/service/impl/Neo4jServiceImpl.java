@@ -7,11 +7,11 @@ import com.dlut.ResearchService.service.INeo4jService;
 import jakarta.annotation.Resource;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Query;
+import org.neo4j.driver.Record;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
-
-import static org.neo4j.driver.Values.parameters;
 
 @Service
 public class Neo4jServiceImpl implements INeo4jService {
@@ -27,14 +27,22 @@ public class Neo4jServiceImpl implements INeo4jService {
 
     @Override
     public Result queryRelatedGraph(Integer id, String cypher) {
+        HashMap<String, Integer> data = new HashMap<>();
         try (var session = driver.session()) {
-            var greeting = session.executeRead(tx -> {
+            List<Record> records = session.executeRead(tx -> {
                 var query = new Query(cypher);
                 // TODO 搞一下返回的查询结果类型
                 return tx.run(query).stream().toList();
             });
-            System.out.println(greeting);
+            for (Record record : records) {
+                String coAuthor = record.get("coAuthor").asString();
+                int coAuthorCount = record.get("coAuthorCount").asInt();
+                data.put(coAuthor, coAuthorCount);
+            }
+        return resultBuilder.build(
+                StatusCode.STATUS_CODE_200,
+                "",
+                data);
         }
-        return null;
     }
 }

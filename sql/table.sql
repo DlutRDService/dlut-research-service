@@ -67,7 +67,8 @@ create table paper (
             esi            varchar(50)     default null               comment 'ESI分类',
             tc             smallint(5)     default 0                  comment '文章被引量',
             nc             smallint(5)     default 0                  comment '文章引文量',
-            ab             TEXT            default null               comment '文献摘要',
+            ab             varchar(200)    default null               comment '文献摘要,只显示200字符',
+            ab_path        varchar(200)    default null               comment '文献摘要详细信息存储地址',
             primary key (paper_id),
             key idx_paper_tl (tl)
 ) engine=innodb auto_increment=0 comment = '文献表';
