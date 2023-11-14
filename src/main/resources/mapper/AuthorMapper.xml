@@ -4,12 +4,12 @@
 
     <select id="selectAuthorInfoById" resultType="com.dlut.ResearchService.entity.dao.Author">
         SELECT author_name, author_country, author_org, H, paper_count, paper_count_per_year
-        FROM author
-        WHERE author_id = #{authorId}
+        FROM RDService.author
+        WHERE RDService.author.author_id = #{authorId}
     </select>
     <select id="getCoAuthor" parameterType="java.util.List" resultType="java.lang.String">
-        SELECT author_name FROM author
-        WHERE author.author_id IN
+        SELECT author_name FROM RDService.author
+        WHERE RDService.author.author_id IN
         <foreach item = "item" collection="list" open="(" separator="," close=")">
             #{item}
         </foreach>

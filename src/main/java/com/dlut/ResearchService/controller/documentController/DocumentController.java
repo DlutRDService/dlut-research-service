@@ -9,6 +9,7 @@ import com.dlut.ResearchService.service.impl.PaperServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +25,7 @@ public class DocumentController {
     private PaperServiceImpl paperService;
 
     @RequestMapping(value = "/export", method = RequestMethod.POST)
-    public void exportPaperRecords(@RequestBody String ids, HttpServletResponse response) throws Exception {
+    public void exportPaperRecords(@RequestBody String ids, @NotNull HttpServletResponse response) throws Exception {
         List<Integer> idList = JSON.parseArray(JSON.parseObject(ids).getString("ids"), Integer.class);
         List<Paper> list = paperService.selectPapersByIdList(idList);
         ExcelWriter writer = ExcelUtil.getWriter(true);
@@ -39,7 +40,7 @@ public class DocumentController {
     }
 
     @PostMapping("/import/excel")
-    public Boolean importPaperRecordsByExcel(MultipartFile file) throws Exception {
+    public Boolean importPaperRecordsByExcel(@NotNull MultipartFile file) throws Exception {
         InputStream inputStream = file.getInputStream();
         ExcelReader reader = ExcelUtil.getReader(inputStream);
         List<Paper> list = reader.read(0, 1, Paper.class);

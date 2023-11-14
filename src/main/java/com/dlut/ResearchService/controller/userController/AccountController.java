@@ -2,7 +2,6 @@ package com.dlut.ResearchService.controller.userController;
 
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.dao.UserInfo;
-import com.dlut.ResearchService.service.impl.LoginServiceImpl;
 import com.dlut.ResearchService.service.impl.UserServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
