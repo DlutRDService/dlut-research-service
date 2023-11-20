@@ -2,6 +2,7 @@
 # ! -*- coding:UTF-8 -*-
 
 import pymysql
+import os
 from flask import Blueprint, request
 
 from dataProcess.CreateESIDict import CreateJournalCategoryDict
@@ -9,8 +10,12 @@ from dataProcess.DealPaperInfo import DealPaperInformation
 from dataProcess.TittleProcess import get_titles
 from assistant.gpt import embeddingGpt
 from assistant.llama import embeddingLlama
+from assistant.gpt.AbstractSegmentation import abstractSegmentation
 
 data_process_blueprint = Blueprint('dataProcess', __name__)
+
+os.environ['OPENAI_API_KEY'] = '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'
+
 # 获取ESI字典
 esi_dict = CreateJournalCategoryDict()
 # 打开数据库连接,设置路径，端口，用户名，密码，数据库名。
@@ -99,3 +104,10 @@ def get_embedding():
 
     # 返回处理结果
     # return jsonify(result)
+
+
+@data_process_blueprint.route('/api/abstractSegment', methods=['Post'])
+def abstract_segment():
+    abstract = request.form.get('abstract')
+    return abstractSegmentation(abstract)
+
