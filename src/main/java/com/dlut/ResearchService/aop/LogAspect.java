@@ -17,10 +17,10 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Aspect
@@ -29,43 +29,43 @@ public class LogAspect {
     @Pointcut("@annotation(com.dlut.ResearchService.annotation.log)")
     private void logPointCut(){}
     @AfterReturning(pointcut = "logPointCut()")
-    public void doAfterReturning(JoinPoint joinPoint) {
-        saveLog(joinPoint);
+    public void doAfterReturning() {
+        saveLog();
     }
     @AfterThrowing(value = "logPointCut()")
-    public void doAfterThrowing(JoinPoint joinPoint) {
-        saveLog(joinPoint);
+    public void doAfterThrowing() {
+        saveLog();
     }
 
-    private void saveLog(@NotNull JoinPoint joinPoint){
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-
-        RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
-        ServletRequestAttributes attributes = (ServletRequestAttributes) requestAttributes;
-        HttpServletRequest request = attributes.getRequest();
-
-        //获取Ip地址
+    private void saveLog(){
         WebLog webLog = new WebLog();
-        webLog.setIp(IpUtils.getIpAddr(request));
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        webLog.setCreate_time(dateFormat.format(new Date()));
-
-        String methodName = signature.getName();
-        webLog.setMethod(methodName);
-        //请求的参数
-        Object[] args = joinPoint.getArgs();
         try {
-            List<String> list = new ArrayList<>();
-            for (Object o : args) {
-                list.add(JSON.toJSONString(o));
-            }
-            webLog.setParameter(list.toString());
+            RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
+            ServletRequestAttributes attributes = (ServletRequestAttributes) requestAttributes;
+            HttpServletRequest request = attributes.getRequest();
+
+            //获取Ip地址
+            webLog.setIp(IpUtils.getIpAddr(request));
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            webLog.setCreate_time(dateFormat.format(new Date()));
+
+            String methodName = request.getMethod();
+            webLog.setMethod(methodName);
+
+            String url = request.getRequestURI();
+            webLog.setUrl(url);
+            Map<String, String[]> parameterMap = request.getParameterMap();
+            String paramsJson = parameterMap.entrySet().stream()
+                    .map(entry -> entry.getKey() + "=" + Arrays.toString(entry.getValue()))
+                    .collect(Collectors.joining(", ", "{", "}"));
+            webLog.setParameter(paramsJson);
+
         } catch (Exception ex) {
             // TODO log是如何记录到本地异常日志的呢？
             log.error("异常信息 : {}", ex.getMessage());
         }
-        log.info("ip地址：{},访问时间：{},调用接口：{}",
-                webLog.getIp(), webLog.getCreate_time(), webLog.getMethod());
+        log.info("ip地址：{}, 访问时间：{}, 请求方法：{}, 调用接口：{}, 请求参数：{}",
+                webLog.getIp(), webLog.getCreate_time(), webLog.getMethod(), webLog.getUrl(), webLog.getParameter());
     }
 }

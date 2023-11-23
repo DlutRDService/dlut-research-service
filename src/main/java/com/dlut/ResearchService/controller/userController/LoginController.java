@@ -9,6 +9,7 @@
 package com.dlut.ResearchService.controller.userController;
 
 import com.dlut.ResearchService.annotation.RequestRateLimit;
+import com.dlut.ResearchService.annotation.log;
 import com.dlut.ResearchService.component.ResultBuilder;
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.service.impl.EmailCodeServiceImpl;
@@ -24,6 +25,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("login")
+@CrossOrigin(origins = "http://192.168.43.47:3000")
 public class LoginController {
     @Resource
     private EmailCodeServiceImpl emailCodeService;
@@ -32,6 +34,7 @@ public class LoginController {
     @Resource
     private ResultBuilder resultBuilder;
 
+    @log
     @RequestRateLimit
     @RequestMapping
     public void login(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException {
@@ -46,14 +49,15 @@ public class LoginController {
      * 使用账号密码登录时获取验证码进行验证码校验，验证码刷新限制1s内最多1次。
      * @param response 响应
      * @param session 会话
-     * @param emailOrAccount 邮箱或账号
+     * @param username 邮箱或账号
      * @param password 密码
      * @throws IOException 读写异常
      */
+    @log
     @RequestRateLimit
     @PostMapping("sign-in/getCaptcha")
     public void signByAccount(HttpServletResponse response, HttpSession session,
-                                @RequestParam @NotNull(value = "邮箱或账号不为空") String emailOrAccount,
+                                @RequestParam @NotNull(value = "邮箱或账号不为空") String username,
                                 @RequestParam @NotNull(value = "密码不为空") String password) throws IOException {
         emailCodeService.getCaptcha(response, session);
     }
@@ -61,17 +65,18 @@ public class LoginController {
     /**
      * 登陆，使用账号密码。
      * @param session 会话
-     * @param emailOrAccount 邮箱或账号
+     * @param username 邮箱或账号
      * @param password 密码
      * @param captcha 图片验证码
      */
     @RequestRateLimit
     @PostMapping("sign-in/account")
-    public Result signByAccount(@NotNull HttpSession session,
-                                @RequestParam String emailOrAccount,
+    public Result signByAccount(
+            @NotNull HttpSession session,
+                                @RequestParam String username,
                                 @RequestParam String password, @NotNull @RequestParam String captcha) {
         emailCodeService.checkCaptcha(session, captcha);
-        return loginService.signByAccount(session, emailOrAccount, password);
+        return loginService.signByAccount(session, username, password);
     }
 
     /**

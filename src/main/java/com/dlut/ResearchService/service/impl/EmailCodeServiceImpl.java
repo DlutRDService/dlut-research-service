@@ -108,7 +108,6 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);
         response.setContentType("image/jpeg");
-
         // 写入响应流
         OutputStream outputStream = response.getOutputStream();
         vCode.write(outputStream);
@@ -116,7 +115,6 @@ public class EmailCodeServiceImpl implements IEmailCodeService {
         // 将验证码与生成时间放入session
         session.setAttribute(EmailConstants.CAPTCHA, vCode.getCode());
         session.setAttribute("captchaCreateTime", System.currentTimeMillis());
-
     }
 
     /**
