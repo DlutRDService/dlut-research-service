@@ -25,7 +25,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("login")
-@CrossOrigin(origins = "http://192.168.43.47:3000")
+@CrossOrigin(origins = "http://localhost:3000")
 public class LoginController {
     @Resource
     private EmailCodeServiceImpl emailCodeService;
@@ -69,6 +69,7 @@ public class LoginController {
      * @param password 密码
      * @param captcha 图片验证码
      */
+    @log
     @RequestRateLimit
     @PostMapping("sign-in/account")
     public Result signByAccount(

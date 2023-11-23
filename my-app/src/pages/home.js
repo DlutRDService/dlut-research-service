@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import Modal from '../components/modal/Modal'; // Assuming Modal component is in the same directory
 
 const Home = () => {
+  let history = useHistory(); // 获取history实例
+  // ...其他状态和函数
+
+  const handleLoginSuccess = () => {
+    // ...登录成功后的处理
+    history.push('/dashboard'); // 导航到Dashboard页面
+  };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [username, setUsername] = useState(''); // 添加用户名状态
   const [password, setPassword] = useState(''); // 添加密码状态

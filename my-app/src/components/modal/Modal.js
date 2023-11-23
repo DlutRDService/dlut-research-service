@@ -12,12 +12,15 @@ const Modal = ({ isOpen, onClose, onVerify, username, password }) => {
   }, [isOpen, username, password]);
   const formData = new URLSearchParams();
 
-  const fetchCaptcha = async () => {
+   const fetchCaptcha = async () => {
+    if(formData.get('username')?.length>=1){
+      return;
+    }
     formData.append('username', username);
     formData.append('password', password);
-
+    
     try {
-      const response = await fetch('http://192.168.43.93:8080/login/sign-in/getCaptcha', {
+      const response = await fetch('http://localhost:8080/login/sign-in/getCaptcha', {
         method: 'POST',
         body: formData,
         headers: {
@@ -35,7 +38,7 @@ const Modal = ({ isOpen, onClose, onVerify, username, password }) => {
     formData.append('code', codeToVerify); // 假设后端接收名为'code'的参数
 
     try {
-      const response = await fetch('http://192.168.43.93:8080/login/sign-in/verifyCaptcha', {
+      const response = await fetch('http://localhost:8080/login/sign-in/verifyCaptcha', {
         method: 'POST',
         body: formData,
         headers: {
