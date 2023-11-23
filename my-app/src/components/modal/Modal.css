@@ -1,0 +1,75 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 30%; /* 设置模态窗口宽度为屏幕宽度的50% */
+}
+
+.modal h2 {
+  margin-top: 0;
+  font-size: 15px;
+}
+
+.modal form {
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  padding: 10px;
+  margin-right: 10px;
+  width: 30%; /* 按钮宽度调整为容器宽度的30% */
+  margin-top: 10px; /* 如果需要，可以增加上边距 */
+}
+
+/* 添加按钮特定的类以覆盖上述的宽度 */
+.verify-button,
+.close-button {
+  width: 20%; /* 按钮宽度调整为容器宽度的30% */
+}
+/* 确保验证码图片和输入框在同一行 */
+.captcha-container {
+  display: flex;
+  align-items: center; /* 垂直居中对齐 */
+  justify-content: space-between; /* 元素间隔均匀分布 */
+  margin-bottom: 10px; /* 与下方元素的间距 */
+}
+
+.captcha-input {
+  /* 移除 width: 10px; 这一行 */
+  margin-left: 10px;
+  margin-bottom: 10px;
+  flex-grow: 1; /* 输入框将填充剩余空间 */
+  /* 可选: 如果你想要输入框有一个最小宽度，可以设置一个具体的值 */
+  min-width: 30px; /* 或者根据你的设计要求调整 */
+  max-width: 120px;
+}
+
+.captcha-image {
+  /* 调整宽度以适应新布局，可能需要根据图片实际大小调整 */
+  width: auto; /* 如果图片大小是固定的，可以设置成具体的宽度，如120px */
+  height: 40px; /* 根据实际情况调整高度 */
+  cursor: pointer;
+  max-width: 100%; /* 确保图片不会超出模态窗口的宽度 */
+  height: auto; /* 保持图片的原始纵横比 */
+  margin: 10px 0; /* 提供上下边距 */
+}
+
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between; /* 保证按钮左右分布 */
+}
+
