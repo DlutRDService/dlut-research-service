@@ -49,33 +49,31 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
             continue
         # 期刊
         if line.find('SO ') == 0:
-            if ', ' in line:
-                wos_data.SO = line[3:].replace('\'', '').replace('\"', '').split(',')[0]
-                i = 1
-                while title[num + i][0:3] == '   ':
-                    wos_data.SO += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').split(',')[0]
-                    i += 1
-                wos_data.ESI = Esi_dict[wos_data.SO]
-            elif ':' in line:
-                wos_data.SO = line[3:].replace('\'', '').replace('\"', '').split(': ')[0]
-                i = 1
-                while title[num + i][0:3] == '   ':
-                    wos_data.SO += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').split(': ')[0]
-                    i += 1
-                wos_data.ESI = Esi_dict[wos_data.SO]
-            else:
-                wos_data.SO = line[3:].replace('\'', '').replace('\"', '').upper()
-                i = 1
-                while title[num + i][0:3] == '   ':
-                    wos_data.SO += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').upper()
-                    i += 1
-                try:
+            try:
+                if ', ' in line:
+                    wos_data.SO = line[3:].replace('\'', '').replace('\"', '').split(',')[0]
+                    i = 1
+                    while title[num + i][0:3] == '   ':
+                        wos_data.SO += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').split(',')[0]
+                        i += 1
                     wos_data.ESI = Esi_dict[wos_data.SO]
-                except KeyError:
-                    pass
-                finally:
-                    wos_data.ESI = ' '
-            continue
+                elif ':' in line:
+                    wos_data.SO = line[3:].replace('\'', '').replace('\"', '').split(': ')[0]
+                    i = 1
+                    while title[num + i][0:3] == '   ':
+                        wos_data.SO += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').split(': ')[0]
+                        i += 1
+                    wos_data.ESI = Esi_dict[wos_data.SO]
+                else:
+                    wos_data.SO = line[3:].replace('\'', '').replace('\"', '').upper()
+                    i = 1
+                    while title[num + i][0:3] == '   ':
+                        wos_data.SO += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').upper()
+                        i += 1
+                    wos_data.ESI = Esi_dict[wos_data.SO.replace('\'', '').replace('\"', '')]
+            except KeyError:
+                wos_data.ESI = ''
+                pass
         # 关键字
         if line.find("DE ") == 0:
             keywords = line[3:].replace('\'', '').replace('\"', '')
@@ -85,8 +83,9 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
                 i += 1
             wos_data.DE = keywords.split('; ')
             continue
-        # TODO 完成摘要存储
+
         if line.find("AB ") == 0:
+            wos_data.AB = ''
             pass
         # 作者所在国家、作者所在机构
         if line.find('C1 ') == 0:
@@ -105,7 +104,6 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
             # 先遍历从AF中获取的作者和作者名字，通过“[]”获取作者名字与同一行的机构和国籍匹配
             if line.find('] ') != -1:
                 names = line[(line.find('[') + 1):(line.find('] '))].replace('\'', '').replace('\"', '').split('; ')
-
                 for name in names:
                     writtenFlag = False
                     # 名字在AF存在

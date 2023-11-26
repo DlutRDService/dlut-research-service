@@ -57,20 +57,20 @@ create table sys_user (
 -- ----------------------------
 drop table if exists paper;
 create table paper (
-            paper_id       bigint(20)      not null auto_increment    comment '文献id',
-            tl             varchar(200)    default null               comment 'TL文章标题',
-            au             varchar(100)    default null               comment 'AU文章作者',
-            de             varchar(100)    default null               comment 'DE关键词',
-            so             varchar(50)     default null               comment 'SO文章期刊',
-            py             varchar(4)      default null               comment 'PY发表年份',
-            wc             varchar(100)    default null               comment 'WOS分类',
-            esi            varchar(50)     default null               comment 'ESI分类',
-            tc             smallint(5)     default 0                  comment '文章被引量',
-            nc             smallint(5)     default 0                  comment '文章引文量',
-            ab             varchar(200)    default null               comment '文献摘要,只显示200字符',
-            ab_path        varchar(200)    default null               comment '文献摘要详细信息存储地址',
+            paper_id       bigint(20)       not null auto_increment    comment '文献id',
+            tl             varchar(500)     default null               comment 'TL文章标题',
+            au             varchar(2000)    default null               comment 'AU文章作者',
+            de             varchar(500)     default null               comment 'DE关键词',
+            so             varchar(200)     default null               comment 'SO文章期刊',
+            py             varchar(4)       default null               comment 'PY发表年份',
+            wc             varchar(500)     default null               comment 'WOS分类',
+            esi            varchar(100)     default null               comment 'ESI分类',
+            tc             smallint(5)      default 0                  comment '文章被引量',
+            nr             smallint(5)      default 0                  comment '文章引文量',
+            ab             varchar(500)     default null               comment '文献摘要,只显示500字符',
+            ab_path        varchar(200)     default null               comment '文献摘要详细信息存储地址',
             primary key (paper_id),
-            key idx_paper_tl (tl)
+            UNIQUE INDEX idx_paper_tl (tl)
 ) engine=innodb auto_increment=0 comment = '文献表';
 
 -- ----------------------------
@@ -79,15 +79,17 @@ create table paper (
 drop table if exists author;
 create table author (
         author_id               bigint(20)      not null auto_increment    comment '作者id',
-        author_name             varchar(200)    default null               comment '作者姓名',
+        author_name             varchar(200)    not null                   comment '作者姓名',
         author_country          varchar(100)    default null               comment '作者国家',
-        author_org              varchar(100)    default null               comment '作者机构',
+        author_org              varchar(200)    default null               comment '作者机构',
         paper_count             varchar(50)     default null               comment '发文数量',
         paper_count_per_year    varchar(4)      default null               comment '每年发文数量',
-        research                varchar(100)    default null               comment '研究领域',
+        research                varchar(200)    default null               comment '研究领域',
         H                       smallint(4)     default 0                  comment 'H指数',
         high_cited_paper        smallint(4)     default 0                  comment '高被引文章',
-        primary key (author_id)
+        primary key (author_id),
+        KEY idx_author_name (author_name),
+        KEY idx_author_org (author_org)
 ) engine=innodb auto_increment=0 comment = '作者表';
 
 -- ----------------------------
