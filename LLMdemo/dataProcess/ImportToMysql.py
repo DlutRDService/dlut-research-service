@@ -1,3 +1,6 @@
+#! /usr/bin/python3.11
+# -*- coding:utf-8 -*-
+
 import pymysql
 
 from dataProcess.CreateESIDict import CreateJournalCategoryDict

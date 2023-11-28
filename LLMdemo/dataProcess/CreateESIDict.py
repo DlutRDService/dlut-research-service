@@ -1,9 +1,6 @@
 # ! /usr/bin/python3.10
 # ! -*- coding:utf-8 -*-
 
-
-import numpy as np
-import xlrd
 import pandas as pd
 
 
@@ -23,7 +20,8 @@ def CreateJournalCategoryDict():
 
     # 获取索引为index的sheet表格
     # 用 pandas 读取 Excel 文件的第一个sheet
-    df = pd.read_excel('./esi-master-journal-list-4-2021.xlsx', sheet_name=0)
+    df = pd.read_excel('/Users/zhihu55/IdeaProjects/ResearchServicePlatform/LLMdemo/dataProcess/esi-master-journal'
+                       '-list-4-2021.xlsx', sheet_name=0)
 
     # 获取所需的列并将它们转换为列表
     fullTitle = df.iloc[:, 0].tolist()

@@ -1,6 +1,11 @@
 server:
   port: 8080
 spring:
+  # 文件大小配置
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
   # 跨域配置
   graphql:
     cors:

@@ -31,7 +31,7 @@ const Home = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>研究平台</h1>
+        <h1>科学研究服务平台</h1>
       </header>
       <main className="App-main">
         <div className="login-form">

@@ -1,4 +1,4 @@
-package com.dlut.ResearchService.controller.visualizeController;
+package com.dlut.ResearchService.controller.dataController;
 
 import com.dlut.ResearchService.service.impl.WebClientServiceImpl;
 import com.dlut.ResearchService.service.impl.PaperServiceImpl;
