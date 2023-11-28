@@ -10,15 +10,17 @@ const Modal = ({ isOpen, onClose, onVerify, username, password }) => {
       fetchCaptcha();
     }
   }, [isOpen, username, password]);
+
   const formData = new URLSearchParams();
 
    const fetchCaptcha = async () => {
+    
     if(formData.get('username')?.length>=1){
       return;
     }
     formData.append('username', username);
     formData.append('password', password);
-    
+  
     try {
       const response = await fetch('http://localhost:8080/login/sign-in/getCaptcha', {
         method: 'POST',
@@ -33,6 +35,8 @@ const Modal = ({ isOpen, onClose, onVerify, username, password }) => {
       console.error('获取验证码失败:', error);
     }
   };
+  
+
 
   const verifyCaptchaCode = async (codeToVerify) => {
     formData.append('code', codeToVerify); // 假设后端接收名为'code'的参数

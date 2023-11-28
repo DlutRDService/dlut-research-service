@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import Modal from '../components/modal/Modal'; // Assuming Modal component is in the same directory
 
 const Home = () => {
-  let history = useHistory(); // 获取history实例
-  // ...其他状态和函数
+  // let history = useHistory(); // 获取history实例
+  // // ...其他状态和函数
 
-  const handleLoginSuccess = () => {
-    // ...登录成功后的处理
-    history.push('/dashboard'); // 导航到Dashboard页面
-  };
+  // const handleLoginSuccess = () => {
+  //   // ...登录成功后的处理
+  //   history.push('/dashboard'); // 导航到Dashboard页面
+  // };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [username, setUsername] = useState(''); // 添加用户名状态
   const [password, setPassword] = useState(''); // 添加密码状态
@@ -31,7 +31,7 @@ const Home = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>科学研究服务平台</h1>
+        <h1>研究平台</h1>
       </header>
       <main className="App-main">
         <div className="login-form">

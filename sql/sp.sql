@@ -1,36 +1,64 @@
-# DELIMITER //
-#
-# CREATE PROCEDURE insert_paper_procedure(
-#     IN p_tl TEXT,
-#     IN p_au TEXT,
-#     IN p_de TEXT,
-#     IN p_wc TEXT
-# )
-# BEGIN
-#     DECLARE tl_length INT;
-#     DECLARE au_length INT;
-#     DECLARE de_length INT;
-#     DECLARE wc_length INT;
-#
-#     SET tl_length = LENGTH(p_tl);
-#     SET au_length = LENGTH(p_au);
-#     SET de_length = LENGTH(p_de);
-#     SET wc_length = LENGTH(p_wc);
-#
-#     -- 根据字段大小执行不同策略
-#     IF value_length <= 50 THEN
-#         -- 执行策略 A，当字段大小小于等于 50 时
-#         -- ...
-#     ELSEIF value_length > 50 AND value_length <= 200 THEN
-#         -- 执行策略 B，当字段大小在 51 到 200 之间时
-#         -- ...
-#     ELSE
-#         -- 执行策略 C，当字段大小大于 200 时
-#         -- ...
-#     END IF;
-# END //
-#
-# DELIMITER ;
+DROP PROCEDURE IF EXISTS insert_or_update_paper;
+
+DELIMITER //
+
+CREATE PROCEDURE insert_or_update_paper(
+    IN input_tl VARCHAR(500),
+    IN input_au TEXT,
+    IN input_de TEXT,
+    IN input_so VARCHAR(255),
+    IN input_py VARCHAR(4),
+    IN input_wc VARCHAR(255),
+    IN input_esi VARCHAR(100),
+    IN input_tc SMALLINT,
+    IN input_nr SMALLINT,
+    IN input_ab TEXT,
+    IN input_ab_path VARCHAR(500)
+)
+BEGIN
+    DECLARE short_au VARCHAR(500);
+    DECLARE long_au TEXT;
+    DECLARE short_ab VARCHAR(1000);
+    DECLARE long_ab TEXT;
+    DECLARE short_de VARCHAR(500);
+    DECLARE long_de TEXT;
+
+    -- 处理第一个文本字段
+    IF CHAR_LENGTH(input_au) <= 500 THEN
+        SET short_au = input_au;
+        SET long_au = NULL;
+    ELSE
+        SET short_au = LEFT(input_au, 500);
+        SET long_au = input_au;
+    END IF;
+
+    -- 处理第二个文本字段
+    IF CHAR_LENGTH(input_de) <= 500 THEN
+        SET short_de = input_de;
+        SET long_de = NULL;
+    ELSE
+        SET short_de = LEFT(input_de, 500);
+        SET long_au = input_au;
+    END IF;
+
+    -- 处理第三个文本字段
+    IF CHAR_LENGTH(input_ab) <= 1000 THEN
+        SET short_ab = input_ab;
+        SET long_ab = NULL;
+    ELSE
+        SET short_ab = LEFT(input_ab, 1000);
+        SET long_ab = input_ab;
+    END IF;
+
+    -- 插入或更新记录
+    INSERT INTO paper (tl, au, long_au, de, so, py, wc, esi, tc, nr, ab,long_ab, ab_path)
+    VALUES (input_tl, short_au, long_au, input_de, input_so, input_py, input_wc,
+            input_esi, input_tc, input_nr, short_ab, long_ab, input_ab_path);
+
+END //
+
+DELIMITER ;
+
 
 
 -- 创建作者存储过程
