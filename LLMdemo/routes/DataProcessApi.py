@@ -3,6 +3,7 @@
 
 import pymysql
 from flask import Blueprint, request, jsonify
+from langchain.embeddings import LlamaCppEmbeddings
 
 from model.transformer import EmbeddingByTransformer
 from model.gpt import EmbeddingByGpt
@@ -12,8 +13,26 @@ from dataProcess.ImportToMysql import import_to_mysql
 
 data_process_blueprint = Blueprint('dataProcess', __name__)
 
+# 连接数据库
 db = pymysql.connect(host='localhost', user='zsl', passwd='Lish145210@', port=3306, db='RDService')
 
+# 初始化 Llama 模型
+llama_embedding = LlamaCppEmbeddings(model_path="/Users/zhihu55/IdeaProjects/ResearchServicePlatform/LLMdemo/ggml"
+                                                "-model-q4_0.bin")
+
+# TODO GPT的逻辑没写
+@data_process_blueprint.route('/api/embedding', methods=['POST'])
+def get_embedding():
+    # 获取POST请求中的参数
+    model_name = request.form.get('model')
+    sentences = request.form.get('sentences')
+    # 选择模型
+    if model_name == "GPT":
+        return EmbeddingByGpt.embedding(sentences)
+    elif model_name == "Llama":
+        return EmbeddingByLlama.embedding(llama_embedding, sentences)
+    elif model_name == "Transformer":
+        return EmbeddingByTransformer.embedding_by_transformer(sentences)
 
 # TODO flask的返回相应信息如何处理
 @data_process_blueprint.route('/api/import/mysql', methods=['POST'])
@@ -34,23 +53,6 @@ def importToMysql():
         print(e)
         # 如果出现任何异常，返回错误信息
         return jsonify({'error': str(e)}), 500
-
-
-# TODO GPT的逻辑没写
-@data_process_blueprint.route('/api/embedding', methods=['POST'])
-def get_embedding():
-    # 获取POST请求中的参数
-    model_name = request.form.get('model')
-    sentences = request.form.get('sentences')
-    # 选择模型
-    if model_name == "GPT":
-        return EmbeddingByGpt.embedding(sentences)
-    elif model_name == "Llama":
-        return EmbeddingByLlama.embedding(sentences)
-    elif model_name == "Transformer":
-        return EmbeddingByTransformer.embedding_by_transformer(sentences)
-
-
 @data_process_blueprint.route('/api/abstractSegment', methods=['Post'])
 def abstract_segment():
     abstract = request.form.get('abstract')
