@@ -20,7 +20,6 @@ import java.util.Set;
 
 @Service
 public class WebClientServiceImpl implements IWebClientService {
-    private String url;
     @Resource
     private WebClient webClient;
     @Resource
@@ -36,7 +35,7 @@ public class WebClientServiceImpl implements IWebClientService {
         if (file.isEmpty()) {
             return Mono.just(resultBuilder.build(StatusCode.STATUS_CODE_400, "上传文件为空"));
         }
-        url = "api/import/mysql";
+        String url = "api/import/mysql";
         return webClient.post()
                 .uri(uriBuilder -> uriBuilder.path(url).build())
                 .body(BodyInserters.fromMultipartData("file", file.getResource()))
@@ -54,7 +53,7 @@ public class WebClientServiceImpl implements IWebClientService {
      */
     @Override
     public Set<Integer> searchByStringVector(String query) {
-        url = "/api/milvus/search";
+        String url = "/api/milvus/search";
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path(url)
@@ -74,7 +73,7 @@ public class WebClientServiceImpl implements IWebClientService {
      */
     public Mono<Result> getEmbedding(String embeddingModel, @NotNull List<String> sentences){
         if (!sentences.isEmpty()) {
-            url = "/api/encode";
+            String url = "/api/encode";
             return webClient.post()
                    .uri(uriBuilder -> uriBuilder
                            .path(url)
@@ -103,7 +102,7 @@ public class WebClientServiceImpl implements IWebClientService {
 
     @Override
     public List<Integer> searchByIdVector(Integer paperId) {
-        url = "api/searchByTitleVector";
+        String url = "api/searchByTitleVector";
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path(url)

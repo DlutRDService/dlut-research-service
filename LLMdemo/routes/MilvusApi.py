@@ -1,9 +1,8 @@
 from flask import Blueprint, request
-from model.llama.EmbeddingByLlama import get_embedding
-from model.gpt.EmbeddingByGpt import get_embedding
+from model.gpt.EmbeddingByGpt import embedding
 from pymilvus import Collection
 
-milvus_blueprint = Blueprint('Milvus', __name__)  # 创建蓝图
+milvus_blueprint = Blueprint('milvus', __name__)  # 创建蓝图
 
 collection = Collection("book")      # Get an existing collection.
 collection.load()
@@ -25,7 +24,7 @@ def search():
     query_model = request.args.get("query_model")
     # if query_model == :
     #     get_embedding()
-    query_embedding = get_embedding(query_param)
+    query_embedding = embedding(query_param)
     results = collection.search(
         data=query_embedding,
         anns_field="book_intro",

@@ -1,4 +1,3 @@
-from langchain.embeddings import LlamaCppEmbeddings
 from pymilvus import connections, Collection, db
 from pymilvus.orm import utility
 from pymilvus import CollectionSchema, FieldSchema, DataType

@@ -1,17 +1,18 @@
-#! /zhihu55/anaconda3/envs/python/bin/python3.10
+#! /usr/bin/python3.11
 # -*- coding: utf-8 -*-
 
-# 建库的具体参数详见Milvus类，本脚本仅用于调用
+import pymilvus
+from pymilvus import (
+    connections,
+    db,
+    Collection
+)
+from pymilvus import utility
+from sklearn.metrics.pairwise import cosine_similarity
 
-# from pymilvus import (
-#     connections,
-#     db,
-#     Collection
-# )
-# from pymilvus import utility
-# from sklearn.metrics.pairwise import cosine_similarity
-#
-# from Milvus import createCollection, createPartition, createIndex, dropCollection
+from Milvus import createCollection, createPartition, createIndex, dropCollection
+
+
 
 # ------------------------连接数据库----------------------------
 # conn = connections.connect(db_name="Paper", host="127.0.0.1", port=19530)

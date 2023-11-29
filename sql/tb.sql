@@ -122,6 +122,22 @@ create table organization (
 ) engine=innodb auto_increment=0 comment = '机构表';
 
 -- ----------------------------
+-- 摘要表
+-- ----------------------------
+drop table if exists abstract;
+create table abstract (
+    abstract_id          bigint(20)      not null auto_increment    comment '机构id',
+    paper_id             bigint(20)      not null                   comment '论文id',
+    research_content     varchar(200)    default null               comment '研究内容',
+    research_background  varchar(100)    default null               comment '研究背景',
+    research_method      varchar(100)    default null               comment '研究方法',
+    research_result      varchar(50)     default null               comment '研究结果',
+    research_conclusion  varchar(500)    default null               comment '研究结论',
+    primary key (abstract_id),
+    unique key idx_abstract_paper_id (paper_id)
+) engine=innodb auto_increment=0 comment = '摘要表';
+
+-- ----------------------------
 -- 通知表
 -- ----------------------------
 drop table if exists notice;

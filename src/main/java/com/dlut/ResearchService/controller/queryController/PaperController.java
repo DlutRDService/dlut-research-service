@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/query")
-public class QueryController {
+public class PaperController {
     @Resource
     private PaperServiceImpl paperService;
 
