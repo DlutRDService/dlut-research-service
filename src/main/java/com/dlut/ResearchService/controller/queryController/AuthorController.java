@@ -3,7 +3,6 @@ package com.dlut.ResearchService.controller.queryController;
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.dao.Author;
 import com.dlut.ResearchService.service.impl.AuthorServiceImpl;
-import com.dlut.ResearchService.service.impl.Neo4jServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 

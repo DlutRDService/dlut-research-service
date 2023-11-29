@@ -3,11 +3,10 @@ package com.dlut.ResearchService.service.impl;
 import com.dlut.ResearchService.component.ResultBuilder;
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
-import com.dlut.ResearchService.service.IWebClientService;
+import com.dlut.ResearchService.service.ITextAnalysisService;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,8 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-@Service
-public class WebClientServiceImpl implements IWebClientService {
+public class TextAnalysisServiceImpl implements ITextAnalysisService {
     @Resource
     private WebClient webClient;
     @Resource
@@ -31,7 +29,7 @@ public class WebClientServiceImpl implements IWebClientService {
      * @return 导入结果
      */
     @Override
-    public Mono<Result> importToMysql(@NotNull MultipartFile file) {
+    public Mono<Result> txtImportToMysql(@NotNull MultipartFile file) {
         if (file.isEmpty()) {
             return Mono.just(resultBuilder.build(StatusCode.STATUS_CODE_400, "上传文件为空"));
         }
@@ -47,6 +45,12 @@ public class WebClientServiceImpl implements IWebClientService {
                     return result;
                 });
     }
+
+    @Override
+    public Mono<Result> excelImportToMysql(MultipartFile file) {
+        return Mono.just(resultBuilder.build(StatusCode.STATUS_CODE_400, "暂不支持该操作"));
+    }
+
     /**
      * 根据查询的TS字段进行搜索
      * @return 返回id列表
@@ -71,18 +75,19 @@ public class WebClientServiceImpl implements IWebClientService {
      * @param sentences 待编码的句子
      * @return 向量
      */
+    @Override
     public Mono<Result> getEmbedding(String embeddingModel, @NotNull List<String> sentences){
         if (!sentences.isEmpty()) {
             String url = "/api/encode";
             return webClient.post()
-                   .uri(uriBuilder -> uriBuilder
-                           .path(url)
-                           .queryParam("model", embeddingModel)
-                           .queryParam("sentences", sentences)
-                           .build())
-                   .retrieve()
-                   .bodyToMono(Result.class);
-                }
+                    .uri(uriBuilder -> uriBuilder
+                            .path(url)
+                            .queryParam("model", embeddingModel)
+                            .queryParam("sentences", sentences)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(Result.class);
+        }
         return Mono.just(resultBuilder.build(StatusCode.STATUS_CODE_400, "检查输入的内容", null));
     }
 
@@ -97,9 +102,14 @@ public class WebClientServiceImpl implements IWebClientService {
         // String fileName = file.getOriginalFilename();
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "", "");
     }
-
-
-
+    @Override
+    public Result ner(String model, String text) {
+        return null;
+    }
+    @Override
+    public Result classification(String model, String text) {
+        return null;
+    }
     @Override
     public List<Integer> searchByIdVector(Integer paperId) {
         String url = "api/searchByTitleVector";
@@ -113,5 +123,8 @@ public class WebClientServiceImpl implements IWebClientService {
                 .onErrorReturn(Collections.emptyList())
                 .block();
     }
+    @Override
+    public Result sequence(String model, String text) {
+        return null;
+    }
 }
-

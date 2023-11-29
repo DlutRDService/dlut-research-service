@@ -1,6 +1,5 @@
-package com.dlut.ResearchService.service.impl;
+package com.dlut.ResearchService.component;
 
-import com.dlut.ResearchService.service.IMilvusService;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.grpc.SearchResults;
@@ -8,14 +7,14 @@ import io.milvus.param.MetricType;
 import io.milvus.param.R;
 import io.milvus.param.dml.SearchParam;
 import jakarta.annotation.Resource;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
+@Component("milvus")
+public class Milvus {
 
-@Service
-public class MilvusServiceImpl implements IMilvusService {
     private static final String SEARCH_PARAM = "{\"nprobe\":10, \"offset\":5}";
     private static final Integer TOP_5 = 5;
     private static final Integer TOP_10 = 10;
@@ -54,6 +53,3 @@ public class MilvusServiceImpl implements IMilvusService {
         return null;
     }
 }
-
-
-

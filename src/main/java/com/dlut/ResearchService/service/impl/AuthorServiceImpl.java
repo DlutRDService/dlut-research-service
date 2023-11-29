@@ -21,8 +21,6 @@ public class AuthorServiceImpl implements IAuthorService {
     private ResultBuilder resultBuilder;
     @Resource
     private AuthorMapper authorMapper;
-    @Resource
-    private MilvusServiceImpl milvusService;
 
     @Override
     public Result getAuthorInfoById(Integer id) {

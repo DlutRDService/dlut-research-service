@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface IUserService {
+public interface IUserInfoService {
     @Transactional(rollbackFor = Exception.class)
     Result updatePassword(@NotNull HttpSession session, String newPassword, String oldPassword);
 

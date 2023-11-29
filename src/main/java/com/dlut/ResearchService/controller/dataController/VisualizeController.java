@@ -1,6 +1,5 @@
 package com.dlut.ResearchService.controller.dataController;
 
-import com.dlut.ResearchService.service.impl.WebClientServiceImpl;
 import com.dlut.ResearchService.service.impl.PaperServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;

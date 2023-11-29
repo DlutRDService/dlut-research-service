@@ -5,7 +5,7 @@ import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.entity.dao.UserInfo;
 import com.dlut.ResearchService.mapper.UserInfoMapper;
-import com.dlut.ResearchService.service.IUserService;
+import com.dlut.ResearchService.service.IUserInfoService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UserServiceImpl implements IUserService {
+public class UserInfoServiceImpl implements IUserInfoService {
     @Resource
     private ResultBuilder resultBuilder;
     @Resource
