@@ -1,22 +1,24 @@
 package com.dlut.ResearchService.service.impl;
 
 import com.dlut.ResearchService.component.ResultBuilder;
+import com.dlut.ResearchService.entity.constants.FlaskUrl;
 import com.dlut.ResearchService.entity.constants.Result;
 import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.service.ITextAnalysisService;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+@Service
 public class TextAnalysisServiceImpl implements ITextAnalysisService {
     @Resource
     private WebClient webClient;
@@ -33,9 +35,8 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
         if (file.isEmpty()) {
             return Mono.just(resultBuilder.build(StatusCode.STATUS_CODE_400, "上传文件为空"));
         }
-        String url = "api/import/mysql";
         return webClient.post()
-                .uri(uriBuilder -> uriBuilder.path(url).build())
+                .uri(uriBuilder -> uriBuilder.path(FlaskUrl.TEXT_IMPORT_TO_MYSQL_URL).build())
                 .body(BodyInserters.fromMultipartData("file", file.getResource()))
                 .retrieve()
                 .bodyToMono(Result.class)
@@ -76,13 +77,13 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
      * @return 向量
      */
     @Override
-    public Mono<Result> getEmbedding(String embeddingModel, @NotNull List<String> sentences){
+    public Mono<Result> getEmbedding(String model, @NotNull List<String> sentences){
         if (!sentences.isEmpty()) {
-            String url = "/api/encode";
+            String url = "/api/embedding";
             return webClient.post()
                     .uri(uriBuilder -> uriBuilder
                             .path(url)
-                            .queryParam("model", embeddingModel)
+                            .queryParam("model", model)
                             .queryParam("sentences", sentences)
                             .build())
                     .retrieve()
@@ -91,24 +92,32 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
         return Mono.just(resultBuilder.build(StatusCode.STATUS_CODE_400, "检查输入的内容", null));
     }
 
-
-    @Override
-    public Result updatePaper(String path, @NotNull MultipartFile multipartFile) throws IOException {
-        return null;
-    }
-
     @Override
     public Result documentProcess(@NotNull MultipartFile file) {
         // String fileName = file.getOriginalFilename();
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "", "");
     }
     @Override
-    public Result ner(String model, String text) {
-        return null;
+    public Mono<Result> ner(String model, String text) {
+        return webClient.post()
+               .uri(uriBuilder -> uriBuilder
+                       .path(FlaskUrl.TEXT_NER_URL)
+                       .queryParam("model", model)
+                       .queryParam("text", text)
+                       .build())
+               .retrieve()
+               .bodyToMono(Result.class);
     }
     @Override
-    public Result classification(String model, String text) {
-        return null;
+    public Mono<Result> classification(String model, String text) {
+        return webClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path(FlaskUrl.TEXT_NER_URL)
+                        .queryParam("model", model)
+                        .queryParam("text", text)
+                        .build())
+                .retrieve()
+                .bodyToMono(Result.class);
     }
     @Override
     public List<Integer> searchByIdVector(Integer paperId) {
@@ -124,7 +133,46 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
                 .block();
     }
     @Override
-    public Result sequence(String model, String text) {
+    public Mono<Result> sequence(String model, String text) {
+        return webClient.post()
+            .uri(uriBuilder -> uriBuilder
+                    .path(FlaskUrl.TEXT_SEQUENCE_URL)
+                    .queryParam("model", model)
+                    .queryParam("text", text)
+                    .build())
+            .retrieve()
+            .bodyToMono(Result.class);
+    }
+
+    @Override
+    public Mono<Result> txtToExcel(MultipartFile file) {
         return null;
+    }
+    @Override
+    public Mono<Result> sentiment(String model, String text) {
+        return webClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path(FlaskUrl.TEXT_SENTIMENT_URL)
+                        .queryParam("model", model)
+                        .queryParam("text", text)
+                        .build())
+                .retrieve()
+                .bodyToMono(Result.class);
+    }
+    @Override
+    public Result updatePaper(String path, @NotNull MultipartFile multipartFile) {
+        return null;
+    }
+
+    @Override
+    public Mono<Result> question_answer(String model, String question) {
+        return webClient.post()
+               .uri(uriBuilder -> uriBuilder
+                       .path(FlaskUrl.TEXT_QA_URL)
+                       .queryParam("model", model)
+                       .queryParam("question", question)
+                       .build())
+               .retrieve()
+               .bodyToMono(Result.class);
     }
 }

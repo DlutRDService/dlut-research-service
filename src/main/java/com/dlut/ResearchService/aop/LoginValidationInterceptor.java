@@ -18,7 +18,7 @@ import java.util.Objects;
 public class LoginValidationInterceptor {
 
     @Pointcut("execution(* com.dlut.ResearchService.controller.*.*.*(..)) " +
-            "&& !execution(* com.dlut.ResearchService.controller.dataController.DocumentController.*(..))")
+            "&& !execution(* com.dlut.ResearchService.controller.dataController.TextAnalysisController.*(..))")
     public void loginValidationPointcut(){
     }
 

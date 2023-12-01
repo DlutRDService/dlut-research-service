@@ -36,8 +36,6 @@ public class AuthorController {
      */
     @Resource
     private AuthorServiceImpl authorService;
-    @Resource
-    private Neo4jServiceImpl neo4jService;
 
     @PostMapping
     public Result authorInfo1(@RequestParam Author author){
@@ -52,16 +50,18 @@ public class AuthorController {
                 "WHERE a1.name = '"+ author_id + "' AND a1 <> a2 " +
                 "RETURN a2.name AS coAuthor, count(*) AS coAuthorCount " +
                 "ORDER BY coAuthorCount DESC LIMIT 5";
-        return neo4jService.queryRelatedGraph(author_id, cypher);
+        return null;
+        // return neo4jService.queryRelatedGraph(author_id, cypher);
     }
-    @PostMapping
+    @PostMapping("sameOrgAuthor")
     public Result sameOrgAuthor(@RequestParam Integer author_id){
         String cypher = "MATCH (a1:Author)-[:WROTE]->(:Article)<-[:WROTE]-(a2:Author) " +
                 "WHERE a1.name = '"+ author_id + "' AND a1 <> a2 " +
-                \"AND a2.org = a1.org" +
+                "AND a2.org = a1.org" +
                 "RETURN a2.name AS coAuthor, count(*) AS coAuthorCount " +
                 "ORDER BY coAuthorCount DESC LIMIT 5";
-        return neo4jService.queryRelatedGraph(author_id, cypher);
+        return null;
+        //return neo4jService.queryRelatedGraph(author_id, cypher);
     }
 
     @PostMapping("test")

@@ -29,9 +29,9 @@ public class PaperServiceImpl implements IPaperService {
     @Resource
     private RedisServiceImpl redisService;
     @Resource
-    private WebClientServiceImpl webClientService;
-    @Resource
     private ResultBuilder resultBuilder;
+    @Resource
+    private TextAnalysisServiceImpl textAnalysisService;
 
     /**
      * 根据单一检索式进行查询
@@ -41,15 +41,15 @@ public class PaperServiceImpl implements IPaperService {
     @Override
     public Set<Integer> selectByQuery(@NotNull String query){
         String subQuery = query.substring(2);
-        switch (query.substring(0,2)){
-            case "au": return paperMapper.selectIdsByAuthor(subQuery);
-            case "de": return paperMapper.selectIdsByKeyword(subQuery);
-            case "py": return paperMapper.selectIdsByPublishYear(Integer.parseInt(subQuery));
-            case "tl": return paperMapper.selectIdByTitle(subQuery);
-            case "so": return paperMapper.selectIdsByJournal(subQuery);
-            case "wc": return paperMapper.selectIdsByWOSCategory(subQuery);
-            default  : return null;
-        }
+        return switch (query.substring(0, 2)) {
+            case "au" -> paperMapper.selectIdsByAuthor(subQuery);
+            case "de" -> paperMapper.selectIdsByKeyword(subQuery);
+            case "py" -> paperMapper.selectIdsByPublishYear(Integer.parseInt(subQuery));
+            case "tl" -> paperMapper.selectIdByTitle(subQuery);
+            case "so" -> paperMapper.selectIdsByJournal(subQuery);
+            case "wc" -> paperMapper.selectIdsByWOSCategory(subQuery);
+            default -> null;
+        };
     }
 
     /**
@@ -89,7 +89,7 @@ public class PaperServiceImpl implements IPaperService {
         // 单一检索式直接检索
         if (StringUtils.getCharCount(queryField, '=') == 1){
             if(queryField.startsWith("ts")) {
-                ids = new ArrayList<>(webClientService.searchByStringVector(queryField));
+                ids = new ArrayList<>(textAnalysisService.searchByStringVector(queryField));
             }else {
                 ids = new ArrayList<>(selectByQuery(queryField));
             }
@@ -144,7 +144,7 @@ public class PaperServiceImpl implements IPaperService {
                 changeNodeValueToSubResultSet(node.right);
             default:
                 if (node.value.toString().startsWith("ts")){
-                    node.value = webClientService.searchByStringVector(node.value.toString());
+                    node.value = textAnalysisService.searchByStringVector(node.value.toString());
                 } else {
                     node.value = selectByQuery((String) node.value);
                 }
@@ -156,7 +156,7 @@ public class PaperServiceImpl implements IPaperService {
     public Result paperInformation(Integer paperId) {
         HashMap<String, Object> map = new HashMap<>();
         Paper paperInfo = paperMapper.selectPaperById(paperId);
-        List<Integer> ids = webClientService.searchByIdVector(paperId);
+        List<Integer> ids = textAnalysisService.searchByIdVector(paperId);
         List<Paper> recommendationPaper = paperMapper.selectPaperByIdList(ids);
         map.put("Paper", paperInfo);
         map.put("recommendation", recommendationPaper);

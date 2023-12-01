@@ -2,12 +2,10 @@ package com.dlut.ResearchService.service;
 
 import com.dlut.ResearchService.entity.constants.Result;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -24,12 +22,17 @@ public interface ITextAnalysisService {
 
     Result documentProcess(@NotNull MultipartFile file);
 
-    Result ner(String model, String text);
+    Mono<Result> ner(String model, String text);
 
-    Result classification(String model, String text);
-
+    Mono<Result> classification(String model, String text);
 
     List<Integer> searchByIdVector(Integer paperId);
 
-    Result sequence(String model, String text);
+    Mono<Result> sequence(String model, String text);
+
+    Mono<Result> txtToExcel(MultipartFile file);
+
+    Mono<Result> sentiment(String model, String text);
+
+    Mono<Result> question_answer(String model, String question);
 }

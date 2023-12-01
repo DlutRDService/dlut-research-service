@@ -3,12 +3,11 @@
 
 import pymysql
 from flask import Blueprint, request, jsonify
-from langchain.embeddings import LlamaCppEmbeddings
 
-from model.transformer import EmbeddingByTransformer
-from model.gpt import EmbeddingByGpt
-from model.llama import EmbeddingByLlama
-from model.gpt.AbstractSegmentation import abstractSegmentation
+from dataProcess.ConvertToExcel import convert_to_excel
+from model.transformer import Transformer
+from model.gpt import Gpt
+from model.llama import Llama
 from dataProcess.ImportToMysql import import_to_mysql
 
 data_process_blueprint = Blueprint('dataProcess', __name__)
@@ -16,8 +15,6 @@ data_process_blueprint = Blueprint('dataProcess', __name__)
 # 连接数据库
 db = pymysql.connect(host='localhost', user='zsl', passwd='Lish145210@', port=3306, db='RDService')
 
-# 初始化 Llama 模型
-llama_embedding = LlamaCppEmbeddings(model_path="./llama-2-7b.Q4_K_M.gguf")
 
 # TODO GPT的逻辑没写
 @data_process_blueprint.route('/api/embedding', methods=['POST'])
@@ -27,30 +24,27 @@ def get_embedding():
     sentences = request.form.get('sentences')
     # 选择模型
     if model_name == "GPT":
-        return EmbeddingByGpt.embedding(sentences)
+        return Gpt.embedding(sentences)
     elif model_name == "Llama":
-        return EmbeddingByLlama.embedding(llama_embedding, sentences)
-    elif model_name == "Transformer":
-        return EmbeddingByTransformer.embedding_by_transformer(sentences)
+        return Llama.embedding(llama_embedding, sentences)
+    elif model_name == "bert":
+        return Transformer.embedding_by_transformer(sentences)
 
 # TODO flask的返回相应信息如何处理
-# 导入数据到mysql
 @data_process_blueprint.route('/api/import_mysql', methods=['POST'])
 def importToMysql():
     file = request.files['file']
-    # 检查文件是否有名字，即用户是否上传了文件
+
     if file.filename == '':
         return jsonify({'error': 'No file selected for uploading'}), 400
+
     try:
-        # 读取文件内容
         file_content = file.read().decode('utf-8')
         paper = file_content.split("\nER\n")
 
         import_to_mysql(db, paper)
         return jsonify({'message': 'File successfully processed'}), 200
     except Exception as e:
-        print(e)
-        # 如果出现任何异常，返回错误信息
         return jsonify({'error': str(e)}), 500
 
 # TODO 向neo4j中导入数据
@@ -64,13 +58,57 @@ def import_milvus():
     pass
 
 # TODO 摘要序列标注
-@data_process_blueprint.route('/api/abstractSegment', methods=['Post'])
+@data_process_blueprint.route('/api/abstract_segment', methods=['Post'])
 def abstract_segment():
+    model_name = request.form.get('model')
     abstract = request.form.get('abstract')
-    return abstractSegmentation(abstract)
+    if model_name == "GPT":
+        return Gpt.abstract_segmentation(abstract)
+    elif model_name == "Llama":
+        return Llama.abstract_segmentation(abstract)
+    elif model_name == "roberta+GAT":
+        return Transformer.abstract_segmentation(abstract)
+
+
+# TODO ner
+@data_process_blueprint.route('/api/ner', methods=['POST'])
+def ner():
+    file = request.files['file']
+    model = request.form.get('model')
+
+    if file is None:
+        return jsonify({'error': 'No file selected for uploading'}), 400
+    if model == 'gpt':
+        return Gpt.ner(file)
+    if model == 'llama':
+        return Llama.ner(llama_embedding, file)
+    if model == 'bert':
+        return Transformer.ner(file)
+    pass
 
 # TODO txt 转成格式化excel
-@data_process_blueprint.route('/api/get_excel', methods=['POST'])
-def get_excel():
+@data_process_blueprint.route('/api/txt_excel', methods=['POST'])
+def txt_to_excel():
     file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected for uploading'}), 400
+    try:
+        convert_to_excel(file)
+        return jsonify({'message': 'File successfully processed'}), 200
+    except Exception as e:
+        # 如果出现任何异常，返回错误信息
+        return jsonify({'error': str(e)}), 500
+
+@data_process_blueprint.route('/api/question_answering', methods=['POST'])
+def question_answering():
+    model_name = request.form.get('model')
+    question = request.form.get('question')
+    if model_name == "GPT":
+        return Gpt.question_answering(question)
+    return Gpt.question_answering(question)
+
+@data_process_blueprint.route('/api/classification', methods=['POST'])
+def classification():
+    model_name = request.form.get('model')
+    text = request.form.get('text')
     pass

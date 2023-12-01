@@ -74,6 +74,6 @@ if __name__ == '__main__':
     db = pymysql.connect(host='localhost', user='zsl', passwd='Lish145210@', port=3306, db='RDService')
     # 批量处理数据
     # 将txt文本切割成文献列表
-    paper = get_titles(r"./data/AIData/Test.txt")
+    paper = get_titles(r"../data/AIData/Test.txt")
 
     import_to_mysql(db, paper)

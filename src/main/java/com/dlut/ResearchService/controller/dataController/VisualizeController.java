@@ -10,6 +10,4 @@ import org.springframework.web.bind.annotation.*;
 public class VisualizeController {
     @Resource
     private PaperServiceImpl paperService;
-    @Resource
-    private WebClientServiceImpl webClientServiceImpl;
 }

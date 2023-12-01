@@ -1,9 +1,12 @@
 from openai import OpenAI
-import os
 
 
-def abstractSegmentation(abstract):
-    client = OpenAI()
+# TODO 这个方法的数据结构还没弄明白
+def embedding(client, text, model="text-embedding-ada-002"):
+    text = text.replace("\n", " ")
+    return client.embeddings.create(input=[text], model=model)['data'][0]['embedding']
+
+def abstract_segmentation(client, abstract):
     response = client.chat.completions.create(
       model="gpt-3.5-turbo",
       messages=[
@@ -25,3 +28,16 @@ def abstractSegmentation(abstract):
       ]
     )
     return response.choices[0].message.content
+
+def question_answering(client, question):
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a poetic model, skilled in explaining complex programming concepts "
+                                          "with creative flair."},
+            {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
+        ]
+    )
+
+def ner(file):
+    pass
