@@ -56,8 +56,6 @@ public class TextAnalysisController {
     }
     @PostMapping("QA")
     public Mono<Result> question_answer(@RequestParam String model, @RequestParam String question) {
-
-
         return textAnalysisService.question_answer(model, question);
     }
 
