@@ -15,9 +15,6 @@ def disconnect(name):
     connections.disconnect(name)
 
 
-
-
-
 def insert(collection, entities):
     collection.insert(entities)
 
@@ -37,9 +34,9 @@ def createCollection(db_name, collection_name):
         is_primary=True,
     )
     paper = FieldSchema(
-        name="paper",
+        name="text",
         dtype=DataType.VARCHAR,
-        max_length=200,
+        max_length=1000,
         # The default value will be used if this field is left empty during data inserts or upsets.
         # The data type of `default_value` must be the same as that specified in `type`.
         default_value="Unknown"
@@ -47,7 +44,7 @@ def createCollection(db_name, collection_name):
     vector = FieldSchema(
         name="vector",
         dtype=DataType.FLOAT_VECTOR,
-        dim=4096
+        dim=1536
     )
     description = FieldSchema(
         name="description",
@@ -59,7 +56,7 @@ def createCollection(db_name, collection_name):
     )
     schema = CollectionSchema(
         fields=[paper_id, paper, vector, description],
-        description="paper_embedding",
+        description="text_embedding",
         enable_dynamic_field=True
     )
     collection_name = collection_name
@@ -88,7 +85,7 @@ def createIndex(collection, field_name):
     index_params = {
         "metric_type": "L2",
         "index_type": "IVF_FLAT",
-        "params": {"nlist": 4096}
+        "params": {"nlist": 1536}
     }
     collection.create_index(
         field_name=field_name,

@@ -1,7 +1,7 @@
 #! /zhihu55/anaconda3/envs/python/bin/python3.10
 # -*- coding: utf-8 -*-
 
-# 建库的具体参数详见Milvus类，本脚本仅用于调用
+# 建库的具体参数详见Milvus类，本脚本仅用于说明指示
 
 # from pymilvus import (
 #     connections,

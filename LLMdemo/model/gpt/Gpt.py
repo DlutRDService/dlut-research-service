@@ -1,5 +1,6 @@
 from openai import OpenAI
-
+import os
+import openai
 
 # TODO 这个方法的数据结构还没弄明白
 def embedding(client, text, model="text-embedding-ada-002"):
@@ -41,3 +42,28 @@ def question_answering(client, question):
 
 def ner(file):
     pass
+
+
+if __name__ == '__main__':
+    os.environ["OPENAI_API_KEY"] = "sk-uQzvGpP0SZmjBm8J918c590782Cc4e93A2715dC3286fD9C8"
+    client = OpenAI(base_url="https://d2.xiamoai.top/v1")
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a poetic model, skilled in explaining complex programming concepts "
+                                          "with creative flair."},
+            {"role": "user", "content": "按照我给出的热点主题以及我的个人个性生成小红书的 Emoji 风格文本。请使用 Emoji "
+                                        "风格进行编辑，该风格以引人入胜的标题、每个段落中包含表情符号和在末尾添加相关标签为特点。"
+                                        "请确保围绕主题，主题为冬日穿搭。我只要一段内容，避免出现“首先“、”其次”等顺序词,"
+                                        "我的个人个性可以从下面我的文章中提炼，文章如下：“冬天走在寒冷的大街上，"
+                                        "我们对脚部的保暖有着更高的要求。"
+                                        "我的奥恩玩的特好“，把把MVP”"
+                                },
+
+            # {"role": "user", "content": "如何做一名产品经理，我只要一段内容，避免出现“首先“、”其次”等顺序词"}
+        ]
+    )
+    print(response.choices[0].message.content)
+    # {"id":
+    #  "content":"冬天走在寒冷的大街上，我们对脚部的保暖有着更高的要求。不用担心，时尚与保暖并不矛盾！一双高筒靴是你最好的选择哦",
+    # ("vector": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])}

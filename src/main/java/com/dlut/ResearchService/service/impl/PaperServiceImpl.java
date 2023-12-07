@@ -175,5 +175,4 @@ public class PaperServiceImpl implements IPaperService {
                 paperMapper.selectPaperByIdListPage(idList, pageNum, pageSize)
         );
     }
-
 }
