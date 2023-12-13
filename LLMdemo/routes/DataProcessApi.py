@@ -4,13 +4,13 @@
 import pymysql
 from flask import Blueprint, request, jsonify
 
-from dataProcess.ConvertToExcel import convert_to_excel
+from data.ConvertToExcel import convert_to_excel
 from model.transformer import Transformer
 from model.gpt import Gpt
 from model.llama import Llama
-from dataProcess.ImportToMysql import import_to_mysql
+from data.ImportToMysql import import_to_mysql
 
-data_process_blueprint = Blueprint('dataProcess', __name__)
+data_process_blueprint = Blueprint('data', __name__)
 
 # 连接数据库
 db = pymysql.connect(host='localhost', user='zsl', passwd='Lish145210@', port=3306, db='RDService')
