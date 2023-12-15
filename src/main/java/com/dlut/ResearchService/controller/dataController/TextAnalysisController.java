@@ -10,10 +10,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
-@RestController("textAnalysis")
+@RestController
+@RequestMapping("/textAnalysis")
 public class TextAnalysisController {
     @Resource
     private TextAnalysisServiceImpl textAnalysisService;
+
+    @log
+    @RequestMapping(value = "/demo", method = RequestMethod.GET)
+    public Mono<Result> demo(@NotNull @RequestParam String a){
+        return textAnalysisService.demo(a);
+    }
 
     /**
      * 上传文件到flask服务器，并导入数据到mysql(txt)

@@ -1,6 +1,5 @@
 # ! /usr/bin/python3.11
 # ! -*- coding:UTF-8 -*-
-
 import pymysql
 from flask import Blueprint, request, jsonify
 
@@ -9,14 +8,26 @@ from model.transformer import Transformer
 from model.gpt import Gpt
 from model.llama import Llama
 from data.ImportToMysql import import_to_mysql
+from openai import OpenAI
+from llama_cpp import Llama
+from sentence_transformers import SentenceTransformer
+import os
+
+os.environ["OPENAI_API_KEY"] = "sk-uQzvGpP0SZmjBm8J918c590782Cc4e93A2715dC3286fD9C8"
+
+llama = Llama(model_path='../../../PycharmProjects/roberta-gat/llama-2-7b.Q4_K_M.gguf')
+
+client = OpenAI(base_url="https://d2.xiamoai.top/v1")
+
+sens_tan_md = SentenceTransformer('all-MiniLM-L6-v2')
+
+roberta_gat = None
+
+# 连接数据库
+db = pymysql.connect(host='localhost', user='root', passwd='lish145210', port=3306, db='rdreaserch')
 
 data_process_blueprint = Blueprint('data', __name__)
 
-# 连接数据库
-db = pymysql.connect(host='localhost', user='zsl', passwd='Lish145210@', port=3306, db='RDService')
-
-
-# TODO GPT的逻辑没写
 @data_process_blueprint.route('/api/embedding', methods=['POST'])
 def get_embedding():
     # 获取POST请求中的参数
@@ -24,13 +35,12 @@ def get_embedding():
     sentences = request.form.get('sentences')
     # 选择模型
     if model_name == "GPT":
-        return Gpt.embedding(sentences)
-    elif model_name == "Llama":
-        return Llama.embedding(llama_embedding, sentences)
-    elif model_name == "bert":
-        return Transformer.embedding_by_transformer(sentences)
+        return Gpt.embedding(client, sentences)
+    elif model_name == "Llama2":
+        return Llama.embedding(llama, sentences)
+    elif model_name == "sentence-transformer":
+        return Transformer.embedding_by_transformer(sens_tan_md, sentences)
 
-# TODO flask的返回相应信息如何处理
 @data_process_blueprint.route('/api/import_mysql', methods=['POST'])
 def importToMysql():
     file = request.files['file']
@@ -63,28 +73,25 @@ def abstract_segment():
     model_name = request.form.get('model')
     abstract = request.form.get('abstract')
     if model_name == "GPT":
-        return Gpt.abstract_segmentation(abstract)
+        return Gpt.abstract_segmentation(client, abstract)
     elif model_name == "Llama":
-        return Llama.abstract_segmentation(abstract)
-    elif model_name == "roberta+GAT":
-        return Transformer.abstract_segmentation(abstract)
+        return Llama.abstract_segmentation(llama, abstract)
+    elif model_name == "RobertaGAT":
+        return Transformer.abstract_segmentation(roberta_gat, abstract)
 
 
 # TODO ner
 @data_process_blueprint.route('/api/ner', methods=['POST'])
 def ner():
-    file = request.files['file']
+    text = request.form.get('text')
     model = request.form.get('model')
 
-    if file is None:
-        return jsonify({'error': 'No file selected for uploading'}), 400
     if model == 'gpt':
-        return Gpt.ner(file)
+        return Gpt.ner(client, text)
     if model == 'llama':
-        return Llama.ner(llama_embedding, file)
+        return Llama.ner(llama, text)
     if model == 'bert':
-        return Transformer.ner(file)
-    pass
+        return Transformer.ner(text)
 
 # TODO txt 转成格式化excel
 @data_process_blueprint.route('/api/txt_excel', methods=['POST'])
@@ -101,14 +108,19 @@ def txt_to_excel():
 
 @data_process_blueprint.route('/api/question_answering', methods=['POST'])
 def question_answering():
-    model_name = request.form.get('model')
+    model = request.form.get('model')
     question = request.form.get('question')
-    if model_name == "GPT":
-        return Gpt.question_answering(question)
-    return Gpt.question_answering(question)
+    if model == "GPT":
+        return Gpt.question_answering(client, question)
+    if model == "llama":
+        return Llama.question_answering(llama, question)
 
 @data_process_blueprint.route('/api/classification', methods=['POST'])
 def classification():
-    model_name = request.form.get('model')
+    model = request.form.get('model')
     text = request.form.get('text')
-    pass
+    if model == "GPT":
+        return Gpt.classification(client, text)
+    if model == "llama":
+        return Llama.classification(llama, text)
+

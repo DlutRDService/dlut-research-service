@@ -7,3 +7,7 @@ def embedding_by_transformer(model, sentences):
 
 def ner(file):
     return None
+
+
+def abstract_segmentation(roberta_gat, abstract):
+    return None

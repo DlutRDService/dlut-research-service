@@ -8,7 +8,7 @@ def embedding(llama_embedding, text):
 def ner(llama_embedding, file):
     return None
 
-def question_answering(llama, question, context):
+def question_answering(llama, question):
     output = llama(
         "Q: Name the planets in the solar system? A: ",  # Prompt
         max_tokens=32,  # Generate up to 32 tokens
@@ -19,3 +19,7 @@ def question_answering(llama, question, context):
 
 def abstract_segmentation(llama, abstract):
     pass
+
+
+def classification(llama, text):
+    return None

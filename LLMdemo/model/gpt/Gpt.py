@@ -1,8 +1,6 @@
 from openai import OpenAI
 import os
-import openai
 
-# TODO 这个方法的数据结构还没弄明白
 def embedding(client, text, model="text-embedding-ada-002"):
     text = text.replace("\n", " ")
     return client.embeddings.create(input=[text], model=model)['data'][0]['embedding']
@@ -40,7 +38,7 @@ def question_answering(client, question):
         ]
     )
 
-def ner(file):
+def ner(client, text):
     pass
 
 
@@ -67,3 +65,7 @@ if __name__ == '__main__':
     # {"id":
     #  "content":"冬天走在寒冷的大街上，我们对脚部的保暖有着更高的要求。不用担心，时尚与保暖并不矛盾！一双高筒靴是你最好的选择哦",
     # ("vector": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])}
+
+
+def classification(client, text):
+    return None

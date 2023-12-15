@@ -39,12 +39,7 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
                 .uri(uriBuilder -> uriBuilder.path(FlaskUrl.TEXT_IMPORT_TO_MYSQL_URL).build())
                 .body(BodyInserters.fromMultipartData("file", file.getResource()))
                 .retrieve()
-                .bodyToMono(Result.class)
-                .map(result -> {
-                    // TODO 处理Flask服务器端的相应。
-                    result.setMsg("");
-                    return result;
-                });
+                .bodyToMono(Result.class);
     }
 
     @Override
