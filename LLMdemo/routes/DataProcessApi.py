@@ -94,7 +94,7 @@ def ner():
         return Transformer.ner(text)
 
 # TODO txt 转成格式化excel
-@data_process_blueprint.route('/api/txt_excel', methods=['POST'])
+@data_process_blueprint.route('/api/txt_to_excel', methods=['POST'])
 def txt_to_excel():
     file = request.files['file']
     if file.filename == '':

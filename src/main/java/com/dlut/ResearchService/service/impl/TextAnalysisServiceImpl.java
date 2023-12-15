@@ -141,7 +141,11 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
 
     @Override
     public Mono<Result> txtToExcel(MultipartFile file) {
-        return null;
+        return webClient.post()
+                .uri(uriBuilder -> uriBuilder.path(FlaskUrl.TXT_TO_EXCEL).build())
+                .body(BodyInserters.fromMultipartData("file", file.getResource()))
+                .retrieve()
+                .bodyToMono();
     }
     @Override
     public Mono<Result> sentiment(String model, String text) {
