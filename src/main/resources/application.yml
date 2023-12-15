@@ -17,9 +17,9 @@ spring:
   # 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/RDService?serverTimezone=GMT%2b8&allowMultiQueries=true
-    username: zsl
-    password: Lish145210@
+    url: jdbc:mysql://127.0.0.1:3306/rdreaserch?serverTimezone=GMT%2b8&allowMultiQueries=true
+    username: root
+    password: lish145210
 
   # 邮箱配置
   mail:

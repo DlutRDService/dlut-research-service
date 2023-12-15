@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("authorInfo")
-public class AuthorController {
+public class AuthorQueryController {
     /*
     * 构建作者画像：
     点开作者信息后。首先是作者的基本信息，姓名、机构、国家、主要研究内容、给出近些年发表的文章以及被引高的的文章，

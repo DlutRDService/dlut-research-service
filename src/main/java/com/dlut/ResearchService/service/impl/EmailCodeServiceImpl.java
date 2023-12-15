@@ -1,7 +1,7 @@
 package com.dlut.ResearchService.service.impl;
 
 import com.dlut.ResearchService.config.AppConfig;
-import com.dlut.ResearchService.entity.dto.EmailDto;
+import com.dlut.ResearchService.entity.constants.EmailDto;
 import com.dlut.ResearchService.exception.AccessException;
 import com.dlut.ResearchService.exception.BusinessException;
 import com.dlut.ResearchService.utils.CreateImageCode;

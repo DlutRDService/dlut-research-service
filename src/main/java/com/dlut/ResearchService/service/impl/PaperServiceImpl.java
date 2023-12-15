@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static com.dlut.ResearchService.entity.constants.Query.EXPRESSION_ERROR;
+import static com.dlut.ResearchService.entity.constants.QueryError.EXPRESSION_ERROR;
 import static com.dlut.ResearchService.entity.constants.redis.RedisTimePolicy.SEARCH_EXPIRATION_TIME;
 
 @Slf4j

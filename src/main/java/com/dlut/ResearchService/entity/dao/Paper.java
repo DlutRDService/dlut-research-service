@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class Paper {
-    @ApiModelProperty(value = "作者id")
+    @ApiModelProperty(value = "论文id")
     private Integer paper_id;
 
     @ApiModelProperty(value = "标题")
@@ -37,4 +37,7 @@ public class Paper {
 
     @ApiModelProperty(value = "论文摘要")
     private String ab;
+
+    @ApiModelProperty(value = "摘要路径", example = "/user/...")
+    private String ab_path;
 }

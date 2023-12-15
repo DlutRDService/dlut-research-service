@@ -1,4 +1,4 @@
-package com.dlut.ResearchService.entity.dto;
+package com.dlut.ResearchService.entity.constants;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
@@ -8,5 +8,5 @@ import lombok.Getter;
 public class EmailDto {
     private final String registerMailTitle = "邮箱验证码";
     private final String registerEmailContent = "欢迎登陆大连理工大学科研服务平台，您的邮箱验证码是: %s，5分钟内有效";
-    private final Integer userInitSpace = 5;
+    private final Integer userInitSpace = 6;
 }

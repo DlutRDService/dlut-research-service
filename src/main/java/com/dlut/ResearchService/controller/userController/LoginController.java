@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
+@RequestRateLimit
 @RestController
 @RequestMapping("login")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -35,7 +36,6 @@ public class LoginController {
     private ResultBuilder resultBuilder;
 
     @log
-    @RequestRateLimit
     @RequestMapping
     public void login(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException {
         try {
@@ -54,7 +54,6 @@ public class LoginController {
      * @throws IOException 读写异常
      */
     @log
-    @RequestRateLimit
     @PostMapping("sign-in/getCaptcha")
     public void signByAccount(HttpServletResponse response, HttpSession session,
                                 @RequestParam @NotNull(value = "邮箱或账号不为空") String username,
@@ -70,7 +69,6 @@ public class LoginController {
      * @param captcha 图片验证码
      */
     @log
-    @RequestRateLimit
     @PostMapping("sign-in/account")
     public Result signByAccount(
             @NotNull HttpSession session,
@@ -85,7 +83,6 @@ public class LoginController {
      * @param email 邮箱
      * @param emailCode 邮箱验证码
      */
-    @RequestRateLimit
     @PostMapping("sign-in/emailCode")
     public Result signByEmailCode(@NotNull HttpSession session,
                                   @RequestParam String email,
@@ -98,7 +95,6 @@ public class LoginController {
      * @param email 注册邮箱
      * @param emailCode 邮箱验证码
      */
-    @RequestRateLimit
     @PostMapping("sign-up/registration")
     public Result registration(@NotNull HttpSession session,
                                @RequestParam String email,
@@ -110,7 +106,6 @@ public class LoginController {
      * 设置密码，密码设置成功后修改或导入数据库
      * @param password 密码
      */
-    @RequestRateLimit
     @PostMapping("setAccountAndPassword")
     public Result setPassword(@NotNull HttpSession session,
                               @RequestParam String password,
@@ -122,26 +117,14 @@ public class LoginController {
      * 发送邮件验证码
      * @param email 目标邮箱
      */
-    @RequestRateLimit
     @PostMapping("sendEmailCode")
     public Result sendEmailCode(String email){
         emailCodeService.sendEmailCode(email);
         return resultBuilder.build(StatusCode.STATUS_CODE_200,"验证码已发送", null);
     }
 
-    @RequestRateLimit
     @PostMapping("recoveryPassword")
     public Result recoveryPassword(HttpSession session, String email, String emailCode){
         return loginService.recoveryPassword(session, email, emailCode);
     }
-    //     风险太大，考虑关闭
-//    /**
-//     * 生成验证码
-//     */
-//    @RequestRateLimit
-//    @PostMapping("getCaptcha")
-//    public void getCaptcha(HttpServletResponse response, HttpSession session) throws
-//            IOException {
-//        emailCodeService.getCaptcha(response, session);
-//    }
 }
