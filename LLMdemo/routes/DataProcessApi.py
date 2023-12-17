@@ -1,7 +1,10 @@
 # ! /usr/bin/python3.11
 # ! -*- coding:UTF-8 -*-
+from io import BytesIO
+
+import pandas as pd
 import pymysql
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 
 from data.ConvertToExcel import convert_to_excel
 from model.transformer import Transformer
@@ -9,13 +12,13 @@ from model.gpt import Gpt
 from model.llama import Llama
 from data.ImportToMysql import import_to_mysql
 from openai import OpenAI
-from llama_cpp import Llama
+# from llama_cpp import Llama
 from sentence_transformers import SentenceTransformer
 import os
 
 os.environ["OPENAI_API_KEY"] = "sk-uQzvGpP0SZmjBm8J918c590782Cc4e93A2715dC3286fD9C8"
 
-llama = Llama(model_path='../../../PycharmProjects/roberta-gat/llama-2-7b.Q4_K_M.gguf')
+# llama = Llama(model_path='../../../PycharmProjects/roberta-gat/llama-2-7b.Q4_K_M.gguf')
 
 client = OpenAI(base_url="https://d2.xiamoai.top/v1")
 
@@ -100,8 +103,16 @@ def txt_to_excel():
     if file.filename == '':
         return jsonify({'error': 'No file selected for uploading'}), 400
     try:
-        convert_to_excel(file)
-        return jsonify({'message': 'File successfully processed'}), 200
+        df = convert_to_excel(file)
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False)
+        output.seek(0)
+
+        return send_file(output,
+                         download_name='data.xlsx',
+                         as_attachment=True,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     except Exception as e:
         # 如果出现任何异常，返回错误信息
         return jsonify({'error': str(e)}), 500

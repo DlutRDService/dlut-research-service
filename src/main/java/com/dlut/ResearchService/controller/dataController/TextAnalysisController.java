@@ -6,8 +6,11 @@ import com.dlut.ResearchService.entity.constants.StatusCode;
 import com.dlut.ResearchService.service.impl.TextAnalysisServiceImpl;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -32,9 +35,9 @@ public class TextAnalysisController {
             return Mono.just(new Result(StatusCode.STATUS_CODE_400, "文件为空或格式不正确", null));
         }
     }
-
+    @log
     @PostMapping("txtToExcel")
-    public Mono<Result> txtToExcel(@NotNull @RequestParam MultipartFile file) {
+    public ResponseEntity<Flux<DataBuffer>> txtToExcel(@NotNull @RequestParam MultipartFile file) {
         return textAnalysisService.txtToExcel(file);
     }
 

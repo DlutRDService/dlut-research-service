@@ -8,12 +8,19 @@ import com.dlut.ResearchService.service.ITextAnalysisService;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -140,12 +147,16 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
     }
 
     @Override
-    public Mono<Result> txtToExcel(MultipartFile file) {
-        return webClient.post()
+    public ResponseEntity<Flux<DataBuffer>> txtToExcel(@NotNull MultipartFile file) {
+        Flux<DataBuffer> dataBufferFlux =  webClient.post()
                 .uri(uriBuilder -> uriBuilder.path(FlaskUrl.TXT_TO_EXCEL).build())
                 .body(BodyInserters.fromMultipartData("file", file.getResource()))
                 .retrieve()
-                .bodyToMono();
+                .bodyToFlux(DataBuffer.class);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=data.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(dataBufferFlux);
     }
     @Override
     public Mono<Result> sentiment(String model, String text) {

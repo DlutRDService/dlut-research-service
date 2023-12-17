@@ -2,7 +2,10 @@ package com.dlut.ResearchService.service;
 
 import com.dlut.ResearchService.entity.constants.Result;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
@@ -30,7 +33,7 @@ public interface ITextAnalysisService {
 
     Mono<Result> sequence(String model, String text);
 
-    Mono<Result> txtToExcel(MultipartFile file);
+    ResponseEntity<Flux<DataBuffer>> txtToExcel(MultipartFile file);
 
     Mono<Result> sentiment(String model, String text);
 
