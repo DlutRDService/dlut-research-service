@@ -33,7 +33,7 @@ public interface ITextAnalysisService {
 
     Mono<Result> sequence(String model, String text);
 
-    ResponseEntity<Flux<DataBuffer>> txtToExcel(MultipartFile file);
+    Mono<ResponseEntity<byte[]>> txtToExcel(MultipartFile file) throws IOException;
 
     Mono<Result> sentiment(String model, String text);
 

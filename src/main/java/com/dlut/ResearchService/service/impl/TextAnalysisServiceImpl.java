@@ -8,18 +8,24 @@ import com.dlut.ResearchService.service.ITextAnalysisService;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
@@ -147,17 +153,29 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
     }
 
     @Override
-    public ResponseEntity<Flux<DataBuffer>> txtToExcel(@NotNull MultipartFile file) {
-        Flux<DataBuffer> dataBufferFlux =  webClient.post()
+    public Mono<ResponseEntity<byte[]>> txtToExcel(@NotNull MultipartFile file) throws IOException {
+        ByteArrayResource fileResource = new ByteArrayResource(file.getBytes()) {
+            @Override
+            public String getFilename() {
+                return file.getOriginalFilename();
+            }
+        };
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", fileResource);
+
+        return webClient.post()
                 .uri(uriBuilder -> uriBuilder.path(FlaskUrl.TXT_TO_EXCEL).build())
-                .body(BodyInserters.fromMultipartData("file", file.getResource()))
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(body))
                 .retrieve()
-                .bodyToFlux(DataBuffer.class);
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=data.xlsx")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(dataBufferFlux);
+                .bodyToMono(byte[].class)
+                .map(response -> ResponseEntity
+                        .ok()
+                        .header("Content-Disposition", "attachment; filename=\"data.xlsx\"")
+                        .body(response));
     }
+
     @Override
     public Mono<Result> sentiment(String model, String text) {
         return webClient.post()

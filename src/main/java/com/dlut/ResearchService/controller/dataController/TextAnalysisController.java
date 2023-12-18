@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/textAnalysis")
 public class TextAnalysisController {
@@ -37,7 +39,7 @@ public class TextAnalysisController {
     }
     @log
     @PostMapping("txtToExcel")
-    public ResponseEntity<Flux<DataBuffer>> txtToExcel(@NotNull @RequestParam MultipartFile file) {
+    public Mono<ResponseEntity<byte[]>> txtToExcel(@NotNull @RequestParam MultipartFile file) throws IOException {
         return textAnalysisService.txtToExcel(file);
     }
 
