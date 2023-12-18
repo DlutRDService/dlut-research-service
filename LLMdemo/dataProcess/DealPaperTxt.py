@@ -1,7 +1,7 @@
 # !/usr/bin/python3.10
 # -*- coding:UTF-8 -*-
 
-from data.paperentity.wos_data import WosData, AuthorInformation
+from dataprocess import WosData, AuthorInformation
 
 
 def DealPaperInformation(title, WC=None, Esi_dict=None):

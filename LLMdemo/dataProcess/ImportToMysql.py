@@ -3,9 +3,9 @@
 
 import pymysql
 
-from data.CreateESIDict import CreateJournalCategoryDict
-from data.DealPaperTxt import DealPaperInformation
-from data.TittleProcess import get_titles
+from dataprocess.CreateESIDict import CreateJournalCategoryDict
+from dataprocess.DealPaperTxt import DealPaperInformation
+from dataprocess.TittleProcess import get_titles
 
 
 # TODO paper存储只剩引文信息处理

@@ -8,6 +8,7 @@ def embedding(llama_embedding, text):
 def ner(llama_embedding, file):
     return None
 
+
 def question_answering(llama, question):
     output = llama(
         "Q: Name the planets in the solar system? A: ",  # Prompt
