@@ -1,7 +1,7 @@
 # !/usr/bin/python3.10
 # -*- coding:UTF-8 -*-
 
-from dataprocess import WosData, AuthorInformation
+from dao.wos_data import WosData, AuthorInformation
 
 
 def DealPaperInformation(title, WC=None, Esi_dict=None):
@@ -74,6 +74,8 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
             except KeyError:
                 wos_data.ESI = ''
                 pass
+            finally:
+                continue
         # 关键字
         if line.find("DE ") == 0:
             keywords = line[3:].replace('\'', '').replace('\"', '')
@@ -83,10 +85,15 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
                 i += 1
             wos_data.DE = keywords.split('; ')
             continue
-
+        # 摘要
         if line.find("AB ") == 0:
-            wos_data.AB = ''
-            pass
+            abstracts = line[3:]
+            i = 1
+            while title[num + i][0:3] == '   ':
+                abstracts += ' ' + title[num + i][3:]
+                i += 1
+            wos_data.AB = abstracts
+            continue
         # 作者所在国家、作者所在机构
         if line.find('C1 ') == 0:
             # 国家

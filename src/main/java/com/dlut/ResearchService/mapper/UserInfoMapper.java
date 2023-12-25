@@ -24,4 +24,6 @@ public interface UserInfoMapper{
     Integer checkStatusById(Integer userId);
 
     Integer checkStatusByEmail(String email);
+
+    Boolean checkManagerIdentity(String emailOrAccount);
 }

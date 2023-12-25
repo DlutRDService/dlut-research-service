@@ -65,27 +65,24 @@ public class LoginServiceImpl implements ILoginService {
     }
 
     /**
-     * 登陆，使用账号密码。
+     * 登陆，使用账号密码。管理员需要管理员身份验证
      * @param session 用户会话
      * @param password 用户密码
      * @return 用户存在且密码正确返回成功
      */
     @Override
+    public Result signByAccount(@NotNull HttpSession session, String emailOrAccount, String password, String isManager) {
+        if (isManager != null) {
+            if (!userInfoMapper.checkManagerIdentity(emailOrAccount)){
+                return resultBuilder.build(StatusCode.STATUS_CODE_500, "管理员身份错误");
+            }
+        }
+        return checkLogin(session, emailOrAccount, password);
+    }
+
+    @Override
     public Result signByAccount(@NotNull HttpSession session, String emailOrAccount, String password) {
-        Integer userId = userInfoMapper.selectByEmailOrAccount(emailOrAccount);
-        if (userId == null){
-            return resultBuilder.build(StatusCode.STATUS_CODE_400, "用户不存在，请检查输入的邮箱与密码或注册新用户");
-        }
-        if (userInfoMapper.checkStatusById(userId) == 0){
-            return resultBuilder.build(StatusCode.STATUS_CODE_400, "登陆失败，用户已登录，若账号异常请修改密码");
-        }
-        if (userInfoMapper.selectPasswordByEmailOrAccount(emailOrAccount, password) == null){
-            return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码错误，请重新输入");
-        }
-        String sessionId = UUID.randomUUID().toString();
-        session.setAttribute("sessionID", sessionId);
-        session.setAttribute("email", emailOrAccount);
-        return resultBuilder.build(StatusCode.STATUS_CODE_200, "登陆成功");
+        return checkLogin(session, emailOrAccount, password);
     }
 
     /**
@@ -187,6 +184,23 @@ public class LoginServiceImpl implements ILoginService {
         userInfo.setPassword(password);
         userInfoMapper.insert(userInfo);
         log.info("新用户：" + email + "，添加成功");
+    }
+
+    public Result checkLogin(HttpSession session, String emailOrAccount, String password){
+        Integer userId = userInfoMapper.selectByEmailOrAccount(emailOrAccount);
+        if (userId == null){
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, "用户不存在，请检查输入的邮箱与密码或注册新用户");
+        }
+        if (userInfoMapper.checkStatusById(userId) == 0){
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, "登陆失败，用户已登录，若账号异常请修改密码");
+        }
+        if (userInfoMapper.selectPasswordByEmailOrAccount(emailOrAccount, password) == null){
+            return resultBuilder.build(StatusCode.STATUS_CODE_400, "密码错误，请重新输入");
+        }
+        String sessionId = UUID.randomUUID().toString();
+        session.setAttribute("sessionID", sessionId);
+        session.setAttribute("email", emailOrAccount);
+        return resultBuilder.build(StatusCode.STATUS_CODE_200, "登陆成功");
     }
 
     @Override

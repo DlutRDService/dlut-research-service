@@ -1,20 +1,19 @@
 # ! /usr/bin/python3.11
 # ! -*- coding:UTF-8 -*-
 from io import BytesIO
-
 import pandas as pd
 import pymysql
 from flask import Blueprint, request, jsonify, send_file
+from openai import OpenAI
+import os
+from sentence_transformers import SentenceTransformer
 
 from dataprocess.ConvertToExcel import convert_to_excel
 from model.transformer import Transformer
 from model.gpt import Gpt
 from model.llama import Llama
 from dataprocess.ImportToMysql import import_to_mysql
-from openai import OpenAI
 # from llama_cpp import Llama
-from sentence_transformers import SentenceTransformer
-import os
 
 os.environ["OPENAI_API_KEY"] = "sk-uQzvGpP0SZmjBm8J918c590782Cc4e93A2715dC3286fD9C8"
 

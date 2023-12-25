@@ -16,7 +16,9 @@ public interface ILoginService {
 
     void login(@NotNull HttpServletResponse response, @NotNull HttpSession session) throws IOException;
 
-    Result signByAccount(HttpSession session, String email, String password);
+    Result signByAccount(@NotNull HttpSession session, String emailOrAccount, String password, String isManager);
+
+    Result signByAccount(@NotNull HttpSession session, String emailOrAccount, String password);
 
     Result signByEmailCodeOrRegistration(HttpSession session, String email, String captcha);
 

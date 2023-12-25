@@ -46,7 +46,7 @@ public class LoginController {
     }
 
     /**
-     * 使用账号密码登录时获取验证码进行验证码校验，验证码刷新限制1s内最多1次。
+     * 使用账号密码登录时获取验证码进行验证码校验，验证码刷新限制1s内最多1次，管理员登录需要校验管理员身份。
      * @param response 响应
      * @param session 会话
      * @param username 邮箱或账号
@@ -55,10 +55,18 @@ public class LoginController {
      */
     @log
     @PostMapping("sign-in/getCaptcha")
-    public void signByAccount(HttpServletResponse response, HttpSession session,
-                                @RequestParam @NotNull(value = "邮箱或账号不为空") String username,
-                                @RequestParam @NotNull(value = "密码不为空") String password) throws IOException {
+    public void getCaptcha(HttpServletResponse response, HttpSession session
+                                ) throws IOException {
         emailCodeService.getCaptcha(response, session);
+    }
+
+    @log
+    @PostMapping("sign-in/manager")
+    public Result signByManager(@NotNull HttpSession session,
+                              @RequestParam String username,
+                              @RequestParam String password,
+                              @RequestParam String isManager){
+        return loginService.signByAccount(session, username, password, isManager);
     }
 
     /**
