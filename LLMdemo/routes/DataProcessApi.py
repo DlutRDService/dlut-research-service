@@ -12,18 +12,13 @@ from model.gpt import Gpt
 from model.llama import Llama
 from dataprocess.ImportToMysql import import_to_mysql
 from openai import OpenAI
-from llama_cpp import Llama
+# from llama_cpp import Llama
 from sentence_transformers import SentenceTransformer
 import os
 
 os.environ["OPENAI_API_KEY"] = "sk-uQzvGpP0SZmjBm8J918c590782Cc4e93A2715dC3286fD9C8"
 
-llama = Llama(
-    model_path=r'C:\Users\AI\PycharmProjects\roberta-gat\llama-2-7b.Q4_K_M.gguf',
-    embedding=True,
-    n_ctx=2048,
-    n_gpu_layers=30
-)
+# llama = Llama(model_path='../../../PycharmProjects/roberta-gat/llama-2-7b.Q4_K_M.gguf')
 
 client = OpenAI(base_url="https://d2.xiamoai.top/v1")
 
@@ -31,21 +26,17 @@ sens_tan_md = SentenceTransformer('all-MiniLM-L6-v2')
 
 roberta_gat = None
 
-# link mysql
+# 连接数据库
 db = pymysql.connect(host='localhost', user='root', passwd='lish145210', port=3306, db='rdreaserch')
 
 data_process_blueprint = Blueprint('data', __name__)
 
-
 @data_process_blueprint.route('/api/embedding', methods=['POST'])
 def get_embedding():
-    """
-    get two parameters (model, sentences) from request. Return embedding list of the sentences by the model
-    """
-    # get params from request
+    # 获取POST请求中的参数
     model_name = request.form.get('model')
     sentences = request.form.get('sentences')
-    # chose the model
+    # 选择模型
     if model_name == "GPT":
         return Gpt.embedding(client, sentences)
     elif model_name == "Llama2":
@@ -53,10 +44,9 @@ def get_embedding():
     elif model_name == "sentence-transformer":
         return Transformer.embedding_by_transformer(sens_tan_md, sentences)
 
-
 @data_process_blueprint.route('/api/import_mysql', methods=['POST'])
-def import_to_mysql():
-    file = request.files['file']  # get file
+def importToMysql():
+    file = request.files['file']
 
     if file.filename == '':
         return jsonify({'error': 'No file selected for uploading'}), 400
@@ -70,18 +60,15 @@ def import_to_mysql():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 # TODO 向neo4j中导入数据
 @data_process_blueprint.route('/api/import_neo4j', methods=['POST'])
 def import_neo4j():
     pass
 
-
 # TODO 向milvus中导入数据
 @data_process_blueprint.route('/api/import_milvus', methods=['POST'])
 def import_milvus():
     pass
-
 
 # TODO 摘要序列标注
 @data_process_blueprint.route('/api/abstract_segment', methods=['Post'])
@@ -109,12 +96,9 @@ def ner():
     if model == 'bert':
         return Transformer.ner(text)
 
-
+# TODO txt 转成格式化excel
 @data_process_blueprint.route('/api/txt_to_excel', methods=['POST'])
 def txt_to_excel():
-    """
-    get a file and save it to an Excel file
-    """
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No file selected for uploading'}), 400
@@ -133,7 +117,6 @@ def txt_to_excel():
         # 如果出现任何异常，返回错误信息
         return jsonify({'error': str(e)}), 500
 
-
 @data_process_blueprint.route('/api/question_answering', methods=['POST'])
 def question_answering():
     model = request.form.get('model')
@@ -143,7 +126,6 @@ def question_answering():
     if model == "llama":
         return Llama.question_answering(llama, question)
 
-
 @data_process_blueprint.route('/api/classification', methods=['POST'])
 def classification():
     model = request.form.get('model')
@@ -152,4 +134,3 @@ def classification():
         return Gpt.classification(client, text)
     if model == "llama":
         return Llama.classification(llama, text)
-

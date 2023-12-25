@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from model.gpt.EmbeddingByGpt import embedding
+from model.gpt.Gpt import embedding
 from pymilvus import Collection
 
 milvus_blueprint = Blueprint('milvus', __name__)  # 创建蓝图
@@ -15,15 +15,12 @@ search_params = {    # 查询参数条件
 }
 
 
-@milvus_blueprint.route('/api/milvus/search', methods=['GET'])
+@milvus_blueprint.route('/api/milvus_search', methods=['GET'])
 def search():
     """
-    根据字符串查询相关内容，制定编码方式
+    get a String from request. Search the similary embedding list
     """
     query_param = request.args.get("query_param")  # 获取查询参数
-    query_model = request.args.get("query_model")
-    # if query_model == :
-    #     get_embedding()
     query_embedding = embedding(query_param)
     results = collection.search(
         data=query_embedding,

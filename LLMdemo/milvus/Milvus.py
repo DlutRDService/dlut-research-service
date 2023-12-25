@@ -36,7 +36,7 @@ def createCollection(db_name, collection_name):
     paper = FieldSchema(
         name="text",
         dtype=DataType.VARCHAR,
-        max_length=1000,
+        max_length=512,
         # The default value will be used if this field is left empty during data inserts or upsets.
         # The data type of `default_value` must be the same as that specified in `type`.
         default_value="Unknown"
@@ -44,7 +44,7 @@ def createCollection(db_name, collection_name):
     vector = FieldSchema(
         name="vector",
         dtype=DataType.FLOAT_VECTOR,
-        dim=1536
+        dim=1
     )
     description = FieldSchema(
         name="description",

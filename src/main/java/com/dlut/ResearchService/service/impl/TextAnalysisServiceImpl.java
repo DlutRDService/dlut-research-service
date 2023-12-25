@@ -9,9 +9,6 @@ import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,13 +17,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -66,10 +59,9 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
      */
     @Override
     public Set<Integer> searchByStringVector(String query) {
-        String url = "/api/milvus/search";
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path(url)
+                        .path(FlaskUrl.SEARCH_MILVUS)
                         .queryParam("param", query)
                         .build())
                 .retrieve()
@@ -102,7 +94,6 @@ public class TextAnalysisServiceImpl implements ITextAnalysisService {
 
     @Override
     public Result documentProcess(@NotNull MultipartFile file) {
-        // String fileName = file.getOriginalFilename();
         return resultBuilder.build(StatusCode.STATUS_CODE_200, "", "");
     }
     @Override
