@@ -8,7 +8,7 @@ from model.RoBERTaGAT.model import RobertaGAT
 
 
 model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
-model.load_state_dict(torch.load('model/model.pth'))
+model.load_state_dict(torch.load('../model/RoBERTaGAT/model.pth'))
 model.eval()
 
 
@@ -101,9 +101,9 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
             wos_data.AB = abstract
             # TODO 添加将摘要文本进行序列标注并将相对应的值写入wosdata的代码逻辑，
             #  输入的abs是一个列表，每一个列表元素是一个Json，具体的格式详见飞书文档，
-            #  输出的result也是一个列表，列表每个元素是一个Json，这个Json包含两部分，
+            #  输出的result是一个Json，这个Json包含两部分，两部分一一对应，
             #  一部分是划分的句子，另一部分是标注结果，最后将标注结果的值传入wosdata。
-            # 实现摘要文本数据处理的逻辑
+            # 实现摘要文本数据处理的逻辑(可以封装成函数)
             # result = seq_annotation(abs)
             # 实现将result值传入wosdata的逻辑。
             continue
@@ -444,6 +444,7 @@ def CheckNation(Str=''):
 
 def seq_annotation(data):
     tokenors = encode_batch(data['seq'])
-    output = model(tokenors['input_ids'], tokenors['attention_mask'], torch.tensor(data[i]['rel']))[0]
-    return output.argmax(dim=1).tolist()
+    output = model(tokenors['input_ids'], tokenors['attention_mask'], torch.tensor(data['rel']))[0]
+    output = output.argmax(dim=1).tolist()
+    return {"seq": data['seq'][1:], "label": output[1:]}
 
