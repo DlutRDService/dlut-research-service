@@ -17,7 +17,7 @@ from dataprocess.ImportToMysql import import_to_mysql
 
 os.environ["OPENAI_API_KEY"] = "sk-uQzvGpP0SZmjBm8J918c590782Cc4e93A2715dC3286fD9C8"
 
-# llama = Llama(model_path='../../../PycharmProjects/roberta-gat/llama-2-7b.Q4_K_M.gguf')
+# llama = Llama(model_path='../../../PycharmProjects/RoBERTaGAT/llama-2-7b.Q4_K_M.gguf')
 
 client = OpenAI(base_url="https://d2.xiamoai.top/v1")
 

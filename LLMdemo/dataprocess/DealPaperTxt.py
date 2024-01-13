@@ -1,7 +1,15 @@
 # !/usr/bin/python3.10
 # -*- coding:UTF-8 -*-
+import torch
 
 from dao.wos_data import WosData, AuthorInformation
+from model.RoBERTaGAT.utils import encode_batch
+from model.RoBERTaGAT.model import RobertaGAT
+
+
+model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
+model.load_state_dict(torch.load('model/model.pth'))
+model.eval()
 
 
 def DealPaperInformation(title, WC=None, Esi_dict=None):
@@ -85,13 +93,21 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
             continue
         # 摘要
         if line.find("AB ") == 0:
-            abstracts = line[3:]
+            abstract = line[3:]
             i = 1
             while title[num + i][0:3] == '   ':
-                abstracts += ' ' + title[num + i][3:]
+                abstract += ' ' + title[num + i][3:]
                 i += 1
-            wos_data.AB = abstracts
+            wos_data.AB = abstract
+            # TODO 添加将摘要文本进行序列标注并将相对应的值写入wosdata的代码逻辑，
+            #  输入的abs是一个列表，每一个列表元素是一个Json，具体的格式详见飞书文档，
+            #  输出的result也是一个列表，列表每个元素是一个Json，这个Json包含两部分，
+            #  一部分是划分的句子，另一部分是标注结果，最后将标注结果的值传入wosdata。
+            # 实现摘要文本数据处理的逻辑
+            # result = seq_annotation(abs)
+            # 实现将result值传入wosdata的逻辑。
             continue
+
         # 作者所在国家、作者所在机构
         if line.find('C1 ') == 0:
             # 国家
@@ -424,3 +440,10 @@ def CheckNation(Str=''):
         if Str.find(nation) != -1:
             return nation
     return -1
+
+
+def seq_annotation(data):
+    tokenors = encode_batch(data['seq'])
+    output = model(tokenors['input_ids'], tokenors['attention_mask'], torch.tensor(data[i]['rel']))[0]
+    return output.argmax(dim=1).tolist()
+
