@@ -74,8 +74,6 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
             except KeyError:
                 wos_data.ESI = ''
                 pass
-            finally:
-                continue
         # 关键字
         if line.find("DE ") == 0:
             keywords = line[3:].replace('\'', '').replace('\"', '')
@@ -182,7 +180,7 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
         if line.find("NR ") == 0:
             wos_data.NR = line[3:]
             continue
-        # 被引
+        # 被引TC
         if line.find("TC ") == 0:
             wos_data.TC = line[3:]
         # WC 类别
@@ -194,6 +192,7 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
                 i += 1
             wos_data.WC = wc.split('; ')
             continue
+        # 年份PY
         if line.find('PY ') == 0 or line.find('EA ') == 0:
             wos_data.PY = line[-4:]
             continue

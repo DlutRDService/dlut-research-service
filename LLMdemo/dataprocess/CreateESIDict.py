@@ -3,6 +3,7 @@
 
 import pandas as pd
 
+
 def CreateJournalCategoryDict():
     """
     Create a dict of ESI Journal list for charging the simple journal name to full name

@@ -18,6 +18,10 @@ class WosData:
         self.NR = ''
         self.TC = ''
         self.AB = ''
+        self.r_background = ''
+        self.r_method = ''
+        self.r_result = ''
+        self.r_conclusion = ''
 
 
 class AuthorInformation:
