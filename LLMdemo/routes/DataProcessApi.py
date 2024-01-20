@@ -8,11 +8,11 @@ from openai import OpenAI
 import os
 from sentence_transformers import SentenceTransformer
 
-from dataprocess.ConvertToExcel import convert_to_excel
+from utils.ConvertToExcel import convert_to_excel
 from model.transformer import Transformer
 from model.gpt import Gpt
 from model.llama import Llama
-from dataprocess.ImportToMysql import import_to_mysql
+from service.ImportToMysql import import_to_mysql
 # from llama_cpp import Llama
 
 os.environ["OPENAI_API_KEY"] = "sk-uQzvGpP0SZmjBm8J918c590782Cc4e93A2715dC3286fD9C8"

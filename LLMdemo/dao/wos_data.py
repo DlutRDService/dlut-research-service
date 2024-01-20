@@ -1,7 +1,6 @@
 # ! /urs/bin/python3.10
 # ! -*- coding:utf-8 -*-
 
-
 class WosData:
     # 记录每篇论文信息
     def __init__(self):

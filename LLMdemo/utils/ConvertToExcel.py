@@ -1,7 +1,7 @@
 import pandas as pd
 
-from dataprocess.CreateESIDict import CreateJournalCategoryDict
-from dataprocess.DealPaperTxt import DealPaperInformation
+from utils.CreateESIDict import CreateJournalCategoryDict
+from utils.DealPaperTxt import DealPaperInformation
 
 
 def object_to_dict(obj):
