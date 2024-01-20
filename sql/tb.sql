@@ -95,6 +95,10 @@ create table paper (
             ab             varchar(1500)     default null               comment '文献摘要,只显示1500字符',
             long_ab        TEXT              default null               comment '文献摘要',
             ab_path        varchar(500)      default null               comment '文献摘要详细信息存储地址',
+            r_background   varchar(2000)     default null               comment '研究背景',
+            r_method       varchar(2000)     default null               comment '研究方法',
+            r_result       varchar(2000)     default null               comment '研究结果',
+            r_conclusion   varchar(2000)     default null               comment '研究结论',
             primary key (paper_id),
             UNIQUE INDEX idx_paper_tl (tl)
 ) engine=innodb auto_increment=0 comment = '文献表';
