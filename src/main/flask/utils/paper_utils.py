@@ -2,16 +2,20 @@
 # -*- coding:utf-8 -*-
 
 import os
+
 import torch
 import pandas as pd
 from transformers import RobertaTokenizer
+from nltk.tokenize import sent_tokenize
 
 from dao.Paper import WosData, AuthorInformation
 from model.RoBERTaGAT.RoBERTaGAT import RobertaGAT
 
 
-model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
-model.load_state_dict(torch.load('../model/RoBERTaGAT/model.pth'))
+model = RobertaGAT(roberta_model_name="roberta-base", num_classes=5)
+model.load_state_dict(torch.load('../model/RoBERTaGAT/model5.pth', map_location='cuda:0'))
+# model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
+# model.load_state_dict(torch.load('../model/RoBERTaGAT/model.pth', map_location='cuda:0'))
 model.eval()
 
 
@@ -55,7 +59,7 @@ def DealPaperInformation(title):
     """
     传入一个title，读取统计文献的名称、期刊名、期刊ESI类别、WC类别、年份、引文、摘要、关键词、作者、作者机构、国家
     :param title: 传入文献
-    :return:返回论文全部信息，格式为类
+    :return:返回论文全部信息的paper类
     """
 
     Esi_dict = CreateJournalCategoryDict()
@@ -126,14 +130,30 @@ def DealPaperInformation(title):
             while title[num + i][0:3] == '   ':
                 abstract += ' ' + title[num + i][3:]
                 i += 1
+            abstract = abstract.replace("e.g.", "for example")
+            abstract = abstract.replace("i.e.", "that is")
             wos_data.AB = abstract
-            # TODO 添加将摘要文本进行序列标注并将相对应的值写入wosdata的代码逻辑，
-            #  输入的abs是一个列表，每一个列表元素是一个Json，具体的格式详见飞书文档，
-            #  输出的result是一个Json，这个Json包含两部分，两部分一一对应，
-            #  一部分是划分的句子，另一部分是标注结果，最后将标注结果的值传入wosdata。
-            # 实现摘要文本数据处理的逻辑(可以封装成函数)，生成abs
-            # result = seq_annotation(abs)
-            # 实现将result值传入wosdata的逻辑。
+            ab_seqs = sent_tokenize(wos_data.AB)
+            indices = [list(range(1, len(ab_seqs)+1)), [0 for _ in range(len(ab_seqs))]]
+            indices[0].extend(list(range(1, len(ab_seqs))))
+            indices[1].extend(list(range(2, len(ab_seqs)+1)))
+            ab_seqs.insert(0, wos_data.TI_name)
+            input_data = {"seq":ab_seqs, "rel":indices}
+            result = seq_annotation(input_data)
+            result["label"][0] = 0
+            result["label"][-1] = 3
+            for i in range(len(result['label'])):
+                if result['label'][i] == 0:
+                    wos_data.r_background += result['seq'][i] + " "
+                if result['label'][i] == 1:
+                    wos_data.r_method += result['seq'][i] + " "
+                if result['label'][i] == 2:
+                    if wos_data.r_method == '':
+                        wos_data.r_method = result['seq'][i]
+                        continue
+                    wos_data.r_result += result['seq'][i] + " "
+                if result['label'][i] == 3:
+                    wos_data.r_conclusion += result['seq'][i] + " "
             continue
 
         # 作者所在国家、作者所在机构
@@ -253,7 +273,6 @@ def DealPaperInformation(title):
 def split_to_titles(file_path):
     with open(file_path, "r+", encoding="utf8") as f:
         content = f.read()
-        # 切割文本，分割成一篇一篇的文献
         return content.split('\nER\n')
 
 def CheckNation(Str=''):
@@ -506,7 +525,8 @@ def CreateJournalCategoryDict():
     return esi_dict
 
 def seq_annotation(data):
-    tokenors = encode_batch(data['seq'])
+    tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+    tokenors = tokenizer(data['seq'], padding='max_length', truncation=True, max_length=96, return_tensors="pt")
     output = model(tokenors['input_ids'], tokenors['attention_mask'], torch.tensor(data['rel']))[0]
     output = output.argmax(dim=1).tolist()
     return {"seq": data['seq'][1:], "label": output[1:]}
@@ -532,6 +552,33 @@ def convert_to_excel(file):
     df = pd.DataFrame(wos_dict)
     return df
 
-def encode_batch(abstract):
-    tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
-    return tokenizer(abstract, padding='max_length', truncation=True, max_length=96, return_tensors="pt")
+
+
+
+
+if __name__ == '__main__':
+    titles = get_titles('../data/Test.txt')
+    wos_js = []
+    for title in titles:
+        wosdata = DealPaperInformation(title)
+        print(wosdata.r_background)
+        print("-----")
+        print(wosdata.r_method)
+        print("-----")
+        print(wosdata.r_result)
+        print("-----")
+        print(wosdata.r_conclusion)
+
+        print("----------------next------------------")
+        # wos_js.append(wosdata.to_json())
+    # 将整个列表转换为 JSON 字符串
+    # wos_js_json = json.dumps(wos_js, ensure_ascii=False, indent=4)
+
+    # 将 JSON 字符串写入文件
+    # with open('../data/1.json', 'w', encoding='utf-8') as f:
+        # f.write(wos_js_json)
+
+
+
+
+

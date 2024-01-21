@@ -1,5 +1,7 @@
 # ! /urs/bin/python3.10
 # ! -*- coding:utf-8 -*-
+import json
+
 
 class WosData:
     # 记录每篇论文信息
@@ -21,6 +23,33 @@ class WosData:
         self.r_method = ''       # 研究方法
         self.r_result = ''       # 研究结果
         self.r_conclusion = ''   # 研究结论
+    def to_dict(self):
+        return {
+            'TI_name': self.TI_name,
+            'AF': self.AF,
+            'DE': self.DE,
+            'SO': self.SO,
+            'CR': self.CR,
+            'WC': self.WC,
+            'PY': self.PY,
+            'ESI': self.ESI,
+            'Nation': self.Nation,
+            'Organization': self.Organization,
+            'NR': self.NR,
+            'TC': self.TC,
+            'AB': self.AB,
+            'r_background': self.r_background,
+            'r_method': self.r_method,
+            'r_result': self.r_result,
+            'r_conclusion': self.r_conclusion
+        }
+
+    def to_json(self):
+        for i in range(len(self.AF)):
+            self.AF[i] = self.AF[i].to_dict()
+        wosdata_dict = self.to_dict()
+        return json.dumps(wosdata_dict, ensure_ascii=False, indent=4)
+
 
 
 class AuthorInformation:
@@ -28,6 +57,19 @@ class AuthorInformation:
         self.AuthorOrganization = []
         self.AuthorNation = ''
         self.AuthorName = ''
+
+    def to_dict(self):
+        if len(self.AuthorOrganization) == 0:
+            self.AuthorOrganization = ''
+        elif len(self.AuthorOrganization) == 1:
+            self.AuthorOrganization = self.AuthorOrganization[0]
+        elif len(self.AuthorOrganization) > 1:
+            self.AuthorOrganization = {i + 1: org for i, org in enumerate(self.AuthorOrganization)}
+        return {
+            'AuthorOrganization': self.AuthorOrganization,
+            'AuthorNation': self.AuthorNation,
+            'AuthorName': self.AuthorName
+        }
 
 
 WOS_categoryList = (
