@@ -14,7 +14,7 @@ public class Neo4jConfig {
     private String url;  // 所在服务器地址
     @Value("${neo4j.username:#{\"neo4j\"}}")
     private String user;  // 用户名
-    @Value("${neo4j.password:#{\"dlutaiservice\"}}")
+    @Value("${neo4j.password:#{\"AcademicKG\"}}")
     private String password;  //密码
     @Bean
     public Driver driver(){

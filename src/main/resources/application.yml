@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9090
 spring:
   # 文件大小配置
   servlet:
@@ -17,9 +17,9 @@ spring:
   # 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/rdreaserch?serverTimezone=GMT%2b8&allowMultiQueries=true
-    username: root
-    password: lish145210
+    url: jdbc:mysql://127.0.0.1:3306/dlut_academic_platform?serverTimezone=GMT%2b8&allowMultiQueries=true
+    username: AI
+    password: "!@#$AI"
 
   # 邮箱配置
   mail:
@@ -60,4 +60,4 @@ redis:
 neo4j:
   url: bolt://localhost:7687
   username: neo4j
-  password: dlutaiservice
+  password: AcademicKG

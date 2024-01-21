@@ -1,6 +1,6 @@
 from py2neo import Graph
 
-class Neo4jConnection:
+class Neo4jConfig:
     def __init__(self, uri, user, pwd):
         self.__uri = uri
         self.__user = user
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     user = "neo4j_username"
     pwd = "neo4j_password"
 
-    conn = Neo4jConnection(uri, user, pwd)
+    conn = Neo4jConfig(uri, user, pwd)
 
     # 示例查询
     query_result = conn.query("MATCH (n) RETURN n LIMIT 5")

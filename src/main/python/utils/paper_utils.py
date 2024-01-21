@@ -1,10 +1,13 @@
-# !/usr/bin/python3.10
-# -*- coding:UTF-8 -*-
-import torch
+#! /usr/bin/python3.11
+# -*- coding:utf-8 -*-
 
-from dao.wos_data import WosData, AuthorInformation
-from model.RoBERTaGAT.utils import encode_batch
-from model.RoBERTaGAT.model import RobertaGAT
+import os
+import torch
+import pandas as pd
+from transformers import RobertaTokenizer
+
+from dao.Paper import WosData, AuthorInformation
+from model.RoBERTaGAT.RoBERTaGAT import RobertaGAT
 
 
 model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
@@ -12,28 +15,53 @@ model.load_state_dict(torch.load('../model/RoBERTaGAT/model.pth'))
 model.eval()
 
 
-def DealPaperInformation(title, WC=None, Esi_dict=None):
+def get_titles(file_path):
     """
-    读取统计文献的名称、期刊名、期刊ESI类别、WC类别、年份、引文、摘要、关键词、作者、作者机构、国家
-    :param Esi_dict: 字典，用于获取文献的ESI类别
+    获取路径下的所有文献,或者路径文本
+    :param : 论文存储路径
+    :return: 返回一个存放所有论文数据的列表
+    """
+    titles = []
+    if file_path is None:
+        raise ValueError('Please enter a valid path')
+    paths = []
+    num = 0
+    if os.path.isdir(file_path):
+        for (dir_path, dirname, filenames) in os.walk(file_path):
+            if filenames is None:
+                continue
+            for i, filename in enumerate(filenames):
+                # 获取当前处理的文件路径
+                paths.append(os.path.join(dir_path, filename))
+        for path in paths:
+            title = split_to_titles(path)
+            for i in title:
+                num += 1
+                if num % 10000 == 0 and num != 0:
+                    print('----已经读入{}篇文献数据----'.format(num))
+                titles.append(i)
+        print("共有{}篇文献".format(len(titles)))
+    elif os.path.isfile(file_path):
+        title = split_to_titles(file_path)
+        for i in title:
+            num += 1
+            if num % 10000 == 0 and num != 0:
+                print('----已经读入{}篇文献数据----'.format(num))
+            titles.append(i)
+        print("共有{}篇文献".format(len(titles)))
+    return titles
+
+def DealPaperInformation(title):
+    """
+    传入一个title，读取统计文献的名称、期刊名、期刊ESI类别、WC类别、年份、引文、摘要、关键词、作者、作者机构、国家
     :param title: 传入文献
-    :param WC: 要获取统计字段
     :return:返回论文全部信息，格式为类
     """
+
+    Esi_dict = CreateJournalCategoryDict()
     wos_data = WosData()
-    # 是否按照WC类别处理
-    if WC is None:
-        pass
-    else:
-        flg = 0
-        for i in WC:
-            if title[title.find('\nWC '):title.find('\nSC ')].find(i) != -1:
-                flg = 1
-                break
-        if flg == 0:
-            return wos_data
+
     title = title.split('\n')
-    wos_data.WC = WC
     for num, line in enumerate(title):
         # 作者
         if line.find('AF ') == 0:
@@ -222,6 +250,11 @@ def DealPaperInformation(title, WC=None, Esi_dict=None):
     wos_data.DE = list(set(wos_data.DE))
     return wos_data
 
+def split_to_titles(file_path):
+    with open(file_path, "r+", encoding="utf8") as f:
+        content = f.read()
+        # 切割文本，分割成一篇一篇的文献
+        return content.split('\nER\n')
 
 def CheckNation(Str=''):
     nationList = [
@@ -441,6 +474,36 @@ def CheckNation(Str=''):
             return nation
     return -1
 
+def CreateJournalCategoryDict():
+    """
+    Create a dict of ESI Journal list for charging the simple journal name to full name
+    :return: dict with ESI Journal
+    """
+    '''
+    python3.9以上不在支持xlrd1.2，xlrd1.2以上不在支持xlsx文件格式
+    # table = xlrd.open_workbook(r'./esi-master-journal-list-4-2021.xlsx').sheets()[0]
+    # fullTitle = np.matrix(table.col_values(0)).tolist()[0]
+    # Title_2017 = np.matrix(table.col_values(1)).tolist()[0]
+    # Title_2019 = np.matrix(table.col_values(2)).tolist()[0]
+    # esiCategory = np.matrix(table.col_values(5)).tolist()[0]
+    '''
+
+    # 获取索引为index的sheet表格
+    # 用 pandas 读取 Excel 文件的第一个sheet
+    df = pd.read_excel(r"../data/esi-master-journal-list-4-2021.xlsx", sheet_name=0)
+
+    # 获取所需的列并将它们转换为列表
+    fullTitle = df.iloc[:, 0].tolist()
+    Title_2017 = df.iloc[:, 1].tolist()
+    Title_2019 = df.iloc[:, 2].tolist()
+    esiCategory = df.iloc[:, 5].tolist()
+    journalList = [fullTitle, Title_2017, Title_2019, esiCategory]
+    esi_dict = {journalList[0][i].upper(): journalList[3][i] for i in range(0, len(journalList[3]))}
+    esi_dict1 = {journalList[1][i].upper(): journalList[3][i] for i in range(0, len(journalList[3]))}
+    esi_dict2 = {journalList[2][i].upper(): journalList[3][i] for i in range(0, len(journalList[3]))}
+    esi_dict1.update(esi_dict2)
+    esi_dict.update(esi_dict1)
+    return esi_dict
 
 def seq_annotation(data):
     tokenors = encode_batch(data['seq'])
@@ -448,3 +511,27 @@ def seq_annotation(data):
     output = output.argmax(dim=1).tolist()
     return {"seq": data['seq'][1:], "label": output[1:]}
 
+def object_to_dict(obj):
+    return obj.__dict__
+
+def convert_to_excel(file):
+    file_content = file.read().decode('utf-8')
+    file_content = file_content.replace('\r', '')
+    titles = file_content.split("\nER\n")
+    wos_paper = []
+    for title in titles:
+        wos_data = DealPaperInformation(title)
+        AF = ''
+        if wos_data.AF is not None:
+            for j in range(len(wos_data.AF)):
+                if wos_data.AF[j] is not None:
+                    AF += wos_data.AF[j].AuthorName + "; "
+        wos_data.AF = AF
+        wos_paper.append(wos_data)
+    wos_dict = [object_to_dict(obj) for obj in wos_paper]
+    df = pd.DataFrame(wos_dict)
+    return df
+
+def encode_batch(abstract):
+    tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+    return tokenizer(abstract, padding='max_length', truncation=True, max_length=96, return_tensors="pt")

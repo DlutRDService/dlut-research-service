@@ -1,21 +1,31 @@
-from config.neo4j_config import Neo4jConnection
+from config.Neo4jConfig import Neo4jConnection
 
 class Neo4jService:
     def __init__(self, uri, user, pwd):
         self.conn = Neo4jConnection(uri, user, pwd)
+        self.graph = self.conn.connect()
 
     def get_data(self, query):
         """ 获取数据 """
         return self.conn.query(query)
 
     def add_node(self, label, properties):
-        """ 添加新的节点 """
-        prop_string = ', '.join(f'{key}: "{value}"' for key, value in properties.items())
-        query = f"CREATE (n:{label} {{ {prop_string} }})"
-        self.conn.query(query)
+        """添加新的节点"""
+        tx = self.graph.begin()  # 开启一个新事务
+        try:
+            prop_string = ', '.join(f'{key}: "{value}"' for key, value in properties.items())
+            query = f"CREATE (n:{label} {{ {prop_string} }})"
+            tx.run(query)
+            tx.commit()  # 提交事务
+            return "Node successfully added."
+        except Exception as e:
+            tx.rollback()  # 报错回滚
+            return f"Failed to add node: {e}"
 
-    def add_relationship(self, from_node, rel_type, to_node, properties={}):
+    def add_relationship(self, from_node, rel_type, to_node, properties=None):
         """ 添加新的关系 """
+        if properties is None:
+            properties = {}
         prop_string = ', '.join(f'{key}: "{value}"' for key, value in properties.items())
         query = (f"MATCH (a), (b) WHERE a.name = '{from_node}' AND b.name = '{to_node}' "
                  f"CREATE (a)-[r:{rel_type} {{ {prop_string} }}]->(b)")

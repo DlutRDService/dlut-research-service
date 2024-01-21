@@ -3,9 +3,8 @@
 
 import pymysql
 
-from utils.CreateESIDict import CreateJournalCategoryDict
-from utils.DealPaperTxt import DealPaperInformation
-from utils.TittleProcess import get_titles
+from utils.paper_utils import DealPaperInformation
+from utils.paper_utils import get_titles
 
 class MysqlService:
 
@@ -15,17 +14,12 @@ class MysqlService:
         pass
 
     def import_to_mysql(self, titles):
-        # 获取ESI字典
-        esi_dict = CreateJournalCategoryDict()
-
         # 分批次导入mysql
         num_paper = 0
         num_author = 0
         for title in titles:
             AF = ''
-            wos_data = DealPaperInformation(
-                title, WC=None, Esi_dict=esi_dict
-            )
+            wos_data = DealPaperInformation(title)
             if wos_data.TI_name == "":
                 continue
             for af in wos_data.AF:

@@ -4,23 +4,23 @@
 class WosData:
     # 记录每篇论文信息
     def __init__(self):
-        self.TI_name = ''
-        self.AF = []
-        self.DE = []
-        self.SO = ''
-        self.CR = []
-        self.WC = []
-        self.PY = ''
-        self.ESI = ''
-        self.Nation = []
-        self.Organization = []
-        self.NR = ''
-        self.TC = ''
-        self.AB = ''
-        self.r_background = ''
-        self.r_method = ''
-        self.r_result = ''
-        self.r_conclusion = ''
+        self.TI_name = ''        # 标题
+        self.AF = []             # 作者
+        self.DE = []             # 关键词
+        self.SO = ''             # 期刊
+        self.CR = []             # 引文类别
+        self.WC = []             # WC类别
+        self.PY = ''             # 出版年
+        self.ESI = ''            # ESI类别
+        self.Nation = []         # 作者国家
+        self.Organization = []   # 作者机构
+        self.NR = ''             # 引文数量
+        self.TC = ''             # 被引用
+        self.AB = ''             # 摘要
+        self.r_background = ''   # 研究背景
+        self.r_method = ''       # 研究方法
+        self.r_result = ''       # 研究结果
+        self.r_conclusion = ''   # 研究结论
 
 
 class AuthorInformation:
