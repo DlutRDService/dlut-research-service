@@ -2,18 +2,19 @@
 # -*- coding:utf-8 -*-
 
 import os
+import re
 
 import torch
 import pandas as pd
 from transformers import RobertaTokenizer
 from nltk.tokenize import sent_tokenize
 
-from dao.Paper import WosData, AuthorInformation
+from dao.wos_data import WosData, AuthorInformation
 from model.RoBERTaGAT.RoBERTaGAT import RobertaGAT
 
 
 model = RobertaGAT(roberta_model_name="roberta-base", num_classes=5)
-model.load_state_dict(torch.load('../model/RoBERTaGAT/model5.pth', map_location='cuda:0'))
+model.load_state_dict(torch.load(r'C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\model\RoBERTaGAT\model5.pth', map_location='cuda:0'))
 # model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
 # model.load_state_dict(torch.load('../model/RoBERTaGAT/model.pth', map_location='cuda:0'))
 model.eval()
@@ -130,18 +131,21 @@ def DealPaperInformation(title):
             while title[num + i][0:3] == '   ':
                 abstract += ' ' + title[num + i][3:]
                 i += 1
-            abstract = abstract.replace("e.g.", "for example")
-            abstract = abstract.replace("i.e.", "that is")
             wos_data.AB = abstract
-            ab_seqs = sent_tokenize(wos_data.AB)
+
+            ab_seqs = sent_tokenize(abstract)
+
             indices = [list(range(1, len(ab_seqs)+1)), [0 for _ in range(len(ab_seqs))]]
             indices[0].extend(list(range(1, len(ab_seqs))))
             indices[1].extend(list(range(2, len(ab_seqs)+1)))
+
             ab_seqs.insert(0, wos_data.TI_name)
             input_data = {"seq":ab_seqs, "rel":indices}
+
             result = seq_annotation(input_data)
             result["label"][0] = 0
             result["label"][-1] = 3
+
             for i in range(len(result['label'])):
                 if result['label'][i] == 0:
                     wos_data.r_background += result['seq'][i] + " "
@@ -509,7 +513,7 @@ def CreateJournalCategoryDict():
 
     # 获取索引为index的sheet表格
     # 用 pandas 读取 Excel 文件的第一个sheet
-    df = pd.read_excel(r"../data/esi-master-journal-list-4-2021.xlsx", sheet_name=0)
+    df = pd.read_excel(r"C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\data\esi-master-journal-list-4-2021.xlsx", sheet_name=0)
 
     # 获取所需的列并将它们转换为列表
     fullTitle = df.iloc[:, 0].tolist()
@@ -552,8 +556,75 @@ def convert_to_excel(file):
     df = pd.DataFrame(wos_dict)
     return df
 
+def split_sentence(abstract):
+    abstract = replace_abbreviations(abstract)
+    ab_seqs = sent_tokenize(abstract)
+    return ab_seqs
+
+def replace_abbreviations(text):
+    # 常见省略词
+    abbreviations = {
+        "e.g.": "for example",
+        "i.e.": "that is",
+        "etc.": "and so on",
+        "viz.": "namely",
+        "cf.": "compare",
+        "vs.": "versus",
+        "esp.": "especially",
+        "a.m.": "before noon",
+        "p.m.": "after noon",
+        "Dr.": "Doctor",
+        "Mr.": "Mister",
+        "Mrs.": "Mistress",
+        "Ms.": "Miss",
+        "Prof.": "Professor",
+        "Sr.": "Senior",
+        "Jr.": "Junior",
+        "Inc.": "Incorporated",
+        "Ltd.": "Limited",
+        "Co.": "Company",
+        "Corp.": "Corporation",
+        "Pty.": "Proprietary",
+        "Plc.": "Public limited company",
+        "LLC.": "Limited Liability Company",
+        "LP.": "Limited Partnership",
+        "LLP.": "Limited Liability Partnership",
+        "No.": "number",
+        "St.": "Street",
+        "Ave.": "Avenue",
+        "Blvd.": "Boulevard",
+        "Mt.": "Mount",
+        "Ft.": "Fort",
+        "Dept.": "Department",
+        "Univ.": "University",
+        "Assn.": "Association",
+        "Bros.": "Brothers",
+        "Est.": "Established",
+        "Fig.": "Figure",
+        "Max.": "Maximum",
+        "Min.": "Minimum",
+        "Gov.": "Governor",
+        "Sgt.": "Sergeant",
+        "Capt.": "Captain",
+        "Gen.": "General",
+        "Lt.": "Lieutenant",
+        "Col.": "Colonel",
+        "Adm.": "Admiral",
+        "Pres.": "President",
+        "VP.": "Vice President",
+        "Sec.": "Secretary",
+        "Treas.": "Treasurer"
+    }
 
 
+    pattern = re.compile(
+        r'\b(' + '|'.join(re.escape(abbreviation) for abbreviation in abbreviations.keys()) + r')(?=\W|$)')
+
+    def replace(match):
+        return abbreviations[match.group(0)]
+
+    # Replace abbreviations in the provided text
+    return pattern.sub(replace, text)
 
 
 if __name__ == '__main__':
@@ -561,13 +632,13 @@ if __name__ == '__main__':
     wos_js = []
     for title in titles:
         wosdata = DealPaperInformation(title)
-        print(wosdata.r_background)
+        print('B:' + wosdata.r_background)
         print("-----")
-        print(wosdata.r_method)
+        print("M:" + wosdata.r_method)
         print("-----")
-        print(wosdata.r_result)
+        print("R:" + wosdata.r_result)
         print("-----")
-        print(wosdata.r_conclusion)
+        print("C:" + wosdata.r_conclusion)
 
         print("----------------next------------------")
         # wos_js.append(wosdata.to_json())
@@ -577,8 +648,4 @@ if __name__ == '__main__':
     # 将 JSON 字符串写入文件
     # with open('../data/1.json', 'w', encoding='utf-8') as f:
         # f.write(wos_js_json)
-
-
-
-
 

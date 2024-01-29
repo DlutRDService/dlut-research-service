@@ -1,4 +1,4 @@
-from config.Neo4jConfig import Neo4jConnection
+from config.neo4j_config import Neo4jConnection
 
 class Neo4jService:
     def __init__(self, uri, user, pwd):

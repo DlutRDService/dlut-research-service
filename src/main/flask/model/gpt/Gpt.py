@@ -37,6 +37,7 @@ def question_answering(client, question):
             {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
         ]
     )
+    print(response.choices[0].message.content)
 
 def ner(client, text):
     pass

@@ -1,5 +1,4 @@
 from flask import Flask
-from openai import OpenAI
 
 from routes.DataProcessApi import data_process_blueprint
 
