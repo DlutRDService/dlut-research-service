@@ -56,12 +56,15 @@ def get_titles(file_path):
         print("共有{}篇文献".format(len(titles)))
     return titles
 
-def DealPaperInformation(title):
+def DealPaperInformation(title, *args):
     """
     传入一个title，读取统计文献的名称、期刊名、期刊ESI类别、WC类别、年份、引文、摘要、关键词、作者、作者机构、国家
     :param title: 传入文献
     :return:返回论文全部信息的paper类
     """
+
+    if args is None:
+        args = ["TI", "AF", "DE", "AB", "SO", "NR", "TC", "WC", "PY", "ab_seq"]
 
     Esi_dict = CreateJournalCategoryDict()
     wos_data = WosData()
@@ -69,7 +72,7 @@ def DealPaperInformation(title):
     title = title.split('\n')
     for num, line in enumerate(title):
         # 作者
-        if line.find('AF ') == 0:
+        if line.find('AF ') == 0 and 'AF' in args:
             Author = AuthorInformation()
             Author.AuthorName = line[3:].replace('\'', '').replace('\"', '')
             wos_data.AF.append(Author)
@@ -81,7 +84,7 @@ def DealPaperInformation(title):
                 i += 1
             continue
         # 标题
-        if line.find('TI ') == 0:
+        if line.find('TI ') == 0 and 'TI' in args:
             wos_data.TI_name = line[3:].replace('\'', '').replace('\"', '').replace('\\', '')
             i = 1
             while title[num + i][0:3] == '   ':
@@ -89,7 +92,7 @@ def DealPaperInformation(title):
                 i += 1
             continue
         # 期刊
-        if line.find('SO ') == 0:
+        if line.find('SO ') == 0 and 'SO' in args:
             try:
                 if ', ' in line:
                     wos_data.SO = line[3:].replace('\'', '').replace('\"', '').split(',')[0]
@@ -116,7 +119,7 @@ def DealPaperInformation(title):
                 wos_data.ESI = ''
                 pass
         # 关键字
-        if line.find("DE ") == 0:
+        if line.find("DE ") == 0 and 'DE' in args:
             keywords = line[3:].replace('\'', '').replace('\"', '')
             i = 1
             while title[num + i][0:3] == '   ':
@@ -125,7 +128,7 @@ def DealPaperInformation(title):
             wos_data.DE = keywords.split('; ')
             continue
         # 摘要
-        if line.find("AB ") == 0:
+        if line.find("AB ") == 0 and 'AB' in args:
             abstract = line[3:]
             i = 1
             while title[num + i][0:3] == '   ':
@@ -133,35 +136,37 @@ def DealPaperInformation(title):
                 i += 1
             wos_data.AB = abstract
 
-            ab_seqs = sent_tokenize(abstract)
+            if "ab_seq" in args:
+                ab_seqs = sent_tokenize(abstract)
 
-            indices = [list(range(1, len(ab_seqs)+1)), [0 for _ in range(len(ab_seqs))]]
-            indices[0].extend(list(range(1, len(ab_seqs))))
-            indices[1].extend(list(range(2, len(ab_seqs)+1)))
+                indices = [list(range(1, len(ab_seqs) + 1)), [0 for _ in range(len(ab_seqs))]]
+                indices[0].extend(list(range(1, len(ab_seqs))))
+                indices[1].extend(list(range(2, len(ab_seqs) + 1)))
 
-            ab_seqs.insert(0, wos_data.TI_name)
-            input_data = {"seq":ab_seqs, "rel":indices}
+                ab_seqs.insert(0, wos_data.TI_name)
+                input_data = {"seq": ab_seqs, "rel": indices}
 
-            result = seq_annotation(input_data)
-            result["label"][0] = 0
-            result["label"][-1] = 3
+                result = seq_annotation(input_data)
+                result["label"][0] = 0
+                result["label"][-1] = 3
 
-            for i in range(len(result['label'])):
-                if result['label'][i] == 0:
-                    wos_data.r_background += result['seq'][i] + " "
-                if result['label'][i] == 1:
-                    wos_data.r_method += result['seq'][i] + " "
-                if result['label'][i] == 2:
-                    if wos_data.r_method == '':
-                        wos_data.r_method = result['seq'][i]
-                        continue
-                    wos_data.r_result += result['seq'][i] + " "
-                if result['label'][i] == 3:
-                    wos_data.r_conclusion += result['seq'][i] + " "
+                for i in range(len(result['label'])):
+                    if result['label'][i] == 0:
+                        wos_data.r_background += result['seq'][i] + " "
+                    if result['label'][i] == 1:
+                        wos_data.r_method += result['seq'][i] + " "
+                    if result['label'][i] == 2:
+                        if wos_data.r_method == '':
+                            wos_data.r_method = result['seq'][i]
+                            continue
+                        wos_data.r_result += result['seq'][i] + " "
+                    if result['label'][i] == 3:
+                        wos_data.r_conclusion += result['seq'][i] + " "
+                continue
             continue
 
         # 作者所在国家、作者所在机构
-        if line.find('C1 ') == 0:
+        if line.find('C1 ') == 0 and 'AF' in args:
             # 国家
             if CheckNation(line) != -1:
                 wos_data.Nation.append(CheckNation(line))
@@ -237,7 +242,7 @@ def DealPaperInformation(title):
             continue
         # 若没有C1字段,则查找RP字段
         if len(wos_data.Nation) == 0 and len(wos_data.Organization) == 0:
-            if line.find('RP ') == 0:
+            if line.find('RP ') == 0 and 'AF' in args:
                 # 统计国家
                 for AF in wos_data.AF:
                     if CheckNation(line) != -1:
@@ -245,14 +250,14 @@ def DealPaperInformation(title):
                         AF.AuthorNation = wos_data.Nation[0]
                 continue
         # 引文数量
-        if line.find("NR ") == 0:
+        if line.find("NR ") == 0 and 'NR' in args:
             wos_data.NR = line[3:]
             continue
         # 被引TC
-        if line.find("TC ") == 0:
+        if line.find("TC ") == 0 and 'TC' in args:
             wos_data.TC = line[3:]
         # WC 类别
-        if line.find("WC ") == 0:
+        if line.find("WC ") == 0 and 'WC' in args:
             wc = line[3:].strip('\n')
             i = 1
             while title[num + i][0:3] == '   ':
@@ -261,7 +266,7 @@ def DealPaperInformation(title):
             wos_data.WC = wc.split('; ')
             continue
         # 年份PY
-        if line.find('PY ') == 0 or line.find('EA ') == 0:
+        if (line.find('PY ') == 0 or line.find('EA ') == 0) and 'PY' in args:
             wos_data.PY = line[-4:]
             continue
     for i in range(len(wos_data.AF)):
@@ -631,7 +636,9 @@ if __name__ == '__main__':
     titles = get_titles('../data/Test.txt')
     wos_js = []
     for title in titles:
-        wosdata = DealPaperInformation(title)
+        wosdata = DealPaperInformation(title, "AB", "ab_seq")
+        print(wosdata)
+        break
         print('B:' + wosdata.r_background)
         print("-----")
         print("M:" + wosdata.r_method)

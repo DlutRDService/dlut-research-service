@@ -23,6 +23,7 @@ class WosData:
         self.r_method = ''       # 研究方法
         self.r_result = ''       # 研究结果
         self.r_conclusion = ''   # 研究结论
+
     def to_dict(self):
         return {
             'TI_name': self.TI_name,
