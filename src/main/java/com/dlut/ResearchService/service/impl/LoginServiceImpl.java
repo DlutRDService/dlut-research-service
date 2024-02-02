@@ -94,6 +94,7 @@ public class LoginServiceImpl implements ILoginService {
     @Override
     public Result signByEmailCodeOrRegistration(@NotNull HttpSession session, String email, String emailCode) {
         Result result  = verify(email, emailCode);
+        //Result result = verify()
         if (result.getData() == null){
             return result;
         } else if (result.getData() instanceof String) {

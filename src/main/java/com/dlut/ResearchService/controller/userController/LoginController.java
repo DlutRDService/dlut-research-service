@@ -49,8 +49,6 @@ public class LoginController {
      * 使用账号密码登录时获取验证码进行验证码校验，验证码刷新限制1s内最多1次，管理员登录需要校验管理员身份。
      * @param response 响应
      * @param session 会话
-     * @param username 邮箱或账号
-     * @param password 密码
      * @throws IOException 读写异常
      */
     @log
@@ -60,6 +58,14 @@ public class LoginController {
         emailCodeService.getCaptcha(response, session);
     }
 
+    /**
+     * 管理员模式
+     * @param session
+     * @param username
+     * @param password
+     * @param isManager
+     * @return
+     */
     @log
     @PostMapping("sign-in/manager")
     public Result signByManager(@NotNull HttpSession session,
