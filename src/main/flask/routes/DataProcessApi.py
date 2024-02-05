@@ -8,11 +8,11 @@ from openai import OpenAI
 import os
 from sentence_transformers import SentenceTransformer
 
-from utils.ConvertToExcel import convert_to_excel
+from utils.paper_utils import convert_to_excel
 from model.transformer import Transformer
 from model.gpt import Gpt
 from model.llama import Llama
-from service.ImportToMysql import import_to_mysql
+# from service.mysql_service import MysqlService
 # from llama_cpp import Llama
 
 os.environ["OPENAI_API_KEY"] = "sk-uQzvGpP0SZmjBm8J918c590782Cc4e93A2715dC3286fD9C8"
@@ -26,7 +26,7 @@ sens_tan_md = SentenceTransformer('all-MiniLM-L6-v2')
 roberta_gat = None
 
 # 连接数据库
-db = pymysql.connect(host='localhost', user='root', passwd='lish145210', port=3306, db='rdreaserch')
+db = pymysql.connect(host='localhost', user='AI', passwd='!@#$AI', port=3306, db='dlut_academic_platform')
 
 data_process_blueprint = Blueprint('data', __name__)
 

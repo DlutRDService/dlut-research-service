@@ -22,6 +22,7 @@ public class TextAnalysisController {
     private TextAnalysisServiceImpl textAnalysisService;
     @Resource
     private UserInfoMapper userInfo;
+
     /**
      * 上传文件到flask服务器，并导入数据到mysql(txt),需要管理员身份
      * @param file 上传文件

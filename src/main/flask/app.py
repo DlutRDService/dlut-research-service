@@ -1,5 +1,4 @@
 from flask import Flask
-
 from routes.DataProcessApi import data_process_blueprint
 
 

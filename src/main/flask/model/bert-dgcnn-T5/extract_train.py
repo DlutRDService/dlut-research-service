@@ -15,7 +15,7 @@ model.to("cuda:0")
 
 abstracts = []
 # 加载训练数据集
-with open("dgcnn_dataset.json", 'r', encoding="utf-8") as json_file:
+with open("../../data/dgcnn_dataset.json", 'r', encoding="utf-8") as json_file:
     abstracts.extend(json.load(json_file))
 
 inputs = []
