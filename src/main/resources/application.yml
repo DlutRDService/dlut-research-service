@@ -9,7 +9,7 @@ spring:
   # 跨域配置
   graphql:
     cors:
-      allowed-origins: "http://localhost:3000"
+      allowed-origins: "*"
       allowed-methods: "*"
       allowed-headers: "*"
       allow-credentials: true  # 是否允许发送身份凭证（例如，包含Cookie的请求）

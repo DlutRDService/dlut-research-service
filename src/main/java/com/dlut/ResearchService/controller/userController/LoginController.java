@@ -52,7 +52,7 @@ public class LoginController {
      * @throws IOException 读写异常
      */
     @log
-    @PostMapping("sign-in/getCaptcha")
+    @GetMapping("sign-in/getCaptcha")
     public void getCaptcha(HttpServletResponse response, HttpSession session
                                 ) throws IOException {
         emailCodeService.getCaptcha(response, session);
