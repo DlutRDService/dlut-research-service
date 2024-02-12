@@ -7,17 +7,24 @@ from flask import Blueprint, request, jsonify, send_file
 from openai import OpenAI
 import os
 from sentence_transformers import SentenceTransformer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
 
 from utils.paper_utils import convert_to_excel
 from model.transformer import Transformer
 from model.gpt import Gpt
 from model.llama import Llama
-# from service.mysql_service import MysqlService
-# from llama_cpp import Llama
+
 
 os.environ["OPENAI_API_KEY"] = "sk-uQzvGpP0SZmjBm8J918c590782Cc4e93A2715dC3286fD9C8"
+device = "cuda:0" # the device to load the model onto
 
-# llama = Llama(model_path='../../../PycharmProjects/RoBERTaGAT/llama-2-7b.Q4_K_M.gguf')
+model = AutoModelForCausalLM.from_pretrained(
+    "mistralai/Mistral-7B-Instruct-v0.1",
+    torch_dtype=torch.bfloat16
+)
+model.to(device)
+tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")
 
 client = OpenAI(base_url="https://d2.xiamoai.top/v1")
 
@@ -29,6 +36,23 @@ roberta_gat = None
 db = pymysql.connect(host='localhost', user='AI', passwd='!@#$AI', port=3306, db='dlut_academic_platform')
 
 data_process_blueprint = Blueprint('data', __name__)
+@data_process_blueprint.route("api/demo", methods=["POST"])
+def demo():
+    user_input = input()
+    messages = [
+        {"role": "user", "content": user_input}
+    ]
+
+    encodeds = tokenizer.apply_chat_template(messages, return_tensors="pt")
+
+    model_inputs = encodeds.to(device)
+
+    generated_ids = model.generate(model_inputs, max_new_tokens=1000, do_sample=True)
+
+    decoded = tokenizer.batch_decode(generated_ids)
+    print(decoded[0])
+
+
 
 @data_process_blueprint.route('/api/embedding', methods=['POST'])
 def get_embedding():
