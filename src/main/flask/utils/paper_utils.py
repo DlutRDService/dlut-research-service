@@ -62,7 +62,6 @@ def DealPaperInformation(title, *args):
     :param title: 传入文献
     :return:返回论文全部信息的paper类
     """
-
     if args is None:
         args = ["TI", "AF", "DE", "AB", "SO", "NR", "TC", "WC", "PY", "ab_seq"]
 
@@ -118,6 +117,15 @@ def DealPaperInformation(title, *args):
             except KeyError:
                 wos_data.ESI = ''
                 pass
+        # 会议
+        if line.find('SE ') == 0 and 'SE' in args:
+            wos_data.SE = line[3:].replace('\'', '').replace('\"', '')
+            i = 1
+            while title[num + i][0:3] == '   ':
+                wos_data.SE += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '')
+                i += 1
+            wos_data.SE = wos_data.SE.split('; ')
+            continue
         # 关键字
         if line.find("DE ") == 0 and 'DE' in args:
             keywords = line[3:].replace('\'', '').replace('\"', '')

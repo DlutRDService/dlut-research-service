@@ -6,10 +6,11 @@ import json
 class WosData:
     # 记录每篇论文信息
     def __init__(self):
-        self.TI_name = ''        # 标题
+        self.TI = ''        # 标题
         self.AF = []             # 作者
         self.DE = []             # 关键词
         self.SO = ''             # 期刊
+        self.SE = ''             # 会议
         self.CR = []             # 引文类别
         self.WC = []             # WC类别
         self.PY = ''             # 出版年

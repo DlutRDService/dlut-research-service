@@ -1,3 +1,6 @@
+#! /usr/bin/python3.11
+# -*- coding:utf-8 -*-
+
 from utils.paper_utils import DealPaperInformation, get_titles
 
 class Dataset:
