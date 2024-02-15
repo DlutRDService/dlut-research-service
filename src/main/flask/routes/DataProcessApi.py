@@ -1,13 +1,16 @@
 # ! /usr/bin/python3.11
 # ! -*- coding:UTF-8 -*-
+import json
 from io import BytesIO
+from threading import Thread
+
 import pandas as pd
 import pymysql
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify, send_file, stream_with_context, Response
 from openai import OpenAI
 import os
 from sentence_transformers import SentenceTransformer
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer, TextIteratorStreamer
 import torch
 
 from utils.paper_utils import convert_to_excel
@@ -36,9 +39,12 @@ roberta_gat = None
 db = pymysql.connect(host='localhost', user='AI', passwd='!@#$AI', port=3306, db='dlut_academic_platform')
 
 data_process_blueprint = Blueprint('data', __name__)
-@data_process_blueprint.route("api/demo", methods=["POST"])
+@data_process_blueprint.route("/api/demo", methods=["GET"])
 def demo():
-    user_input = input()
+    user_input = request.args.get("user_input")
+    print(user_input)
+    streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+
     messages = [
         {"role": "user", "content": user_input}
     ]
@@ -47,10 +53,22 @@ def demo():
 
     model_inputs = encodeds.to(device)
 
-    generated_ids = model.generate(model_inputs, max_new_tokens=1000, do_sample=True)
+    # Run the generation in a separate thread, so that we can fetch the generated text in a non-blocking way.
+    generation_kwargs = dict(input_ids=model_inputs, max_new_tokens=512, streamer=streamer, do_sample=True)
 
-    decoded = tokenizer.batch_decode(generated_ids)
-    print(decoded[0])
+    thread = Thread(target=model.generate, kwargs=generation_kwargs)
+    thread.start()
+    for item in streamer:
+        print(item, end='')
+
+    return Response(stream_with_context(generate_stream(streamer)), content_type='text/event-stream')
+
+def generate_stream(streamer):
+    for item in streamer:
+        print(item, end='')
+        # item = json.dumps({"message": f"Message {item}"})
+        yield f"data: {json.dumps(item)}\n\n"
+
 
 
 

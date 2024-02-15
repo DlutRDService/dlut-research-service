@@ -1,8 +1,8 @@
-from config.neo4j_config import Neo4jConnection
+from config.neo4j_config import Neo4jConfig
 
 class Neo4jService:
     def __init__(self, uri, user, pwd):
-        self.conn = Neo4jConnection(uri, user, pwd)
+        self.conn = Neo4jConfig(uri, user, pwd)
         self.graph = self.conn.connect()
 
     def get_data(self, query):
