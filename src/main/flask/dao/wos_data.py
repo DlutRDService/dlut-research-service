@@ -6,8 +6,9 @@ import json
 class WosData:
     # 记录每篇论文信息
     def __init__(self):
-        self.TI = ''        # 标题
-        self.AF = []             # 作者
+        self.TI = ''             # 标题
+        self.AF = []             # 作者信息
+        self.AU = []             # 作者
         self.DE = []             # 关键词
         self.SO = ''             # 期刊
         self.SE = ''             # 会议
@@ -27,7 +28,7 @@ class WosData:
 
     def to_dict(self):
         return {
-            'TI_name': self.TI_name,
+            'TI': self.TI,
             'AF': self.AF,
             'DE': self.DE,
             'SO': self.SO,

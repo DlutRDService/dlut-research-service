@@ -14,7 +14,8 @@ from model.RoBERTaGAT.RoBERTaGAT import RobertaGAT
 
 
 model = RobertaGAT(roberta_model_name="roberta-base", num_classes=5)
-model.load_state_dict(torch.load(r'C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\model\RoBERTaGAT\model5.pth', map_location='cuda:0'))
+model.load_state_dict(torch.load(r'C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\model\RoBERTaGAT'
+                                 r'\model5.pth', map_location='cpu'))
 # model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
 # model.load_state_dict(torch.load('../model/RoBERTaGAT/model.pth', map_location='cuda:0'))
 model.eval()
@@ -84,10 +85,10 @@ def DealPaperInformation(title, *args):
             continue
         # 标题
         if line.find('TI ') == 0 and 'TI' in args:
-            wos_data.TI_name = line[3:].replace('\'', '').replace('\"', '').replace('\\', '')
+            wos_data.TI = line[3:].replace('\'', '').replace('\"', '').replace('\\', '')
             i = 1
             while title[num + i][0:3] == '   ':
-                wos_data.TI_name += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').replace('\\', '')
+                wos_data.TI += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').replace('\\', '')
                 i += 1
             continue
         # 期刊
@@ -151,7 +152,7 @@ def DealPaperInformation(title, *args):
                 indices[0].extend(list(range(1, len(ab_seqs))))
                 indices[1].extend(list(range(2, len(ab_seqs) + 1)))
 
-                ab_seqs.insert(0, wos_data.TI_name)
+                ab_seqs.insert(0, wos_data.TI)
                 input_data = {"seq": ab_seqs, "rel": indices}
 
                 result = seq_annotation(input_data)
@@ -277,14 +278,21 @@ def DealPaperInformation(title, *args):
         if (line.find('PY ') == 0 or line.find('EA ') == 0) and 'PY' in args:
             wos_data.PY = line[-4:]
             continue
+
+    if wos_data.AF is not None:
+        for j in range(len(wos_data.AF)):
+            if wos_data.AF[j] is not None and j <= 2:
+                wos_data.AU.append(wos_data.AF[j].AuthorName)
     for i in range(len(wos_data.AF)):
         if wos_data.AF[i].AuthorOrganization is None:
             wos_data.AF[i].AuthorOrganization = ' '
         if wos_data.AF[i].AuthorNation is None:
             wos_data.AF[i].AuthorNation = ' '
+    wos_data.AU = list(set(wos_data.AU))
     wos_data.Nation = list(set(wos_data.Nation))
     wos_data.Organization = list(set(wos_data.Organization))
     wos_data.DE = list(set(wos_data.DE))
+
     return wos_data
 
 def split_to_titles(file_path):
@@ -646,7 +654,7 @@ if __name__ == '__main__':
     for title in titles:
         wosdata = DealPaperInformation(title, "AB", "ab_seq")
         print(wosdata)
-        break
+        # break
         print('B:' + wosdata.r_background)
         print("-----")
         print("M:" + wosdata.r_method)

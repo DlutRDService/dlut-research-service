@@ -19,6 +19,6 @@ if __name__ == '__main__':
         "Output": i["short_abs"]
     } for i in data]
 
-    with open('summarize_abstract_dataset.json', 'w', encoding='utf-8') as f:
+    with open('../data/summarize_abstract_dataset.json', 'w', encoding='utf-8') as f:
         json.dump(dataset, f, ensure_ascii=False, indent=4)
 
