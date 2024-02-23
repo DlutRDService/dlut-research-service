@@ -2,22 +2,21 @@ import argparse
 import json
 import os
 
-import datasets
-import transformers
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, TrainerCallback, TrainingArguments, Trainer, \
+    DataCollatorForLanguageModeling
 import valohai
 from accelerate import Accelerator, FullyShardedDataParallelPlugin
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from datasets import load_dataset
+from peft import LoraConfig, get_peft_model
 from torch.distributed.fsdp.fully_sharded_data_parallel import FullOptimStateDictConfig, FullStateDictConfig
 
-from helper import get_quantization_config, get_run_identification
-
-# logger = logging.getLogger(__name__)
+from helper import get_run_identification
 
 
 class FineTuner:
     def __init__(self, args):
         self.train_data_path = args.train_data                               # 训练集路径
-        self.val_data_path = args.val_data                                   # 验证集路径
         self.base_mistral_model = args.base_mistral_model                    # 模型名称
         self.output_dir = args.output_dir                                    # 输出文件路径
         self.model_max_length = args.model_max_length                        # 模型最大上下文
@@ -25,11 +24,6 @@ class FineTuner:
         self.max_steps = args.max_steps                                      # 最大训练步数
         self.learning_rate = args.learning_rate                              # 学习率
         self.do_eval = args.do_eval                                          # 是否执行验证
-        self.quantization_config = get_quantization_config()                 # 量化配置
-        if self.quantization_config:
-            self.optimizer = 'paged_adamw_8bit'
-        else:
-            self.optimizer = transformers.TrainingArguments.default_optim
 
         self.setup_accelerator()
         self.setup_datasets()
@@ -39,25 +33,30 @@ class FineTuner:
     def setup_accelerator(self):
         os.environ['WANDB_DISABLED'] = 'true'
         fsdp_plugin = FullyShardedDataParallelPlugin(
-            state_dict_config=FullStateDictConfig(offload_to_cpu=True, rank0_only=False),
-            optim_state_dict_config=FullOptimStateDictConfig(offload_to_cpu=True, rank0_only=False),
+            state_dict_config=FullStateDictConfig(offload_to_cpu=True, rank0_only=True),
+            optim_state_dict_config=FullOptimStateDictConfig(offload_to_cpu=True, rank0_only=True),
         )
         self.accelerator = Accelerator(fsdp_plugin=fsdp_plugin)
 
     def setup_datasets(self):
-        train_path = self.train_data_path
-        val_path = self.val_data_path
+        data_files = self.train_data_path
 
-        self.tokenized_train_dataset = datasets.load_from_disk(os.path.dirname(train_path))
-        self.tokenized_eval_dataset = datasets.load_from_disk(os.path.dirname(val_path))
+        df = load_dataset('json', data_files=data_files)
+        if self.do_eval:
+            split_data = df['train'].train_test_split(test_size=0.2)
+            self.train_df = split_data['train']
+            self.val_df = split_data['test']
+        else:
+            self.train_df = df
+            self.val_df = None
 
     def setup_model(self):
         base_model_id = self.base_mistral_model
-        self.model = transformers.AutoModelForCausalLM.from_pretrained(
+        self.model = AutoModelForCausalLM.from_pretrained(
             base_model_id,
-            quantization_config=self.quantization_config,
+            torch_dtype=torch.bfloat16
         )
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(
+        self.tokenizer = AutoTokenizer.from_pretrained(
             base_model_id,
             model_max_length=self.model_max_length,
             padding_side='right',
@@ -81,7 +80,7 @@ class FineTuner:
         )
 
     def apply_peft(self):
-        model = prepare_model_for_kbit_training(self.model)
+
         config = LoraConfig(
             r=8,
             lora_alpha=16,
@@ -100,7 +99,7 @@ class FineTuner:
             task_type='CAUSAL_LM',
         )
 
-        model = get_peft_model(model, config)
+        model = get_peft_model(self.model, config)
 
         self.print_trainable_parameters()
 
@@ -108,11 +107,11 @@ class FineTuner:
 
     def train(self):
         checkpoint_output_dir = valohai.outputs().path(self.output_dir)
-        trainer = transformers.Trainer(
+        trainer = Trainer(
             model=self.model,
-            train_dataset=self.tokenized_train_dataset,
-            eval_dataset=self.tokenized_eval_dataset,
-            args=transformers.TrainingArguments(
+            train_dataset=self.train_df,
+            eval_dataset=self.val_df,
+            args=TrainingArguments(
                 output_dir=checkpoint_output_dir,
                 warmup_steps=self.warmup_steps,
                 per_device_train_batch_size=2,
@@ -122,7 +121,6 @@ class FineTuner:
                 logging_steps=10,
                 bf16=True,
                 tf32=False,
-                optim=self.optimizer,
                 logging_dir='./logs',  # Directory for storing logs
                 save_strategy='steps',  # Save the model checkpoint every logging step
                 save_steps=10,  # Save checkpoints every 10 steps
@@ -131,7 +129,7 @@ class FineTuner:
                 do_eval=self.do_eval,  # Perform evaluation at the end of training
                 report_to=None,
             ),
-            data_collator=transformers.DataCollatorForLanguageModeling(self.tokenizer, mlm=False),
+            data_collator=DataCollatorForLanguageModeling(self.tokenizer, mlm=False),
             callbacks=[PrinterCallback],
         )
 
@@ -164,14 +162,13 @@ class FineTuner:
                 json.dump(metadata, outfile)
 
 
-class PrinterCallback(transformers.TrainerCallback):
+class PrinterCallback(TrainerCallback):
     def on_log(self, args, state, control, logs=None, **kwargs):
         _ = logs.pop('total_flos', None)
         print(json.dumps(logs))
 
 
 def main():
-    # logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(description='Fine-tune a model')
 
     # Add arguments based on your script's needs
@@ -195,3 +192,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+    # import torch
+    # print(torch.__version__)
+    # print(torch.version.cuda)
+
