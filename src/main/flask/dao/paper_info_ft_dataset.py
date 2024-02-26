@@ -1,20 +1,22 @@
+#! /usr/bin/python3.11
+# -*- coding:utf-8 -*-
+
 """
-Author: AI
-Date: 2024-02
-Description: Generate the dataset about introducing paper info.
+Author: zsl
+Date: 2024-02-25
+Description: Generate the fine-tuning dataset about introducing paper info.
 """
 
 import json
 
-from dao.Dataset import Dataset
+from dao.PaperDataset import PaperDataset
 import torch
-
 
 
 if __name__ == '__main__':
 
     torch.cuda.empty_cache()
-    data = Dataset('../data/conference2023', "TI", "SE", "DE", "WC", "AF", "PY", "AB")
+    data = PaperDataset('../data/conference2023', "TI", "SE", "DE", "WC", "AF", "PY", "AB")
 
     dataset = [{
         "instruction": "Introduce the paper '{TI}'.".format(TI=i.TI),
@@ -26,7 +28,7 @@ if __name__ == '__main__':
                                 WC="and ".join(i.WC))
     } for i in data]
 
-    with open('paper_info_ft_dataset.json', 'w', encoding='utf-8') as file:
+    with open('../data/paper_info_ft_dataset.json', 'w', encoding='utf-8') as file:
         json.dump(dataset, file, ensure_ascii=False, indent=4)
 
 

@@ -1,7 +1,13 @@
 # ! /urs/bin/python3.10
 # ! -*- coding:utf-8 -*-
-import json
 
+"""
+Author: zsl
+Date: 2022-02-23
+Description: Object that stores paper information
+"""
+
+import json
 
 class WosData:
     # 记录每篇论文信息
@@ -12,7 +18,7 @@ class WosData:
         self.DE = []             # 关键词
         self.SO = ''             # 期刊
         self.SE = ''             # 会议
-        self.CR = []             # 引文类别
+        self.cr_category = []    # 引文类别
         self.WC = []             # WC类别
         self.PY = ''             # 出版年
         self.ESI = ''            # ESI类别
@@ -25,6 +31,8 @@ class WosData:
         self.r_method = ''       # 研究方法
         self.r_result = ''       # 研究结果
         self.r_conclusion = ''   # 研究结论
+        self.CR = []             # 引文
+        self.DI = ''
 
     def to_dict(self):
         return {
@@ -32,7 +40,7 @@ class WosData:
             'AF': self.AF,
             'DE': self.DE,
             'SO': self.SO,
-            'CR': self.CR,
+            'cr_category': self.cr_category,
             'WC': self.WC,
             'PY': self.PY,
             'ESI': self.ESI,
@@ -44,7 +52,9 @@ class WosData:
             'r_background': self.r_background,
             'r_method': self.r_method,
             'r_result': self.r_result,
-            'r_conclusion': self.r_conclusion
+            'r_conclusion': self.r_conclusion,
+            "CR": self.CR,
+            "DOI": self.DI
         }
 
     def to_json(self):
@@ -52,8 +62,6 @@ class WosData:
             self.AF[i] = self.AF[i].to_dict()
         wosdata_dict = self.to_dict()
         return json.dumps(wosdata_dict, ensure_ascii=False, indent=4)
-
-
 
 class AuthorInformation:
     def __init__(self):
@@ -74,6 +82,21 @@ class AuthorInformation:
             'AuthorName': self.AuthorName
         }
 
+
+class CitedReference:
+    def __init__(self, author=None, year=None, journal=None, doi=None):
+        self.Author = author
+        self.Year = year
+        self.Journal = journal
+        self.DOI = doi
+
+    def to_dict(self):
+        return {
+            'Author': self.Author,
+            'Year': self.Year,
+            'Journal': self.Journal,
+            'DOI': self.DOI
+        }
 
 WOS_categoryList = (
     'Acoustics',
@@ -327,6 +350,7 @@ WOS_categoryList = (
     'Women\'s Studies',
     'Zoology',
 )
+
 NationList = (
     'USA',
     'Abkhazia',

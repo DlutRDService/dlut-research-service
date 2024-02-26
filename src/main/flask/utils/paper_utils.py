@@ -9,13 +9,13 @@ import pandas as pd
 from transformers import RobertaTokenizer
 from nltk.tokenize import sent_tokenize
 
-from dao.wos_data import WosData, AuthorInformation
+from dao.wos_data import WosData, AuthorInformation, CitedReference
 from model.RoBERTaGAT.RoBERTaGAT import RobertaGAT
 
 
 model = RobertaGAT(roberta_model_name="roberta-base", num_classes=5)
 model.load_state_dict(torch.load(r'C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\model\RoBERTaGAT'
-                                 r'\model5.pth', map_location='cpu'))
+                                 r'\model5.pth', map_location='cuda:0'))
 # model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
 # model.load_state_dict(torch.load('../model/RoBERTaGAT/model.pth', map_location='cuda:0'))
 model.eval()
@@ -55,6 +55,8 @@ def get_titles(file_path):
                 print('----已经读入{}篇文献数据----'.format(num))
             titles.append(i)
         print("共有{}篇文献".format(len(titles)))
+    else:
+        raise ValueError('Please enter a valid path')
     return titles
 
 def DealPaperInformation(title, *args):
@@ -64,7 +66,7 @@ def DealPaperInformation(title, *args):
     :return:返回论文全部信息的paper类
     """
     if args is None:
-        args = ["TI", "AF", "DE", "AB", "SO", "NR", "TC", "WC", "PY", "ab_seq"]
+        args = ["TI", "AF", "DE", "AB", "SO", "NR", "TC", "WC", "PY", "ab_seq", 'CR', 'DI']
 
     Esi_dict = CreateJournalCategoryDict()
     wos_data = WosData()
@@ -258,6 +260,23 @@ def DealPaperInformation(title, *args):
                         wos_data.Nation.append(CheckNation(line))
                         AF.AuthorNation = wos_data.Nation[0]
                 continue
+        # 引文
+        if line.find('CR ') == 0 and 'CR' in args:
+            cr_list = line[3:].split(', ')
+            if len(cr_list) >= 4:
+                if cr_list[-1].find('DOI ') == 0:
+                    CR = CitedReference(author=cr_list[0], year=cr_list[1],
+                                        journal=cr_list[2], doi=cr_list[-1])
+                    wos_data.CR.append(CR.to_dict())
+            i = 1
+            while title[num + i][0:3] == '   ':
+                cr_list = title[num + i][0:3].split(', ')
+                if len(cr_list) >= 4:
+                    if cr_list[-1].find('DOI ') == 0:
+                        CR = CitedReference(author=cr_list[0], year=cr_list[1],
+                                            journal=cr_list[2], doi=cr_list[-1])
+                        wos_data.CR.append(CR.to_dict())
+                i += 1
         # 引文数量
         if line.find("NR ") == 0 and 'NR' in args:
             wos_data.NR = line[3:]
@@ -278,7 +297,8 @@ def DealPaperInformation(title, *args):
         if (line.find('PY ') == 0 or line.find('EA ') == 0) and 'PY' in args:
             wos_data.PY = line[-4:]
             continue
-
+        if line.find("DI ") == 0 and 'DI' in args:
+            wos_data.DI = line[3:]
     if wos_data.AF is not None:
         for j in range(len(wos_data.AF)):
             if wos_data.AF[j] is not None and j <= 2:
