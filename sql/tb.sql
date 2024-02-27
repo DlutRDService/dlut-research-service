@@ -31,22 +31,22 @@ create table sys_ops_log (
 -- ----------------------------
 drop table if exists sys_ops_log;
 create table sys_ops_log (
-                             ops_id            bigint(20)      not null auto_increment    comment '日志主键',
-                             method            varchar(100)    default ''                 comment '方法名称',
-                             request_method    varchar(10)     default ''                 comment '请求方式',
-                             operator_type     int(1)          default 0                  comment '操作类别（0其它 1后台用户 2普通用户）',
-                             ops_name          varchar(50)     default ''                 comment '操作人员',
-                             ops_url           varchar(255)    default ''                 comment '请求URL',
-                             ops_ip            varchar(128)    default ''                 comment '主机地址',
-                             ops_param         varchar(2000)   default ''                 comment '请求参数',
-                             json_result       varchar(2000)   default ''                 comment '返回参数',
-                             status            int(1)          default 0                  comment '操作状态（0正常 1异常）',
-                             error_msg         varchar(2000)   default ''                 comment '错误消息',
-                             ops_time          datetime                                   comment '操作时间',
-                             cost_time         bigint(20)      default 0                  comment '消耗时间',
-                             primary key (ops_id),
-                             key idx_sys_ops_log_s  (status),
-                             key idx_sys_ops_log_ot (ops_time)
+    ops_id            bigint(20)      not null auto_increment    comment '日志主键',
+    method            varchar(100)    default ''                 comment '方法名称',
+    request_method    varchar(10)     default ''                 comment '请求方式',
+    operator_type     int(1)          default 0                  comment '操作类别（0其它 1后台用户 2普通用户）',
+    ops_name          varchar(50)     default ''                 comment '操作人员',
+    ops_url           varchar(255)    default ''                 comment '请求URL',
+    ops_ip            varchar(128)    default ''                 comment '主机地址',
+    ops_param         varchar(2000)   default ''                 comment '请求参数',
+    json_result       varchar(2000)   default ''                 comment '返回参数',
+    status            int(1)          default 0                  comment '操作状态（0正常 1异常）',
+    error_msg         varchar(2000)   default ''                 comment '错误消息',
+    ops_time          datetime                                   comment '操作时间',
+    cost_time         bigint(20)      default 0                  comment '消耗时间',
+    primary key (ops_id),
+    key idx_sys_ops_log_s  (status),
+    key idx_sys_ops_log_ot (ops_time)
 ) engine=innodb auto_increment=100 comment = '接口访问日志';
 
 -- ----------------------------
@@ -77,30 +77,51 @@ create table sys_user (
 -- ----------------------------
 -- 文献表
 -- ----------------------------
+-- 删除外键约束
+ALTER TABLE abstract DROP FOREIGN KEY fk_abstract_paper;
+
 drop table if exists paper;
 create table paper (
-            paper_id       bigint(20)        not null auto_increment    comment '文献id',
-            tl             varchar(500)      default null               comment 'TL文章标题',
-            au             varchar(1000)     default null               comment 'AU文章作者,只显示1000字符',
-            long_au        TEXT              default null               comment 'AU文章作者',
-            de             varchar(500)      default null               comment 'DE关键词',
-            long_de        TEXT              default null               comment 'DE关键词',
-            so             varchar(500)      default null               comment 'SO文章期刊',
-            py             varchar(4)        default null               comment 'PY发表年份',
-            wc             varchar(500)      default null               comment 'WOS分类',
-            esi            varchar(100)      default null               comment 'ESI分类',
-            tc             smallint(5)       default 0                  comment '文章被引量',
-            nr             smallint(5)       default 0                  comment '文章引文量',
-            ab             varchar(1500)     default null               comment '文献摘要,只显示1500字符',
-            long_ab        TEXT              default null               comment '文献摘要',
-            ab_path        varchar(500)      default null               comment '文献摘要详细信息存储地址',
-            r_background   varchar(2000)     default null               comment '研究背景',
-            r_method       varchar(2000)     default null               comment '研究方法',
-            r_result       varchar(2000)     default null               comment '研究结果',
-            r_conclusion   varchar(2000)     default null               comment '研究结论',
-            primary key (paper_id),
-            UNIQUE INDEX idx_paper_tl (tl)
+    paper_id       bigint(20)        not null auto_increment    comment '文献id',
+    tl             varchar(500)      default null               comment 'TL文章标题',
+    au             TEXT              default null               comment 'AU文章作者',
+    de             TEXT              default null               comment 'DE关键词',
+    so             varchar(500)      default null               comment 'SO文章期刊',
+    py             varchar(4)        default null               comment 'PY发表年份',
+    wc             varchar(500)      default null               comment 'WOS分类',
+    esi            varchar(100)      default null               comment 'ESI分类',
+    tc             smallint(5)       default 0                  comment '文章被引量',
+    nr             smallint(5)       default 0                  comment '文章引文量',
+    ab             varchar(1500)     default null               comment '文献摘要（1500字符）',
+    ab_id          bigint(20)        not null                   comment '摘要id',
+    doi            varchar(500)      default null               comment '论文DOI号',
+    cr             text              default null               comment '引文DOI',
+    primary key (paper_id),
+    UNIQUE INDEX idx_paper_tl (tl),
+    UNIQUE INDEX idx_paper_ab (ab_id),
+    UNIQUE INDEX idx_paper_doi (doi)
 ) engine=innodb auto_increment=0 comment = '文献表';
+
+-- ----------------------------
+-- 摘要表
+-- ----------------------------
+drop table if exists abstract;
+create table abstract (
+                          abstract_id          bigint(20)      not null auto_increment    comment '机构id',
+                          paper_id             bigint(20)      not null                   comment '论文id',
+                          paper_doi            varchar(50)     not null                   comment '论文DOI',
+                          abstract             text            default null               comment '摘要全文',
+                          research_background  varchar(2000)    default null               comment '研究背景',
+                          research_method      varchar(2000)    default null               comment '研究方法',
+                          research_result      varchar(2000)     default null               comment '研究结果',
+                          research_conclusion  varchar(2000)    default null               comment '研究结论',
+                          primary key (abstract_id),
+                          unique key idx_abstract_paper_id (paper_id),
+                          unique key idx_abstract_paper_doi (paper_doi),
+                          CONSTRAINT fk_abstract_paper FOREIGN KEY (paper_id) REFERENCES paper(paper_id)
+                              ON DELETE CASCADE
+                              ON UPDATE CASCADE
+) engine=innodb auto_increment=0 comment = '摘要表';
 
 -- ----------------------------
 -- 作者表
@@ -146,22 +167,6 @@ create table organization (
         org_author_count   varchar(50)     default null               comment '机构作者数',
         primary key (org_id)
 ) engine=innodb auto_increment=0 comment = '机构表';
-
--- ----------------------------
--- 摘要表
--- ----------------------------
-drop table if exists abstract;
-create table abstract (
-    abstract_id          bigint(20)      not null auto_increment    comment '机构id',
-    paper_id             bigint(20)      not null                   comment '论文id',
-    research_content     varchar(200)    default null               comment '研究内容',
-    research_background  varchar(100)    default null               comment '研究背景',
-    research_method      varchar(100)    default null               comment '研究方法',
-    research_result      varchar(50)     default null               comment '研究结果',
-    research_conclusion  varchar(500)    default null               comment '研究结论',
-    primary key (abstract_id),
-    unique key idx_abstract_paper_id (paper_id)
-) engine=innodb auto_increment=0 comment = '摘要表';
 
 -- ----------------------------
 -- 通知表

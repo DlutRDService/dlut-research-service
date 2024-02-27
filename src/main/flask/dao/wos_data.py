@@ -32,7 +32,7 @@ class WosData:
         self.r_result = ''       # 研究结果
         self.r_conclusion = ''   # 研究结论
         self.CR = []             # 引文
-        self.DI = ''
+        self.DI = ''             # DOI号
 
     def to_dict(self):
         return {
@@ -84,17 +84,17 @@ class AuthorInformation:
 
 
 class CitedReference:
-    def __init__(self, author=None, year=None, journal=None, doi=None):
+    def __init__(self, author=None, year=None, SO=None, doi=None):
         self.Author = author
         self.Year = year
-        self.Journal = journal
+        self.SO = SO
         self.DOI = doi
 
     def to_dict(self):
         return {
             'Author': self.Author,
             'Year': self.Year,
-            'Journal': self.Journal,
+            'Journal': self.SO,
             'DOI': self.DOI
         }
 

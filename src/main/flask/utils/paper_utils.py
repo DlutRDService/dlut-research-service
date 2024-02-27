@@ -65,8 +65,8 @@ def DealPaperInformation(title, *args):
     :param title: 传入文献
     :return:返回论文全部信息的paper类
     """
-    if args is None:
-        args = ["TI", "AF", "DE", "AB", "SO", "NR", "TC", "WC", "PY", "ab_seq", 'CR', 'DI']
+    if not args:
+        args = ["TI", "AF", "DE", "AB", "SO", "SE", "NR", "TC", "WC", "PY", "ab_seq", 'CR', 'DI']
 
     Esi_dict = CreateJournalCategoryDict()
     wos_data = WosData()
@@ -263,18 +263,26 @@ def DealPaperInformation(title, *args):
         # 引文
         if line.find('CR ') == 0 and 'CR' in args:
             cr_list = line[3:].split(', ')
-            if len(cr_list) >= 4:
+            if len(cr_list) == 3:
+                CR = CitedReference(author=cr_list[0], year=cr_list[1],
+                                    SO=cr_list[2], doi=cr_list[-1].replace(']', ''))
+                wos_data.CR.append(CR.to_dict())
+            if len(cr_list) > 3:
                 if cr_list[-1].find('DOI ') == 0:
                     CR = CitedReference(author=cr_list[0], year=cr_list[1],
-                                        journal=cr_list[2], doi=cr_list[-1])
+                                        SO=cr_list[2], doi=cr_list[-1].replace(']', ''))
                     wos_data.CR.append(CR.to_dict())
             i = 1
             while title[num + i][0:3] == '   ':
-                cr_list = title[num + i][0:3].split(', ')
-                if len(cr_list) >= 4:
+                cr_list = title[num + i][3:].split(', ')
+                if len(cr_list) == 3:
+                    CR = CitedReference(author=cr_list[0], year=cr_list[1],
+                                    SO=cr_list[2])
+                    wos_data.CR.append(CR.to_dict())
+                if len(cr_list) > 3:
                     if cr_list[-1].find('DOI ') == 0:
                         CR = CitedReference(author=cr_list[0], year=cr_list[1],
-                                            journal=cr_list[2], doi=cr_list[-1])
+                                        SO=cr_list[2], doi=cr_list[-1].replace(']', ''))
                         wos_data.CR.append(CR.to_dict())
                 i += 1
         # 引文数量
@@ -297,6 +305,7 @@ def DealPaperInformation(title, *args):
         if (line.find('PY ') == 0 or line.find('EA ') == 0) and 'PY' in args:
             wos_data.PY = line[-4:]
             continue
+        # DOI号
         if line.find("DI ") == 0 and 'DI' in args:
             wos_data.DI = line[3:]
     if wos_data.AF is not None:
