@@ -16,14 +16,13 @@ from helper import get_run_identification
 
 class FineTuner:
     def __init__(self, args):
-        self.train_data_path = args.train_data                               # 训练集路径
+        self.data_files = args.data_files                                    # 数据集路径
         self.base_mistral_model = args.base_mistral_model                    # 模型名称
         self.output_dir = args.output_dir                                    # 输出文件路径
         self.model_max_length = args.model_max_length                        # 模型最大上下文
         self.warmup_steps = args.warmup_steps                                # 学习率预热
         self.max_steps = args.max_steps                                      # 最大训练步数
         self.learning_rate = args.learning_rate                              # 学习率
-        self.do_eval = args.do_eval                                          # 是否执行验证
 
         self.setup_accelerator()
         self.setup_datasets()
@@ -39,16 +38,13 @@ class FineTuner:
         self.accelerator = Accelerator(fsdp_plugin=fsdp_plugin)
 
     def setup_datasets(self):
-        data_files = self.train_data_path
+        data_files = self.data_files
 
         df = load_dataset('json', data_files=data_files)
-        if self.do_eval:
-            split_data = df['train'].train_test_split(test_size=0.2)
-            self.train_df = split_data['train']
-            self.val_df = split_data['test']
-        else:
-            self.train_df = df
-            self.val_df = None
+        split_data = df['train'].train_test_split(test_size=0.2)
+        self.train_df = split_data['train']
+        self.val_df = split_data['test']
+
 
     def setup_model(self):
         base_model_id = self.base_mistral_model
@@ -117,23 +113,22 @@ class FineTuner:
                 per_device_train_batch_size=2,
                 gradient_accumulation_steps=4,
                 max_steps=self.max_steps,
-                learning_rate=self.learning_rate,  # Want about 10x smaller than the Mistral learning rate
+                learning_rate=self.learning_rate,
                 logging_steps=10,
                 bf16=True,
                 tf32=False,
-                logging_dir='./logs',  # Directory for storing logs
-                save_strategy='steps',  # Save the model checkpoint every logging step
-                save_steps=10,  # Save checkpoints every 10 steps
-                evaluation_strategy='steps',  # Evaluate the model every logging step
-                eval_steps=17,  # Evaluate and save checkpoints every 17 steps
-                do_eval=self.do_eval,  # Perform evaluation at the end of training
+                logging_dir='./logs',
+                save_strategy='steps',
+                save_steps=10,
+                evaluation_strategy='steps',
+                eval_steps=17,
                 report_to=None,
             ),
             data_collator=DataCollatorForLanguageModeling(self.tokenizer, mlm=False),
             callbacks=[PrinterCallback],
         )
 
-        self.model.config.use_cache = False  # silence the warnings. Please re-enable for inference!
+        self.model.config.use_cache = False
         trainer.train()
         model_save_dir = os.path.join(checkpoint_output_dir, 'best_model')
 
@@ -174,14 +169,12 @@ def main():
     # Add arguments based on your script's needs
     # fmt: off
     parser.add_argument("--base_mistral_model", type=str, default="mistralai/Mistral-7B-v0.1", help="Base mistral from hugging face")
-    parser.add_argument("--train_data", type=str, help="Path to the training data")
-    parser.add_argument("--val_data", type=str, help="Path to the validation data")
+    parser.add_argument("--data_files", type=str, help="Path to the training data")
     parser.add_argument("--output_dir", type=str, default="finetuned_mistral", help="Output directory for checkpoints")
     parser.add_argument("--model_max_length", type=int, default=512, help="Maximum length for the model")
     parser.add_argument("--warmup_steps", type=int, default=5, help="Warmup steps")
     parser.add_argument("--max_steps", type=int, default=10, help="Maximum training steps")
     parser.add_argument("--learning_rate", type=float, default=2.5e-5, help="Learning rate")
-    parser.add_argument("--do_eval", action="store_true", help="Perform evaluation at the end of training")
     # fmt: on
 
     args = parser.parse_args()
@@ -191,22 +184,7 @@ def main():
 
 
 if __name__ == '__main__':
-    # main()
+    main()
     # import torch
     # print(torch.__version__)
     # print(torch.version.cuda)
-    text = "<s>[INST] What is your favourite condiment? [/INST]"
-    "Well, I'm quite partial to a good squeeze of fresh lemon juice. It adds just the right amount of zesty flavour to whatever I'm cooking up in the kitchen!</s> "
-    "[INST] Do you have mayonnaise recipes? [/INST]"
-
-    model = AutoModelForCausalLM.from_pretrained(
-        "mistralai/Mistral-7B-v0.1",
-        torch_dtype=torch.bfloat16
-    )
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-v0.1")
-    model_inputs = tokenizer([text], return_tensors="pt").to("cuda")
-    model.to("cuda:0")
-
-    generated_ids = model.generate(**model_inputs, max_new_tokens=100, do_sample=True)
-    output = tokenizer.batch_decode(generated_ids)[0]
-    print(output)

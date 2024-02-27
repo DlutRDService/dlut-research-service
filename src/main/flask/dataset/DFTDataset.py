@@ -94,3 +94,11 @@ class FineTuningDataset:
 
         with open(output_path, 'w', encoding='utf-8') as file:
             json.dump(dataset, file, ensure_ascii=False, indent=4)
+
+
+if __name__ == '__main__':
+    dataset = FineTuningDataset()
+    dataset.generate_method_ft_dataset(r'C:\Users\AI\Desktop\data\AI\2024',
+                                       r'C:\Users\AI\Desktop\data\method_ft_dataset.json',
+                                       "TI", "WC", "AB", "ab_seq"
+                                       )

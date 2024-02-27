@@ -22,22 +22,29 @@ CREATE PROCEDURE insert_or_update_paper(
     IN p_research_conclusion VARCHAR(2000)
 )
 BEGIN
-    -- 插入paper表
-    INSERT INTO paper (tl, au, de, so, py, wc, esi, tc, nr, ab, doi, cr, ab_id)
-    VALUES (p_tl, p_au, p_de, p_so, p_py, p_wc, p_esi, p_tc, p_nr, p_short_ab, p_doi, p_cr, 0);
+    
+    DECLARE existing_paper_id BIGINT;
+    -- 判断是否存在
+    SELECT paper.paper_id INTO existing_paper_id FROM paper WHERE paper.tl = p_tl LIMIT 1;
 
-    -- 获取最新插入的paper_id
-    SET @last_paper_id = LAST_INSERT_ID();
+    IF existing_paper_id IS NULL THEN
+        -- 插入paper表
+        INSERT INTO paper (tl, au, de, so, py, wc, esi, tc, nr, ab, doi, cr, ab_id)
+        VALUES (p_tl, p_au, p_de, p_so, p_py, p_wc, p_esi, p_tc, p_nr, p_short_ab, p_doi, p_cr, 0);
 
-    -- 插入abstract表
-    INSERT INTO abstract (paper_id, paper_doi, abstract, research_background, research_method, research_result, research_conclusion)
-    VALUES (@last_paper_id, p_doi, p_ab, p_research_background, p_research_method, p_research_result, p_research_conclusion);
+        -- 获取最新插入的paper_id
+        SET @last_paper_id = LAST_INSERT_ID();
 
-    -- 获取最新插入的abstract_id
-    SET @last_abstract_id = LAST_INSERT_ID();
+        -- 插入abstract表
+        INSERT INTO abstract (paper_id, paper_doi, abstract, research_background, research_method, research_result, research_conclusion)
+        VALUES (@last_paper_id, p_doi, p_ab, p_research_background, p_research_method, p_research_result, p_research_conclusion);
 
-    -- 更新paper表的ab_id
-    UPDATE paper SET ab_id = @last_abstract_id WHERE paper_id = @last_paper_id;
+        -- 获取最新插入的abstract_id
+        SET @last_abstract_id = LAST_INSERT_ID();
+
+        -- 更新paper表的ab_id
+        UPDATE paper SET ab_id = @last_abstract_id WHERE paper_id = @last_paper_id;
+    END IF;
 
 END$$
 
