@@ -99,7 +99,7 @@ create table paper (
     primary key (paper_id),
     UNIQUE INDEX idx_paper_tl (tl),
     UNIQUE INDEX idx_paper_ab (ab_id),
-    UNIQUE INDEX idx_paper_doi (doi)
+    KEY idx_paper_doi (doi)
 ) engine=innodb auto_increment=0 comment = '文献表';
 
 -- ----------------------------
@@ -107,17 +107,17 @@ create table paper (
 -- ----------------------------
 drop table if exists abstract;
 create table abstract (
-                          abstract_id          bigint(20)      not null auto_increment    comment '机构id',
-                          paper_id             bigint(20)      not null                   comment '论文id',
-                          paper_doi            varchar(50)     not null                   comment '论文DOI',
-                          abstract             text            default null               comment '摘要全文',
+                          abstract_id          bigint(20)       not null auto_increment    comment '机构id',
+                          paper_id             bigint(20)       not null                   comment '论文id',
+                          paper_doi            varchar(50)      default null               comment '论文DOI',
+                          abstract             text             default null               comment '摘要全文',
                           research_background  varchar(2000)    default null               comment '研究背景',
-                          research_method      varchar(2000)    default null               comment '研究方法',
-                          research_result      varchar(2000)     default null               comment '研究结果',
-                          research_conclusion  varchar(2000)    default null               comment '研究结论',
+                          research_method      varchar(2000)    default null              comment '研究方法',
+                          research_result      varchar(2000)    default null              comment '研究结果',
+                          research_conclusion  varchar(2000)    default null              comment '研究结论',
                           primary key (abstract_id),
                           unique key idx_abstract_paper_id (paper_id),
-                          unique key idx_abstract_paper_doi (paper_doi),
+                          key idx_abstract_paper_doi (paper_doi),
                           CONSTRAINT fk_abstract_paper FOREIGN KEY (paper_id) REFERENCES paper(paper_id)
                               ON DELETE CASCADE
                               ON UPDATE CASCADE
@@ -134,7 +134,7 @@ create table author (
         author_org              varchar(200)    default null               comment '作者机构',
         paper_count             varchar(50)     default null               comment '发文数量',
         paper_count_per_year    varchar(4)      default null               comment '每年发文数量',
-        research                varchar(200)    default null               comment '研究领域',
+        # research                varchar(200)    default null               comment '研究领域',
         H                       smallint(4)     default 0                  comment 'H指数',
         high_cited_paper        smallint(4)     default 0                  comment '高被引文章',
         primary key (author_id),

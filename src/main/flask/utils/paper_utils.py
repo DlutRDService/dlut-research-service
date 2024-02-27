@@ -131,10 +131,10 @@ def DealPaperInformation(title, *args):
             continue
         # 关键字
         if line.find("DE ") == 0 and 'DE' in args:
-            keywords = line[3:].replace('\'', '').replace('\"', '')
+            keywords = line[3:].replace('\'', '').replace('\"', '').lower()
             i = 1
             while title[num + i][0:3] == '   ':
-                keywords += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '')
+                keywords += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').lower()
                 i += 1
             wos_data.DE = keywords.split('; ')
             continue
@@ -183,12 +183,12 @@ def DealPaperInformation(title, *args):
                 wos_data.Nation.append(CheckNation(line))
             # 所在机构
             if line.find('] ') != -1:
-                C1 = line[(line.find('] ') + 1):].replace('\'', '').replace('\"', '').split(',')
+                C1 = line[(line.find('] ') + 1):].replace('\'', '').replace('\"', '')
                 # 读入一级机构
-                wos_data.Organization.append(C1[0].strip())
+                wos_data.Organization.append(C1)
             else:
-                C1 = line[3:].replace('\'', '').replace('\"', '').split(',')
-                wos_data.Organization.append(C1[0].strip())
+                C1 = line[3:].replace('\'', '').replace('\"', '')
+                wos_data.Organization.append(C1)
             # 写入作者信息(国籍, 机构)
             # 先遍历从AF中获取的作者和作者名字，通过“[]”获取作者名字与同一行的机构和国籍匹配
             if line.find('] ') != -1:
@@ -215,11 +215,11 @@ def DealPaperInformation(title, *args):
                 if CheckNation(Line) != -1:
                     wos_data.Nation.append(CheckNation(Line))
                 if Line.find('] ') != -1:
-                    C1 = Line[(Line.find('] ') + 1):].replace('\'', '').replace('\"', '').split(', ')
-                    wos_data.Organization.append(C1[0].strip())
+                    C1 = Line[(Line.find('] ') + 1):].replace('\'', '').replace('\"', '')
+                    wos_data.Organization.append(C1)
                 else:
-                    C1 = Line[3:].replace('\'', '').replace('\"', '').split(',')
-                    wos_data.Organization.append(C1[0].strip())
+                    C1 = Line[3:].replace('\'', '').replace('\"', '')
+                    wos_data.Organization.append(C1)
                 names = Line[(Line.find('[') + 1):(Line.find('] '))].replace('\'', '').replace('\"', '').split('; ')
                 for name in names:
                     writtenFlag = False
@@ -563,7 +563,7 @@ def CreateJournalCategoryDict():
 
     # 获取索引为index的sheet表格
     # 用 pandas 读取 Excel 文件的第一个sheet
-    df = pd.read_excel(r"C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\data\esi-master-journal-list-4-2021.xlsx", sheet_name=0)
+    df = pd.read_excel(r"C:\Users\AI\Desktop\data\esi-master-journal-list-4-2021.xlsx", sheet_name=0)
 
     # 获取所需的列并将它们转换为列表
     fullTitle = df.iloc[:, 0].tolist()
@@ -581,8 +581,9 @@ def CreateJournalCategoryDict():
 def seq_annotation(data):
     tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
     tokenors = tokenizer(data['seq'], padding='max_length', truncation=True, max_length=96, return_tensors="pt")
-    output = model(tokenors['input_ids'], tokenors['attention_mask'], torch.tensor(data['rel']))[0]
-    output = output.argmax(dim=1).tolist()
+    with torch.no_grad():
+        output = model(tokenors['input_ids'], tokenors['attention_mask'], torch.tensor(data['rel']))[0]
+        output = output.argmax(dim=1).tolist()
     return {"seq": data['seq'][1:], "label": output[1:]}
 
 def object_to_dict(obj):

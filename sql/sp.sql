@@ -1,64 +1,47 @@
 DROP PROCEDURE IF EXISTS insert_or_update_paper;
 
-DELIMITER //
+DELIMITER $$
 
 CREATE PROCEDURE insert_or_update_paper(
-    IN input_tl VARCHAR(500),
-    IN input_au TEXT,
-    IN input_de TEXT,
-    IN input_so VARCHAR(255),
-    IN input_py VARCHAR(4),
-    IN input_wc VARCHAR(255),
-    IN input_esi VARCHAR(100),
-    IN input_tc SMALLINT,
-    IN input_nr SMALLINT,
-    IN input_ab TEXT,
-    IN input_ab_path VARCHAR(500)
+    IN p_tl VARCHAR(500),
+    IN p_au TEXT,
+    IN p_de TEXT,
+    IN p_so VARCHAR(500),
+    IN p_py VARCHAR(4),
+    IN p_wc VARCHAR(500),
+    IN p_esi VARCHAR(100),
+    IN p_tc SMALLINT,
+    IN p_nr SMALLINT,
+    IN p_short_ab VARCHAR(1500),
+    IN p_ab TEXT,
+    IN p_doi VARCHAR(500),
+    IN p_cr TEXT,
+    IN p_research_background VARCHAR(2000),
+    IN p_research_method VARCHAR(2000),
+    IN p_research_result VARCHAR(2000),
+    IN p_research_conclusion VARCHAR(2000)
 )
 BEGIN
-    DECLARE short_au VARCHAR(500);
-    DECLARE long_au TEXT;
-    DECLARE short_ab VARCHAR(1000);
-    DECLARE long_ab TEXT;
-    DECLARE short_de VARCHAR(500);
-    DECLARE long_de TEXT;
+    -- 插入paper表
+    INSERT INTO paper (tl, au, de, so, py, wc, esi, tc, nr, ab, doi, cr, ab_id)
+    VALUES (p_tl, p_au, p_de, p_so, p_py, p_wc, p_esi, p_tc, p_nr, p_short_ab, p_doi, p_cr, 0);
 
-    -- 处理第一个文本字段
-    IF CHAR_LENGTH(input_au) <= 500 THEN
-        SET short_au = input_au;
-        SET long_au = NULL;
-    ELSE
-        SET short_au = LEFT(input_au, 500);
-        SET long_au = input_au;
-    END IF;
+    -- 获取最新插入的paper_id
+    SET @last_paper_id = LAST_INSERT_ID();
 
-    -- 处理第二个文本字段
-    IF CHAR_LENGTH(input_de) <= 500 THEN
-        SET short_de = input_de;
-        SET long_de = NULL;
-    ELSE
-        SET short_de = LEFT(input_de, 500);
-        SET long_au = input_au;
-    END IF;
+    -- 插入abstract表
+    INSERT INTO abstract (paper_id, paper_doi, abstract, research_background, research_method, research_result, research_conclusion)
+    VALUES (@last_paper_id, p_doi, p_ab, p_research_background, p_research_method, p_research_result, p_research_conclusion);
 
-    -- 处理第三个文本字段
-    IF CHAR_LENGTH(input_ab) <= 1000 THEN
-        SET short_ab = input_ab;
-        SET long_ab = NULL;
-    ELSE
-        SET short_ab = LEFT(input_ab, 1000);
-        SET long_ab = input_ab;
-    END IF;
+    -- 获取最新插入的abstract_id
+    SET @last_abstract_id = LAST_INSERT_ID();
 
-    -- 插入或更新记录
-    INSERT INTO paper (tl, au, long_au, de, so, py, wc, esi, tc, nr, ab,long_ab, ab_path)
-    VALUES (input_tl, short_au, long_au, input_de, input_so, input_py, input_wc,
-            input_esi, input_tc, input_nr, short_ab, long_ab, input_ab_path);
+    -- 更新paper表的ab_id
+    UPDATE paper SET ab_id = @last_abstract_id WHERE paper_id = @last_paper_id;
 
-END //
+END$$
 
 DELIMITER ;
-
 
 
 -- 创建作者存储过程
@@ -69,8 +52,7 @@ DELIMITER //
 CREATE PROCEDURE insert_or_update_author_record(
     IN p_author_name VARCHAR(255),
     IN p_author_country VARBINARY(255),
-    IN p_author_org VARCHAR(500),
-    IN p_author_research VARBINARY(255)
+    IN p_author_org VARCHAR(500)
 )
 BEGIN
     DECLARE v_count INT;
@@ -85,8 +67,8 @@ BEGIN
 
     IF v_count IS NULL THEN
         -- 不存在满足条件的记录，执行插入操作
-        INSERT INTO author (author_name, author_country, author_org, paper_count, paper_count_per_year, research, H, high_cited_paper)
-        VALUES (p_author_name, p_author_country, p_author_org, 1, NULL, p_author_research, 0, 0);
+        INSERT INTO author (author_name, author_country, author_org, paper_count, paper_count_per_year, H, high_cited_paper)
+        VALUES (p_author_name, p_author_country, p_author_org, 1, NULL, 0, 0);
     ELSE
         -- 存在满足条件的记录，执行更新操作
         UPDATE author

@@ -199,7 +199,10 @@ if __name__ == '__main__':
     "Well, I'm quite partial to a good squeeze of fresh lemon juice. It adds just the right amount of zesty flavour to whatever I'm cooking up in the kitchen!</s> "
     "[INST] Do you have mayonnaise recipes? [/INST]"
 
-    model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-v0.1")
+    model = AutoModelForCausalLM.from_pretrained(
+        "mistralai/Mistral-7B-v0.1",
+        torch_dtype=torch.bfloat16
+    )
     tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-v0.1")
     model_inputs = tokenizer([text], return_tensors="pt").to("cuda")
     model.to("cuda:0")

@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import pymysql
+import torch.cuda
 
 from utils.paper_utils import DealPaperInformation
 from utils.paper_utils import get_titles
@@ -37,6 +38,8 @@ class MysqlService:
                 num_paper += 1
                 # 提交到数据库执行
                 self.db.commit()
+                if num_paper % 1000 == 0:
+                    print("成功插入（更新）{}条文献数据".format(num_paper))
             except Exception as e:
                 print(e)
                 self.db.rollback()
@@ -51,7 +54,7 @@ class MysqlService:
                 try:
                     self.cursor.callproc("insert_or_update_author_record",
                                     args=(wos_data.AF[i].AuthorName, wos_data.AF[i].AuthorNation,
-                                          wos_data.AF[i].AuthorOrganization, wos_data.WC))
+                                          wos_data.AF[i].AuthorOrganization))
                     # 提交到数据库执行
                     self.db.commit()
                 except Exception as e:
@@ -62,13 +65,22 @@ class MysqlService:
         # 关闭数据库连接
         self.db.close()
 
+    def update_author_H(self):
+        pass
+
+
 
     # 测试
 if __name__ == '__main__':
+
+    torch.cuda.empty_cache()
     # 打开数据库连接,设置路径，端口，用户名，密码，数据库名。
     db = pymysql.connect(host='localhost', user='AI', passwd='!@#$AI', port=3306, db='dlut_academic_platform')
     # 批量处理数据
     # 将txt文本切割成文献列表
-    paper = get_titles(r'../data/conference2023/1-500.txt')
+    paper = get_titles(r'C:\Users\AI\Desktop\data\AI')
     a = MysqlService(db)
     a.import_to_mysql(paper)
+
+
+
