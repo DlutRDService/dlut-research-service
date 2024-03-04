@@ -46,12 +46,13 @@ class FineTuningDataset:
                         "Output": "In '{TI}', {r_method} and found that {r_result}. "
                         .format(TI=self.data[i].TI, r_method=self.data[i].r_method, r_result=self.data[i].r_result, )
                     })
-        except IndexError:
-            pass
+        except IndexError as e:
+            print(e)
         # 写出到Json文件
         with open(output_path, 'w', encoding='utf-8') as file:
             json.dump(ft_dataset, file, ensure_ascii=False, indent=4)
 
+    @staticmethod
     def generate_summarize_abstract_ft_dataset(self):
         """
         Author: AI

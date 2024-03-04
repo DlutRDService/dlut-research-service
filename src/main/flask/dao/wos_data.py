@@ -3,7 +3,7 @@
 
 """
 Author: zsl
-Date: 2022-02-23
+Date: 2021-12-23
 Description: Object that stores paper information
 """
 
@@ -22,8 +22,8 @@ class WosData:
         self.WC = []             # WC类别
         self.PY = ''             # 出版年
         self.ESI = ''            # ESI类别
-        self.Nation = []         # 作者国家
-        self.Organization = []   # 作者机构
+        self.Nation = []         # 国家
+        self.Organization = []   # 机构
         self.NR = ''             # 引文数量
         self.TC = ''             # 被引用
         self.AB = ''             # 摘要
@@ -31,7 +31,7 @@ class WosData:
         self.r_method = ''       # 研究方法
         self.r_result = ''       # 研究结果
         self.r_conclusion = ''   # 研究结论
-        self.CR = []             # 引文
+        self.CR = []             # 引文信息
         self.DI = ''             # DOI号
 
     def to_dict(self):

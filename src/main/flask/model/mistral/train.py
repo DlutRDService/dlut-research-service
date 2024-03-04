@@ -2,7 +2,6 @@ import argparse
 import json
 import os
 
-import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainerCallback, TrainingArguments, Trainer, \
     DataCollatorForLanguageModeling
 import valohai
@@ -16,8 +15,8 @@ from helper import get_run_identification
 
 class FineTuner:
     def __init__(self, args):
-        self.data_files = args.data_files                                    # 数据集路径
-        self.base_mistral_model = args.base_mistral_model                    # 模型名称
+        self.data = args.data                                          # 数据集
+        self.base_model = args.base_model                                    # 模型名称
         self.output_dir = args.output_dir                                    # 输出文件路径
         self.model_max_length = args.model_max_length                        # 模型最大上下文
         self.warmup_steps = args.warmup_steps                                # 学习率预热
@@ -25,41 +24,74 @@ class FineTuner:
         self.learning_rate = args.learning_rate                              # 学习率
 
         self.setup_accelerator()
-        self.setup_datasets()
         self.setup_model()
+        self.setup_datasets()
         self.apply_peft()
 
     def setup_accelerator(self):
+        #
         os.environ['WANDB_DISABLED'] = 'true'
+
+        # user FSDP plugin with loading deepspeed config
         fsdp_plugin = FullyShardedDataParallelPlugin(
             state_dict_config=FullStateDictConfig(offload_to_cpu=True, rank0_only=True),
             optim_state_dict_config=FullOptimStateDictConfig(offload_to_cpu=True, rank0_only=True),
         )
+        # create accelerator
         self.accelerator = Accelerator(fsdp_plugin=fsdp_plugin)
 
-    def setup_datasets(self):
-        data_files = self.data_files
-
-        df = load_dataset('json', data_files=data_files)
-        split_data = df['train'].train_test_split(test_size=0.2)
-        self.train_df = split_data['train']
-        self.val_df = split_data['test']
-
-
     def setup_model(self):
-        base_model_id = self.base_mistral_model
+
+        base_model_id = self.base_model
+        # load model with BF16
         self.model = AutoModelForCausalLM.from_pretrained(
             base_model_id,
-            torch_dtype=torch.bfloat16
+            # torch_dtype=torch.bfloat16
         )
+
+        # load tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
             base_model_id,
             model_max_length=self.model_max_length,
             padding_side='right',
             add_eos_token=True,
         )
+        # Set the pad equal to the eos to
+        # ensure data consistency and reduce the impact of pad information.
         self.tokenizer.pad_token = self.tokenizer.eos_token
         self.model.gradient_checkpointing_enable()
+
+    def setup_datasets(self):
+        data = self.data
+
+        df = load_dataset("json", data_files=data)
+        split_data = df['train'].train_test_split(test_size=0.2)
+
+        def generate_and_tokenize_prompt(prompt):
+            return self.tokenizer(formatting_func(prompt))
+
+        def formatting_func(example):
+            # text = f"### Question: {example['input']}\n ### Answer: {example['output']}"
+            alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+                    ### Instruction:
+                    {}
+
+                    ### Input:
+                    {}
+
+                    ### Response:
+                    {}"""
+            instructions = example["Instruction"]
+            inputs = example["Input"]
+            outputs = example["Output"]
+            text = alpaca_prompt.format(instructions, inputs, outputs) +  self.tokenizer.eos_token
+            return text
+
+        self.train_df = split_data['train'].map(generate_and_tokenize_prompt)
+        self.val_df = split_data['test'].map(generate_and_tokenize_prompt)
+
+
 
     def print_trainable_parameters(self):
         """
@@ -108,7 +140,7 @@ class FineTuner:
             train_dataset=self.train_df,
             eval_dataset=self.val_df,
             args=TrainingArguments(
-                output_dir=checkpoint_output_dir,
+                output_dir=self.output_dir,
                 warmup_steps=self.warmup_steps,
                 per_device_train_batch_size=2,
                 gradient_accumulation_steps=4,
@@ -129,6 +161,7 @@ class FineTuner:
         )
 
         self.model.config.use_cache = False
+
         trainer.train()
         model_save_dir = os.path.join(checkpoint_output_dir, 'best_model')
 
@@ -168,10 +201,12 @@ def main():
 
     # Add arguments based on your script's needs
     # fmt: off
-    parser.add_argument("--base_mistral_model", type=str, default="mistralai/Mistral-7B-v0.1", help="Base mistral from hugging face")
-    parser.add_argument("--data_files", type=str, help="Path to the training data")
+    parser.add_argument("--base_model", type=str, default="mistralai/Mistral-7B-v0.1", help="Base mistral from hugging face")
+    parser.add_argument("--data", type=str,
+                        default=r"C:\Users\AI\Desktop\data\summarize_abstract_dataset.json", help="Path to the "
+                                                                                                  "training data")
     parser.add_argument("--output_dir", type=str, default="finetuned_mistral", help="Output directory for checkpoints")
-    parser.add_argument("--model_max_length", type=int, default=512, help="Maximum length for the model")
+    parser.add_argument("--model_max_length", type=int, default=8192, help="Maximum length for the model")
     parser.add_argument("--warmup_steps", type=int, default=5, help="Warmup steps")
     parser.add_argument("--max_steps", type=int, default=10, help="Maximum training steps")
     parser.add_argument("--learning_rate", type=float, default=2.5e-5, help="Learning rate")
@@ -184,6 +219,7 @@ def main():
 
 
 if __name__ == '__main__':
+    # df = load_dataset('json', data_files=dataset)
     main()
     # import torch
     # print(torch.__version__)

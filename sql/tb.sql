@@ -131,7 +131,7 @@ create table author (
         author_id               bigint(20)      not null auto_increment    comment '作者id',
         author_name             varchar(200)    not null                   comment '作者姓名',
         author_country          varchar(100)    default null               comment '作者国家',
-        author_org              varchar(200)    default null               comment '作者机构',
+        author_org              varchar(2000)   default null               comment '作者机构',
         paper_count             varchar(50)     default null               comment '发文数量',
         paper_count_per_year    varchar(4)      default null               comment '每年发文数量',
         # research                varchar(200)    default null               comment '研究领域',

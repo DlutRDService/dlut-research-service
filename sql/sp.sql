@@ -22,7 +22,7 @@ CREATE PROCEDURE insert_or_update_paper(
     IN p_research_conclusion VARCHAR(2000)
 )
 BEGIN
-    
+
     DECLARE existing_paper_id BIGINT;
     -- 判断是否存在
     SELECT paper.paper_id INTO existing_paper_id FROM paper WHERE paper.tl = p_tl LIMIT 1;
@@ -57,9 +57,9 @@ DROP PROCEDURE IF EXISTS insert_or_update_author_record;
 DELIMITER //
 
 CREATE PROCEDURE insert_or_update_author_record(
-    IN p_author_name VARCHAR(255),
-    IN p_author_country VARBINARY(255),
-    IN p_author_org VARCHAR(500)
+    IN p_author_name TEXT,
+    IN p_author_country VARCHAR(255),
+    IN p_author_org TEXT
 )
 BEGIN
     DECLARE v_count INT;
