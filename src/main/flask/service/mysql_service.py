@@ -15,14 +15,21 @@ class MysqlService:
         pass
 
     def import_to_mysql(self, titles):
-        # 分批次导入mysql
-        num_paper = 0
-        num_author = 0
+
+        num_paper = 0   # statistics the papers
+        num_author = 0  # statistice the authors
         for title in titles:
             AF = ''
-            wos_data = DealPaperInformation(title)
+            # get the TI, exexcute the sp(store process) when not exist in mysql
+            wos_data = DealPaperInformation(title, "TI")
             if wos_data.TI == "":
                 continue
+            query = "SELECT EXISTS(SELECT 1 FROM paper WHERE paper.tl = %s)"
+            self.cursor.execute(query, (wos_data.TI,))
+            result = self.cursor.fetchone()
+            if result[0]:
+                continue
+            wos_data = DealPaperInformation(title)
             for af in wos_data.AF:
                 AF += af.AuthorName + '; '
             wos_data.WC = str(wos_data.WC).replace("]", "").replace("[", "").replace("\'", "").replace('\"', '')
@@ -36,10 +43,10 @@ class MysqlService:
                                       wos_data.DI, wos_data.CR, wos_data.r_background, wos_data.r_method,
                                       wos_data.r_result, wos_data.r_conclusion))
                 num_paper += 1
-                # 提交到数据库执行
+                # commit and callproc the sp
                 self.db.commit()
                 if num_paper % 1000 == 0:
-                    print("成功插入（更新）{}条文献数据".format(num_paper))
+                    print("Already insert (update) {} papers".format(num_paper))
             except Exception as e:
                 print(e)
                 self.db.rollback()
@@ -55,14 +62,14 @@ class MysqlService:
                     self.cursor.callproc("insert_or_update_author_record",
                                     args=(wos_data.AF[i].AuthorName, wos_data.AF[i].AuthorNation,
                                           wos_data.AF[i].AuthorOrganization))
-                    # 提交到数据库执行
+                    # commit
                     self.db.commit()
                 except Exception as e:
-                    # 如果发生错误回滚
+                    # rollback if error
                     print(e)
                     self.db.rollback()
                 num_author += 1
-        # 关闭数据库连接
+        # close db connection
         self.db.close()
 
     def update_author_H(self):
@@ -78,7 +85,7 @@ if __name__ == '__main__':
     db = pymysql.connect(host='localhost', user='AI', passwd='!@#$AI', port=3306, db='dlut_academic_platform')
     # 批量处理数据
     # 将txt文本切割成文献列表
-    paper = get_titles(r'C:\Users\AI\Desktop\data\AI\2023')
+    paper = get_titles(r'C:\Users\AI\Desktop\data\AI\2021')
     a = MysqlService(db)
     a.import_to_mysql(paper)
 
