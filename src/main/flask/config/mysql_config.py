@@ -10,7 +10,7 @@ class MySQLConnection:
         self.connect()
 
     def connect(self):
-        """连接到MySQL数据库"""
+        """connect to Mysql"""
         try:
             self.connection = pymysql.connect(
                 host=self.host,
@@ -25,24 +25,24 @@ class MySQLConnection:
             print(f"Failed to connect to MySQL: {e}")
 
     def query(self, sql, params=None):
-        """执行SQL查询"""
+        """query"""
         with self.connection.cursor() as cursor:
             cursor.execute(sql, params)
             return cursor.fetchall()
 
     def execute(self, sql, params=None):
-        """执行SQL命令"""
+        """run"""
         with self.connection.cursor() as cursor:
             cursor.execute(sql, params)
             self.connection.commit()
 
     def close(self):
-        """关闭数据库连接"""
+        """close connection"""
         if self.connection is not None:
             self.connection.close()
             print("Connection to MySQL closed.")
 
-# 使用示例
+# demo
 if __name__ == "__main__":
     # 替换为您的 MySQL 实例信息
     host = "localhost"

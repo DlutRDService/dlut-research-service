@@ -10,20 +10,20 @@ class Neo4jService:
         return self.conn.query(query)
 
     def add_node(self, label, properties):
-        """添加新的节点"""
-        tx = self.graph.begin()  # 开启一个新事务
+        """add new node"""
+        tx = self.graph.begin()  # start a new transation
         try:
             prop_string = ', '.join(f'{key}: "{value}"' for key, value in properties.items())
             query = f"CREATE (n:{label} {{ {prop_string} }})"
             tx.run(query)
-            tx.commit()  # 提交事务
+            tx.commit()  # commit
             return "Node successfully added."
         except Exception as e:
-            tx.rollback()  # 报错回滚
+            tx.rollback()  # rollback
             return f"Failed to add node: {e}"
 
     def add_relationship(self, from_node, rel_type, to_node, properties=None):
-        """ 添加新的关系 """
+        """ add new relationship """
         if properties is None:
             properties = {}
         prop_string = ', '.join(f'{key}: "{value}"' for key, value in properties.items())
@@ -35,9 +35,8 @@ class Neo4jService:
         """ 关闭连接 """
         self.conn.close()
 
-# 使用示例
+# demo
 if __name__ == "__main__":
-    # 替换为您的 Neo4j 实例信息
     uri = "bolt://localhost:7687"
     user = "neo4j_username"
     pwd = "neo4j_password"

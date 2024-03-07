@@ -8,22 +8,25 @@ Description: Generate the fine-tuning dataset.
 """
 import json
 
-from dataset.PaperInfoDataset import PaperDataset
+from pipeline.PaperInfo import PaperDataset
 
 
-class FineTuningDataset:
+class GenerateFTDataset:
 
-    def __init__(self):
+    def __init__(self, data_file):
+        self.data_file = data_file
+        self.output_path = None
         self.data = None
 
-    def generate_method_ft_dataset(self, data_path=None, output_path=None, *args):
+    def generate_method_ft_dataset(self, output_path=None, *args):
         """
         Author: zsl
         Date: 2024-02-25
         Description: Generate the fine-tuning dataset about paper method.
         """
 
-        self.data = PaperDataset(data_path, *args)
+        self.data = PaperDataset(self.data_file, *args)
+        self.output_path = output_path
         # data = PaperDataset(r'C:\Users\AI\Desktop\data\AI\2024', "TI", "WC", "AB", "ab_seq")
 
         ft_dataset = []
@@ -49,7 +52,7 @@ class FineTuningDataset:
         except IndexError as e:
             print(e)
         # 写出到Json文件
-        with open(output_path, 'w', encoding='utf-8') as file:
+        with open(self.output_path, 'w', encoding='utf-8') as file:
             json.dump(ft_dataset, file, ensure_ascii=False, indent=4)
 
     @staticmethod
@@ -73,14 +76,15 @@ class FineTuningDataset:
         with open(r'C:\Users\AI\Desktop\data\summarize_abstract_dataset.json', 'w', encoding='utf-8') as f:
             json.dump(dataset, f, ensure_ascii=False, indent=4)
 
-    def paper_info_ft_dataset(self, data_path=None, output_path=None, *args):
+    def paper_info_ft_dataset(self, output_path=None, *args):
         """
         Author: zsl
         Date: 2024-02-25
         Description: Generate the fine-tuning dataset about introducing paper info.
         """
 
-        self.data = PaperDataset(data_path, args)
+        self.data = PaperDataset(self.data_file, *args)
+        self.output_path = output_path
         # data = PaperDataset(r'C:\Users\AI\Desktop\data\conference2023', "TI", "SE", "DE", "WC", "AF", "PY", "AB")
 
         dataset = [{
@@ -93,12 +97,37 @@ class FineTuningDataset:
                                     WC="and ".join(i.WC))
         } for i in self.data]
 
-        with open(output_path, 'w', encoding='utf-8') as file:
+        with open(self.output_path, 'w', encoding='utf-8') as file:
             json.dump(dataset, file, ensure_ascii=False, indent=4)
 
-
+# def create_research_ft_dataset(wosdata):
+#     return  [{
+#         "Instruction": "Identify the applications of machine learning techniques in optimizing neural network "
+#                        "performance in the paper titled '{}'.".format(wosdata.TI_name),
+#         "Input": "",
+#         "Output": "The paper '{TI_name}' discusses the use of machine learning techniques such as {keywords} to "
+#                   "optimize neural network performance, focusing on aspects like {specific_aspects}."
+#     } for wosdata in wosdata]
+#
+# def create_research(wosdata):
+#     return  [{
+#         "Instruction": "Identify the applications of machine learning techniques in optimizing neural network "
+#                        "performance in the paper titled '{}'.".format(wosdata.TI_name),
+#         "Input": "",
+#         "Output": "The paper '{TI_name}' discusses the use of machine learning techniques such as {keywords} "
+#                   "to optimize neural network performance, focusing on aspects like {specific_aspects}."
+#     } for wosdata in wosdata]
+# def cr2(wosdata):
+#     return [{
+#         "Instruction": "Identify the applications of machine learning techniques in optimizing neural network "
+#                        "performance in the paper titled '{}'.".format(
+#             wosdata.TI_name),
+#         "Input": "",
+#         "Output": "The paper '{TI_name}' discusses the use of machine learning techniques such as {keywords} "
+#                   "to optimize neural network performance, focusing on aspects like {specific_aspects}."
+#     } for wosdata in wosdata]
 if __name__ == '__main__':
-    dataset = FineTuningDataset()
+    dataset = GenerateFTDataset()
     dataset.generate_method_ft_dataset(r'C:\Users\AI\Desktop\data\AI\2024',
                                        r'C:\Users\AI\Desktop\data\method_ft_dataset.json',
                                        "TI", "WC", "AB", "ab_seq"

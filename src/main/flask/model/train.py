@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 
+import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainerCallback, TrainingArguments, Trainer, \
     DataCollatorForLanguageModeling
 import valohai
@@ -10,26 +11,24 @@ from datasets import load_dataset
 from peft import LoraConfig, get_peft_model
 from torch.distributed.fsdp.fully_sharded_data_parallel import FullOptimStateDictConfig, FullStateDictConfig
 
-from helper import get_run_identification
-
 
 class FineTuner:
     def __init__(self, args):
-        self.data = args.data                                          # 数据集
-        self.base_model = args.base_model                                    # 模型名称
-        self.output_dir = args.output_dir                                    # 输出文件路径
-        self.model_max_length = args.model_max_length                        # 模型最大上下文
-        self.warmup_steps = args.warmup_steps                                # 学习率预热
-        self.max_steps = args.max_steps                                      # 最大训练步数
-        self.learning_rate = args.learning_rate                              # 学习率
+        self.data = args.data                                 # 数据集
+        self.base_model = args.base_model                     # 模型名称
+        self.output_dir = args.output_dir                     # 输出文件路径
+        self.model_max_length = args.model_max_length         # 模型最大上下文
+        self.warmup_steps = args.warmup_steps                 # 学习率预热
+        self.max_steps = args.max_steps                       # 最大训练步数
+        self.learning_rate = args.learning_rate               # 学习率
 
-        self.setup_accelerator()
-        self.setup_model()
-        self.setup_datasets()
-        self.apply_peft()
+        self.setup_accelerator()                              # load accelerator
+        self.setup_model()                                    # load model
+        self.setup_datasets()                                 # load datasets
+        self.apply_peft()                                     # use peft
 
     def setup_accelerator(self):
-        #
+        # ?
         os.environ['WANDB_DISABLED'] = 'true'
 
         # user FSDP plugin with loading deepspeed config
@@ -41,12 +40,12 @@ class FineTuner:
         self.accelerator = Accelerator(fsdp_plugin=fsdp_plugin)
 
     def setup_model(self):
-
         base_model_id = self.base_model
-        # load model with BF16
+
+        # load model
         self.model = AutoModelForCausalLM.from_pretrained(
             base_model_id,
-            # torch_dtype=torch.bfloat16
+            torch_dtype=torch.bfloat16
         )
 
         # load tokenizer
@@ -56,24 +55,31 @@ class FineTuner:
             padding_side='right',
             add_eos_token=True,
         )
+
         # Set the pad equal to the eos to
         # ensure data consistency and reduce the impact of pad information.
         self.tokenizer.pad_token = self.tokenizer.eos_token
+
+        # uses Gradient Checkpointing to reduce memory
         self.model.gradient_checkpointing_enable()
 
     def setup_datasets(self):
         data = self.data
 
+        # json file
         df = load_dataset("json", data_files=data)
+        # split dataset 8:2
         split_data = df['train'].train_test_split(test_size=0.2)
 
         def generate_and_tokenize_prompt(prompt):
             return self.tokenizer(formatting_func(prompt))
 
         def formatting_func(example):
-            # text = f"### Question: {example['input']}\n ### Answer: {example['output']}"
-            alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
+            """
+            generate prompt template
+            """
+            # TODO modify the prompt template (use the token <s></s>)
+            alpaca_prompt = """
                     ### Instruction:
                     {}
 
@@ -82,10 +88,10 @@ class FineTuner:
 
                     ### Response:
                     {}"""
-            instructions = example["Instruction"]
-            inputs = example["Input"]
-            outputs = example["Output"]
-            text = alpaca_prompt.format(instructions, inputs, outputs) +  self.tokenizer.eos_token
+            instructions = example["instruction"]
+            inputs = example["input"]
+            outputs = example["output"]
+            text = alpaca_prompt.format(instructions, inputs, outputs)
             return text
 
         self.train_df = split_data['train'].map(generate_and_tokenize_prompt)
@@ -95,7 +101,7 @@ class FineTuner:
 
     def print_trainable_parameters(self):
         """
-        Prints the number of trainable parameters in the model.
+        Statistics the number of trainable parameters in the model.
         """
         trainable_params = 0
         all_param = 0
@@ -110,8 +116,8 @@ class FineTuner:
     def apply_peft(self):
 
         config = LoraConfig(
-            r=8,
-            lora_alpha=16,
+            r=16,
+            lora_alpha=64,
             target_modules=[
                 'q_proj',
                 'k_proj',
@@ -167,28 +173,6 @@ class FineTuner:
 
         trainer.save_model(model_save_dir)
 
-        # save metadata
-        self.save_valohai_metadata(model_save_dir)
-
-    @staticmethod
-    def save_valohai_metadata(save_dir):
-        project_name, exec_id = get_run_identification()
-
-        metadata = {
-            'valohai.dataset-versions': [
-                {
-                    'uri': f'dataset://mistral-models/{project_name}_{exec_id}',
-                    'targeting_aliases': ['best_mistral_checkpoint'],
-                    'valohai.tags': ['dev', 'mistral'],
-                },
-            ],
-        }
-        for file in os.listdir(save_dir):
-            md_path = os.path.join(save_dir, f'{file}.metadata.json')
-            metadata_path = valohai.outputs().path(md_path)
-            with open(metadata_path, 'w') as outfile:
-                json.dump(metadata, outfile)
-
 
 class PrinterCallback(TrainerCallback):
     def on_log(self, args, state, control, logs=None, **kwargs):
@@ -200,17 +184,16 @@ def main():
     parser = argparse.ArgumentParser(description='Fine-tune a model')
 
     # Add arguments based on your script's needs
-    # fmt: off
-    parser.add_argument("--base_model", type=str, default="mistralai/Mistral-7B-v0.1", help="Base mistral from hugging face")
+    parser.add_argument("--base_model", type=str, default="mistralai/Mistral-7B-Instruct-v0.2", help="Base mistral "
+                                                                                                     "from hugging face")
     parser.add_argument("--data", type=str,
-                        default=r"C:\Users\AI\Desktop\data\summarize_abstract_dataset.json", help="Path to the "
+                        default=r"C:\Users\AI\Desktop\data\paper_info_ft_dataset.json", help="Path to the "
                                                                                                   "training data")
     parser.add_argument("--output_dir", type=str, default="finetuned_mistral", help="Output directory for checkpoints")
     parser.add_argument("--model_max_length", type=int, default=8192, help="Maximum length for the model")
     parser.add_argument("--warmup_steps", type=int, default=5, help="Warmup steps")
     parser.add_argument("--max_steps", type=int, default=10, help="Maximum training steps")
     parser.add_argument("--learning_rate", type=float, default=2.5e-5, help="Learning rate")
-    # fmt: on
 
     args = parser.parse_args()
 
@@ -219,8 +202,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # df = load_dataset('json', data_files=dataset)
     main()
-    # import torch
-    # print(torch.__version__)
-    # print(torch.version.cuda)

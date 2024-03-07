@@ -4,7 +4,8 @@
 """
 Author: zsl
 Date: 2024-02-23
-Description: Generate paper dataset object, each item is a paper. every item can get the special fileds inputed
+Description: A object get the paperInfo from local files, each item is a paper. every item can get the special fileds
+inputed
 """
 
 from utils.paper_utils import DealPaperInformation, get_titles

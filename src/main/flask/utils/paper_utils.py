@@ -13,6 +13,7 @@ from dao.wos_data import WosData, AuthorInformation, CitedReference
 from model.RoBERTaGAT.RoBERTaGAT import RobertaGAT
 
 
+# load RobertaGAT
 model = RobertaGAT(roberta_model_name="roberta-base", num_classes=5)
 model.load_state_dict(torch.load(r'C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\model\RoBERTaGAT'
                                  r'\model5.pth', map_location='cuda:0'))
@@ -23,9 +24,8 @@ model.eval()
 
 def get_titles(file_path):
     """
-    获取路径下的所有文献,或者路径文本
-    :param : 论文存储路径
-    :return: 返回一个存放所有论文数据的列表
+    get the titles from file_path, file_path can be a file or a directory
+    :return: a list of strings containing the titles
     """
     titles = []
     if file_path is None:
@@ -37,33 +37,32 @@ def get_titles(file_path):
             if filenames is None:
                 continue
             for i, filename in enumerate(filenames):
-                # 获取当前处理的文件路径
+                # get the processing file path
                 paths.append(os.path.join(dir_path, filename))
         for path in paths:
             title = split_to_titles(path)
             for i in title:
                 num += 1
                 if num % 10000 == 0 and num != 0:
-                    print('----已经读入{}篇文献数据----'.format(num))
+                    print('----Already Reading {} papers----'.format(num))
                 titles.append(i)
-        print("共有{}篇文献".format(len(titles)))
+        print("A total of {} papers".format(len(titles)))
     elif os.path.isfile(file_path):
         title = split_to_titles(file_path)
         for i in title:
             num += 1
             if num % 10000 == 0 and num != 0:
-                print('----已经读入{}篇文献数据----'.format(num))
+                print('----Already Reading {} papers----'.format(num))
             titles.append(i)
-        print("共有{}篇文献".format(len(titles)))
+        print("A total of {} papers".format(len(titles)))
     else:
         raise ValueError('Please enter a valid path')
     return titles
 
 def DealPaperInformation(title, *args):
     """
-    传入一个title，读取统计文献的名称、期刊名、期刊ESI类别、WC类别、年份、引文、摘要、关键词、作者、作者机构、国家
-    :param title: 传入文献
-    :return:返回论文全部信息的paper类
+    Pass a variable of type String named 'title' and a list of statistics wos fields.
+    :return: wos_data object correspond to the 'title' where store the wos fields in the list passed.
     """
     if not args:
         args = ["TI", "AF", "DE", "AB", "SO", "SE", "NR", "TC", "WC", "PY", "ab_seq", 'CR', 'DI']
@@ -73,7 +72,7 @@ def DealPaperInformation(title, *args):
 
     title = title.split('\n')
     for num, line in enumerate(title):
-        # 作者
+        # author
         if line.find('AF ') == 0 and 'AF' in args:
             Author = AuthorInformation()
             Author.AuthorName = line[3:].replace('\'', '').replace('\"', '')
@@ -85,7 +84,7 @@ def DealPaperInformation(title, *args):
                 wos_data.AF.append(Author)
                 i += 1
             continue
-        # 标题
+        # title
         if line.find('TI ') == 0 and 'TI' in args:
             wos_data.TI = line[3:].replace('\'', '').replace('\"', '').replace('\\', '')
             i = 1
@@ -93,7 +92,7 @@ def DealPaperInformation(title, *args):
                 wos_data.TI += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').replace('\\', '')
                 i += 1
             continue
-        # 期刊
+        # Journal or conference
         if line.find('SO ') == 0 and 'SO' in args:
             try:
                 if ', ' in line:
@@ -120,7 +119,7 @@ def DealPaperInformation(title, *args):
             except KeyError:
                 wos_data.ESI = ''
                 pass
-        # 会议
+        # conference
         if line.find('SE ') == 0 and 'SE' in args:
             wos_data.SE = line[3:].replace('\'', '').replace('\"', '')
             i = 1
@@ -129,7 +128,7 @@ def DealPaperInformation(title, *args):
                 i += 1
             wos_data.SE = wos_data.SE.split('; ')
             continue
-        # 关键字
+        # keywords
         if line.find("DE ") == 0 and 'DE' in args:
             keywords = line[3:].replace('\'', '').replace('\"', '').lower()
             i = 1
@@ -138,7 +137,7 @@ def DealPaperInformation(title, *args):
                 i += 1
             wos_data.DE = keywords.split('; ')
             continue
-        # 摘要
+        # abstract
         if line.find("AB ") == 0 and 'AB' in args:
             abstract = line[3:]
             i = 1
@@ -176,7 +175,7 @@ def DealPaperInformation(title, *args):
                 continue
             continue
 
-        # 作者所在国家、作者所在机构
+        # paper country and orginization
         if line.find('C1 ') == 0 and 'AF' in args:
             # 国家
             if CheckNation(line) != -1:
@@ -260,7 +259,7 @@ def DealPaperInformation(title, *args):
                         wos_data.Nation.append(CheckNation(line))
                         AF.AuthorNation = wos_data.Nation[0]
                 continue
-        # 引文
+        # cite conference
         if line.find('CR ') == 0 and 'CR' in args:
             cr_list = line[3:].split(', ')
             if len(cr_list) == 3:
@@ -285,14 +284,14 @@ def DealPaperInformation(title, *args):
                                         SO=cr_list[2], doi=cr_list[-1].replace(']', ''))
                         wos_data.CR.append(CR.to_dict())
                 i += 1
-        # 引文数量
+        # citing num
         if line.find("NR ") == 0 and 'NR' in args:
             wos_data.NR = line[3:]
             continue
-        # 被引TC
+        # total cited
         if line.find("TC ") == 0 and 'TC' in args:
             wos_data.TC = line[3:]
-        # WC 类别
+        # WC category
         if line.find("WC ") == 0 and 'WC' in args:
             wc = line[3:].strip('\n')
             i = 1
@@ -301,11 +300,11 @@ def DealPaperInformation(title, *args):
                 i += 1
             wos_data.WC = wc.split('; ')
             continue
-        # 年份PY
+        # Published year
         if (line.find('PY ') == 0 or line.find('EA ') == 0) and 'PY' in args:
             wos_data.PY = line[-4:]
             continue
-        # DOI号
+        # DOI
         if line.find("DI ") == 0 and 'DI' in args:
             wos_data.DI = line[3:]
     if wos_data.AF is not None:
@@ -325,11 +324,17 @@ def DealPaperInformation(title, *args):
     return wos_data
 
 def split_to_titles(file_path):
+    """
+    Splits the string about wos_data txt. return a list of strings where each string is a title.
+    """
     with open(file_path, "r+", encoding="utf8") as f:
         content = f.read()
         return content.split('\nER\n')
 
 def CheckNation(Str=''):
+    """
+    Judge the nation of Author by checking if it exists in the nationList.
+    """
     nationList = [
         'USA',
         'England',
@@ -550,22 +555,22 @@ def CheckNation(Str=''):
 def CreateJournalCategoryDict():
     """
     Create a dict of ESI Journal list for charging the simple journal name to full name
-    :return: dict with ESI Journal
+    :return: ESI Journal dict
     """
-    '''
-    python3.9以上不在支持xlrd1.2，xlrd1.2以上不在支持xlsx文件格式
+    #
+    # python3.9 and above no longer support xlrd1.2, xlrd1.2 and above no longer support xlsx file format
     # table = xlrd.open_workbook(r'./esi-master-journal-list-4-2021.xlsx').sheets()[0]
     # fullTitle = np.matrix(table.col_values(0)).tolist()[0]
     # Title_2017 = np.matrix(table.col_values(1)).tolist()[0]
     # Title_2019 = np.matrix(table.col_values(2)).tolist()[0]
     # esiCategory = np.matrix(table.col_values(5)).tolist()[0]
-    '''
+    #
 
-    # 获取索引为index的sheet表格
-    # 用 pandas 读取 Excel 文件的第一个sheet
+    # Get the sheet with index.
+    # Use pandas to read the first sheet of the Excel file.
     df = pd.read_excel(r"C:\Users\AI\Desktop\data\esi-master-journal-list-4-2021.xlsx", sheet_name=0)
 
-    # 获取所需的列并将它们转换为列表
+    # get the row and to list.
     fullTitle = df.iloc[:, 0].tolist()
     Title_2017 = df.iloc[:, 1].tolist()
     Title_2019 = df.iloc[:, 2].tolist()
@@ -579,6 +584,10 @@ def CreateJournalCategoryDict():
     return esi_dict
 
 def seq_annotation(data):
+    """
+    Annotation the list of abstract sentences by roberta+gat.
+    retunr a dict where the key is sentence and value is label.
+    """
     tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
     tokenors = tokenizer(data['seq'], padding='max_length', truncation=True, max_length=96, return_tensors="pt")
     with torch.no_grad():
@@ -590,6 +599,9 @@ def object_to_dict(obj):
     return obj.__dict__
 
 def convert_to_excel(file):
+    """
+    Convert the wos_data info to an excel file
+    """
     file_content = file.read().decode('utf-8')
     file_content = file_content.replace('\r', '')
     titles = file_content.split("\nER\n")
@@ -608,12 +620,18 @@ def convert_to_excel(file):
     return df
 
 def split_sentence(abstract):
+    """
+    Split the abstract to a list of sentences
+    """
     abstract = replace_abbreviations(abstract)
     ab_seqs = sent_tokenize(abstract)
     return ab_seqs
 
 def replace_abbreviations(text):
-    # 常见省略词
+    """
+    Replace all the normal omitted words to the complete word like etc.
+    """
+    # Commonly omitted words
     abbreviations = {
         "e.g.": "for example",
         "i.e.": "that is",
