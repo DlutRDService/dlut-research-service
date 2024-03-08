@@ -28,7 +28,7 @@ class FineTuner:
         self.apply_peft()                                     # use peft
 
     def setup_accelerator(self):
-        # ?
+        # 暂且不熟
         os.environ['WANDB_DISABLED'] = 'true'
 
         # user FSDP plugin with loading deepspeed config
@@ -78,7 +78,7 @@ class FineTuner:
             """
             generate prompt template
             """
-            # TODO modify the prompt template (use the token <s></s>)
+            # TODO modify the prompt (use the token <s></s>?)
             alpaca_prompt = """
                     ### Instruction:
                     {}
@@ -117,7 +117,7 @@ class FineTuner:
 
         config = LoraConfig(
             r=16,
-            lora_alpha=64,
+            lora_alpha=32,
             target_modules=[
                 'q_proj',
                 'k_proj',
@@ -140,7 +140,9 @@ class FineTuner:
         self.model = self.accelerator.prepare_model(model)
 
     def train(self):
+        # set the ckpt dir
         checkpoint_output_dir = valohai.outputs().path(self.output_dir)
+        # set the trainer
         trainer = Trainer(
             model=self.model,
             train_dataset=self.train_df,
@@ -148,7 +150,7 @@ class FineTuner:
             args=TrainingArguments(
                 output_dir=self.output_dir,
                 warmup_steps=self.warmup_steps,
-                per_device_train_batch_size=2,
+                per_device_train_batch_size=10,
                 gradient_accumulation_steps=4,
                 max_steps=self.max_steps,
                 learning_rate=self.learning_rate,
@@ -159,7 +161,7 @@ class FineTuner:
                 save_strategy='steps',
                 save_steps=10,
                 evaluation_strategy='steps',
-                eval_steps=17,
+                eval_steps=10,
                 report_to=None,
             ),
             data_collator=DataCollatorForLanguageModeling(self.tokenizer, mlm=False),
@@ -189,10 +191,10 @@ def main():
     parser.add_argument("--data", type=str,
                         default=r"C:\Users\AI\Desktop\data\paper_info_ft_dataset.json", help="Path to the "
                                                                                                   "training data")
-    parser.add_argument("--output_dir", type=str, default="finetuned_mistral", help="Output directory for checkpoints")
+    parser.add_argument("--output_dir", type=str, default="output", help="Output directory for checkpoints")
     parser.add_argument("--model_max_length", type=int, default=8192, help="Maximum length for the model")
     parser.add_argument("--warmup_steps", type=int, default=5, help="Warmup steps")
-    parser.add_argument("--max_steps", type=int, default=10, help="Maximum training steps")
+    parser.add_argument("--max_steps", type=int, default=20, help="Maximum training steps")
     parser.add_argument("--learning_rate", type=float, default=2.5e-5, help="Learning rate")
 
     args = parser.parse_args()

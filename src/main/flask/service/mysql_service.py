@@ -28,6 +28,7 @@ class MysqlService:
             self.cursor.execute(query, (wos_data.TI,))
             result = self.cursor.fetchone()
             if result[0]:
+                num_paper += 1
                 continue
             wos_data = DealPaperInformation(title)
             for af in wos_data.AF:
@@ -76,8 +77,7 @@ class MysqlService:
         pass
 
 
-
-    # 测试
+# 测试
 if __name__ == '__main__':
 
     torch.cuda.empty_cache()
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     db = pymysql.connect(host='localhost', user='AI', passwd='!@#$AI', port=3306, db='dlut_academic_platform')
     # 批量处理数据
     # 将txt文本切割成文献列表
-    paper = get_titles(r'C:\Users\AI\Desktop\data\AI\2021')
+    paper = get_titles(r'C:\Users\AI\Desktop\data\AI')
     a = MysqlService(db)
     a.import_to_mysql(paper)
 
