@@ -85,7 +85,7 @@ if __name__ == '__main__':
     db = pymysql.connect(host='localhost', user='AI', passwd='!@#$AI', port=3306, db='dlut_academic_platform')
     # 批量处理数据
     # 将txt文本切割成文献列表
-    paper = get_titles(r'C:\Users\AI\Desktop\data\AI')
+    paper = get_titles(r'C:\Users\AI\Desktop\data\AI\2022')
     a = MysqlService(db)
     a.import_to_mysql(paper)
 

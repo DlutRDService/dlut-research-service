@@ -21,3 +21,7 @@ class PaperDataset:
 
     def __len__(self):
         return len(self.wosdata)
+
+
+if "__main__" == __name__:
+    data = PaperDataset(r"C:\Users\AI\Desktop\data\AI\2021\record-1-500.txt", "TI", "PY", "DE")

@@ -16,7 +16,7 @@ from model.RoBERTaGAT.RoBERTaGAT import RobertaGAT
 # load RobertaGAT
 model = RobertaGAT(roberta_model_name="roberta-base", num_classes=5)
 model.load_state_dict(torch.load(r'C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\model\RoBERTaGAT'
-                                 r'\model5.pth', map_location='cuda:0'))
+                                 r'\model5.pth', map_location='cuda:0'), strict=False)
 # model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
 # model.load_state_dict(torch.load('../model/RoBERTaGAT/model.pth', map_location='cuda:0'))
 model.eval()
