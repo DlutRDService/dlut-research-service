@@ -3,7 +3,7 @@
 
 """
 Author: zsl
-Date: 2024-02-23
+Date: 2023-02-23
 Description: A object get the paperInfo from local files, each item is a paper. every item can get the special fileds
 inputed
 """
