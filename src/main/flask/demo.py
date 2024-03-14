@@ -2,6 +2,8 @@
 import json
 import os
 from openai import OpenAI
+from pipeline.PaperPipeline import PaperDataset
+
 
 # TODO didi
 
@@ -21,23 +23,27 @@ def generatedataset(title, DE):
                         "You only need to return a list like [(word, tag)]."},
             {"role": "user",
              # 此处的参数为示例，可改为参数title 与 de
-             "content": "Text:{}, List:{}".format("An Image Interpolation Method Based on Weighted Subdivision",
-                                                  '["Image interpolation","mesh","rational","subdivision"]')
+             "content": "Text:{}, List:{}".format(title, DE)
              },
         ]
     )
-    print(response.choices[0].message.content)
-    result.append({"Text":title, "tag":response.choices[0].message.content})
+    return {"Text":title, "tag":response.choices[0].message.content}
+
+
+
+if __name__ == '__main__':
+
+    # 加载数据集
+    wos_datas = PaperDataset(r'C:\Users\AI\Desktop\data\AI\2021\record-1-500.txt', "TI", "DE")
+    # 处理数据，得到title，de
+    result = []
+    for i in wos_datas:
+        if i.DE == '':
+            continue
+        result.append(generatedataset(i.TI, i.DE))
+
     with open('result.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=4)
 
 
-if __name__ == '__main__':
-    pass
-    # 加载数据集
-
-    # 处理数据，得到title，de
-
-    # 开始标注
-    # generatedataset(title, DE)
 

@@ -33,6 +33,7 @@ class WosData:
         self.r_conclusion = ''   # 研究结论
         self.CR = []             # 引文信息
         self.DI = ''             # DOI号
+        self.JCR = ''            # JCR分区
 
     def to_dict(self):
         return {
@@ -54,7 +55,8 @@ class WosData:
             'r_result': self.r_result,
             'r_conclusion': self.r_conclusion,
             "CR": self.CR,
-            "DOI": self.DI
+            "DOI": self.DI,
+            "JCR": self.JCR
         }
 
     def to_json(self):

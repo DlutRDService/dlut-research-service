@@ -65,9 +65,10 @@ def DealPaperInformation(title, *args):
     :return: wos_data object correspond to the 'title' where store the wos fields in the list passed.
     """
     if not args:
-        args = ["TI", "AF", "DE", "AB", "SO", "SE", "NR", "TC", "WC", "PY", "ab_seq", 'CR', 'DI']
+        args = ["TI", "AF", "DE", "AB", "SO", "SE", "NR", "TC", "JCR", "WC", "PY", "ab_seq", 'CR', 'DI']
 
     Esi_dict = CreateJournalCategoryDict()
+    jcr_dict = CreateJournalJCRDict()
     wos_data = WosData()
 
     title = title.split('\n')
@@ -101,23 +102,27 @@ def DealPaperInformation(title, *args):
                     while title[num + i][0:3] == '   ':
                         wos_data.SO += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').split(',')[0]
                         i += 1
-                    wos_data.ESI = Esi_dict[wos_data.SO]
+                    wos_data.ESI = Esi_dict[wos_data.SO.upper()]
+                    wos_data.JCR = jcr_dict[wos_data.SO.upper()]
                 elif ':' in line:
                     wos_data.SO = line[3:].replace('\'', '').replace('\"', '').split(': ')[0]
                     i = 1
                     while title[num + i][0:3] == '   ':
                         wos_data.SO += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').split(': ')[0]
                         i += 1
-                    wos_data.ESI = Esi_dict[wos_data.SO]
+                    wos_data.ESI = Esi_dict[wos_data.SO.upper()]
+                    wos_data.JCR = jcr_dict[wos_data.SO.upper()]
                 else:
                     wos_data.SO = line[3:].replace('\'', '').replace('\"', '').upper()
                     i = 1
                     while title[num + i][0:3] == '   ':
                         wos_data.SO += ' ' + title[num + i][3:].replace('\'', '').replace('\"', '').upper()
                         i += 1
-                    wos_data.ESI = Esi_dict[wos_data.SO.replace('\'', '').replace('\"', '')]
+                    wos_data.ESI = Esi_dict[wos_data.SO.replace('\'', '').replace('\"', '').upper()]
+                    wos_data.JCR = jcr_dict[wos_data.SO.replace('\'', '').replace('\"', '').upper()]
             except KeyError:
                 wos_data.ESI = ''
+                wos_data.JCR = ''
                 pass
         # conference
         if line.find('SE ') == 0 and 'SE' in args:
@@ -583,6 +588,16 @@ def CreateJournalCategoryDict():
     esi_dict.update(esi_dict1)
     return esi_dict
 
+
+def CreateJournalJCRDict():
+    jcr_dict = {}
+    # load the Jcr excel
+    df = pd.read_excel(r"C:\Users\AI\Desktop\data\JCR_and_Journal_Quartiles.xlsx", sheet_name="Q区")
+    for i in range(df['Journal Name']):
+        jcr_dict.update({df['Journal Name'][i].upper(): df['Q'][i]})
+    return jcr_dict
+
+
 def seq_annotation(data):
     """
     Annotation the list of abstract sentences by roberta+gat.
@@ -697,26 +712,5 @@ def replace_abbreviations(text):
 
 
 if __name__ == '__main__':
-    titles = get_titles('../data/Test.txt')
-    wos_js = []
-    for title in titles:
-        wosdata = DealPaperInformation(title, "AB", "ab_seq")
-        print(wosdata)
-        # break
-        print('B:' + wosdata.r_background)
-        print("-----")
-        print("M:" + wosdata.r_method)
-        print("-----")
-        print("R:" + wosdata.r_result)
-        print("-----")
-        print("C:" + wosdata.r_conclusion)
-
-        print("----------------next------------------")
-        # wos_js.append(wosdata.to_json())
-    # 将整个列表转换为 JSON 字符串
-    # wos_js_json = json.dumps(wos_js, ensure_ascii=False, indent=4)
-
-    # 将 JSON 字符串写入文件
-    # with open('../data/1.json', 'w', encoding='utf-8') as f:
-        # f.write(wos_js_json)
+    CreateJournalJCRDict()
 
