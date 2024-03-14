@@ -4,6 +4,7 @@ import os
 from openai import OpenAI
 
 # TODO didi
+
 def generatedataset(title, DE):
     os.environ["OPENAI_API_KEY"] = "sk-9DTRcJyDuhIBhuy6Ef61B3C9Df77431e832a0f68E9F827Bd"
     client = OpenAI(base_url="https://api.xty.app/v1")
@@ -29,3 +30,14 @@ def generatedataset(title, DE):
     result.append({"Text":title, "tag":response.choices[0].message.content})
     with open('result.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=4)
+
+
+if __name__ == '__main__':
+    pass
+    # 加载数据集
+
+    # 处理数据，得到title，de
+
+    # 开始标注
+    # generatedataset(title, DE)
+
