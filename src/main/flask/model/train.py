@@ -76,18 +76,10 @@ class FineTuner:
 
         def formatting_func(example):
             """
-            generate prompt template
+            generate prompt text
             """
             # TODO modify the prompt (use the token <s></s>?)
-            alpaca_prompt = """
-                    ### Instruction:
-                    {}
-
-                    ### Input:
-                    {}
-
-                    ### Response:
-                    {}"""
+            alpaca_prompt = """<s>[INST] {} [/INST] {}</s> [INST] {} [/INST]"""
             instructions = example["instruction"]
             inputs = example["input"]
             outputs = example["output"]
