@@ -22,7 +22,8 @@ model.load_state_dict(torch.load(r'C:\Users\AI\IdeaProjects\dlut-research-servic
 model.eval()
 
 
-def get_titles(file_path):
+
+def get_titles(file_path) -> list:
     """
     get the titles from file_path, file_path can be a file or a directory
     :return: a list of strings containing the titles
@@ -59,7 +60,7 @@ def get_titles(file_path):
         raise ValueError('Please enter a valid path')
     return titles
 
-def DealPaperInformation(title, *args):
+def DealPaperInformation(title, *args) -> WosData:
     """
     Pass a variable of type String named 'title' and a list of statistics wos fields.
     :return: wos_data object correspond to the 'title' where store the wos fields in the list passed.
@@ -67,10 +68,9 @@ def DealPaperInformation(title, *args):
     if not args:
         args = ["TI", "AF", "DE", "AB", "SO", "SE", "NR", "TC", "JCR", "WC", "PY", "ab_seq", 'CR', 'DI']
 
+    wos_data = WosData()
     Esi_dict = CreateJournalCategoryDict()
     jcr_dict = CreateJournalJCRDict()
-    wos_data = WosData()
-
     title = title.split('\n')
     for num, line in enumerate(title):
         # author
@@ -593,7 +593,7 @@ def CreateJournalJCRDict():
     jcr_dict = {}
     # load the Jcr excel
     df = pd.read_excel(r"C:\Users\AI\Desktop\data\JCR_and_Journal_Quartiles.xlsx", sheet_name="Q区")
-    for i in range(df['Journal Name']):
+    for i in range(len(df['Journal Name'])):
         jcr_dict.update({df['Journal Name'][i].upper(): df['Q'][i]})
     return jcr_dict
 

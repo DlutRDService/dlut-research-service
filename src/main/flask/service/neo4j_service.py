@@ -43,16 +43,3 @@ if __name__ == "__main__":
 
     neo4j_service = Neo4jService(uri, user, pwd)
 
-    # 示例：获取数据
-    result = neo4j_service.get_data("MATCH (n) RETURN n LIMIT 5")
-    for record in result:
-        print(record)
-
-    # 示例：添加节点
-    neo4j_service.add_node("Person", {"name": "Alice", "age": 30})
-
-    # 示例：添加关系
-    neo4j_service.add_relationship("Alice", "KNOWS", "Bob")
-
-    # 关闭服务
-    neo4j_service.close()
