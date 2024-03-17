@@ -9,7 +9,8 @@ Description: Object that stores paper information
 
 import json
 
-class WosData:
+
+class Paper:
     # 记录每篇论文信息
     def __init__(self):
         self.TI = ''             # 标题
@@ -35,12 +36,16 @@ class WosData:
         self.DI = ''             # DOI号
         self.JCR = ''            # JCR分区
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        for i in range(len(self.AF)):
+            self.AF[i] = self.AF[i].to_dict()
         return {
             'TI': self.TI,
             'AF': self.AF,
+            "AU": self.AU,
             'DE': self.DE,
             'SO': self.SO,
+            "SE": self.SE,
             'cr_category': self.cr_category,
             'WC': self.WC,
             'PY': self.PY,
@@ -59,7 +64,7 @@ class WosData:
             "JCR": self.JCR
         }
 
-    def to_json(self):
+    def to_json(self) -> str:
         for i in range(len(self.AF)):
             self.AF[i] = self.AF[i].to_dict()
         wosdata_dict = self.to_dict()
@@ -71,7 +76,7 @@ class AuthorInformation:
         self.AuthorNation = ''
         self.AuthorName = ''
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         if len(self.AuthorOrganization) == 0:
             self.AuthorOrganization = ''
         elif len(self.AuthorOrganization) == 1:
@@ -92,7 +97,7 @@ class CitedReference:
         self.SO = SO
         self.DOI = doi
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             'Author': self.Author,
             'Year': self.Year,

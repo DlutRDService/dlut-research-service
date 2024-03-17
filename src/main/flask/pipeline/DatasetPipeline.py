@@ -8,7 +8,7 @@ Description: Generate the fine-tuning dataset.
 """
 import json
 
-from pipeline.PaperPipeline import PaperDataset
+from pipeline.data_loarder import PaperDataset
 
 
 class GenerateFTDataset:

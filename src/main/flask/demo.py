@@ -3,7 +3,7 @@ import ast
 import json
 import os
 from openai import OpenAI
-from pipeline.PaperPipeline import PaperDataset
+from pipeline.data_loarder import PaperDataset
 
 
 # TODO didi
