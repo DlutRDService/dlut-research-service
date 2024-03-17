@@ -3,6 +3,7 @@
 
 import os
 import re
+from typing import List
 
 import torch
 import pandas as pd
@@ -23,7 +24,7 @@ model.eval()
 
 
 
-def get_titles(file_path) -> list:
+def get_titles(file_path:str) -> List[str]:
     """
     get the titles from file_path, file_path can be a file or a directory
     :return: a list of strings containing the titles
@@ -74,7 +75,9 @@ def DealPaperInformation(title, *args) -> Paper:
     title = title.split('\n')
     for num, line in enumerate(title):
         # author
-        if line.find('AF ') == 0 and 'AF' in args:
+        if line[:2] not in args:
+            continue
+        if line.find('AF ') == 0:
             Author = AuthorInformation()
             Author.AuthorName = line[3:].replace('\'', '').replace('\"', '')
             wos_data.AF.append(Author)
@@ -86,7 +89,7 @@ def DealPaperInformation(title, *args) -> Paper:
                 i += 1
             continue
         # title
-        if line.find('TI ') == 0 and 'TI' in args:
+        if line.find('TI ') == 0:
             wos_data.TI = line[3:].replace('\'', '').replace('\"', '').replace('\\', '')
             i = 1
             while title[num + i][0:3] == '   ':
@@ -94,7 +97,7 @@ def DealPaperInformation(title, *args) -> Paper:
                 i += 1
             continue
         # Journal or conference
-        if line.find('SO ') == 0 and 'SO' in args:
+        if line.find('SO ') == 0:
             try:
                 if ', ' in line:
                     wos_data.SO = line[3:].replace('\'', '').replace('\"', '').split(',')[0]
@@ -125,7 +128,7 @@ def DealPaperInformation(title, *args) -> Paper:
                 wos_data.JCR = ''
                 pass
         # conference
-        if line.find('SE ') == 0 and 'SE' in args:
+        if line.find('SE ') == 0:
             wos_data.SE = line[3:].replace('\'', '').replace('\"', '')
             i = 1
             while title[num + i][0:3] == '   ':
@@ -134,7 +137,7 @@ def DealPaperInformation(title, *args) -> Paper:
             wos_data.SE = wos_data.SE.split('; ')
             continue
         # keywords
-        if line.find("DE ") == 0 and 'DE' in args:
+        if line.find("DE ") == 0:
             keywords = line[3:].replace('\'', '').replace('\"', '').lower()
             i = 1
             while title[num + i][0:3] == '   ':
@@ -143,7 +146,7 @@ def DealPaperInformation(title, *args) -> Paper:
             wos_data.DE = keywords.split('; ')
             continue
         # abstract
-        if line.find("AB ") == 0 and 'AB' in args:
+        if line.find("AB ") == 0:
             abstract = line[3:]
             i = 1
             while title[num + i][0:3] == '   ':
@@ -181,7 +184,7 @@ def DealPaperInformation(title, *args) -> Paper:
             continue
 
         # paper country and orginization
-        if line.find('C1 ') == 0 and 'AF' in args:
+        if line.find('C1 ') == 0:
             # 国家
             if CheckNation(line) != -1:
                 wos_data.Nation.append(CheckNation(line))
@@ -265,7 +268,7 @@ def DealPaperInformation(title, *args) -> Paper:
                         AF.AuthorNation = wos_data.Nation[0]
                 continue
         # cite conference
-        if line.find('CR ') == 0 and 'CR' in args:
+        if line.find('CR ') == 0:
             cr_list = line[3:].split(', ')
             if len(cr_list) == 3:
                 CR = CitedReference(author=cr_list[0], year=cr_list[1],
@@ -290,14 +293,14 @@ def DealPaperInformation(title, *args) -> Paper:
                         wos_data.CR.append(CR.to_dict())
                 i += 1
         # citing num
-        if line.find("NR ") == 0 and 'NR' in args:
+        if line.find("NR ") == 0:
             wos_data.NR = line[3:]
             continue
         # total cited
-        if line.find("TC ") == 0 and 'TC' in args:
+        if line.find("TC ") == 0:
             wos_data.TC = line[3:]
         # WC category
-        if line.find("WC ") == 0 and 'WC' in args:
+        if line.find("WC ") == 0:
             wc = line[3:].strip('\n')
             i = 1
             while title[num + i][0:3] == '   ':
@@ -306,11 +309,11 @@ def DealPaperInformation(title, *args) -> Paper:
             wos_data.WC = wc.split('; ')
             continue
         # Published year
-        if (line.find('PY ') == 0 or line.find('EA ') == 0) and 'PY' in args:
+        if line.find('PY ') == 0 or line.find('EA ') == 0:
             wos_data.PY = line[-4:]
             continue
         # DOI
-        if line.find("DI ") == 0 and 'DI' in args:
+        if line.find("DI ") == 0:
             wos_data.DI = line[3:]
     if wos_data.AF is not None:
         for j in range(len(wos_data.AF)):
@@ -327,6 +330,37 @@ def DealPaperInformation(title, *args) -> Paper:
     wos_data.DE = list(set(wos_data.DE))
 
     return wos_data
+
+
+
+# def handle_author(lines: List[str], index: int, paper: Paper) -> int:
+#
+#     author_line = lines[index][3:].replace('\'', '').replace('\"', '')
+#     paper.AF.append(author_line)
+#     index += 1
+#     while index < len(lines) and lines[index].startswith('   '):
+#         # 继续处理下一行作为作者信息的一部分
+#         author_line_continued = lines[index][3:].replace('\'', '').replace('\"', '')
+#         paper.AF[-1] += ' ' + author_line_continued
+#         index += 1
+#     return index - 1  # 返回更新后的索引（减一是因为主循环会再次加一）
+#
+# def process_paper_data(title: str, args: List[str]) -> Paper:
+#     lines = title.split('\n')
+#     paper = Paper()
+#     Esi_dict = CreateJournalCategoryDict()
+#     jcr_dict = CreateJournalJCRDict()
+#     index = 0
+#     while index < len(lines):
+#         line = lines[index]
+#         if line.startswith('AF '):
+#             index = handle_author(lines, index, paper)
+#         # 对于其他字段，可以使用类似的方式处理
+#         index += 1
+#     return paper
+
+
+
 
 def split_to_titles(file_path):
     """
@@ -687,6 +721,4 @@ def replace_abbreviations(text):
     return pattern.sub(replace, text)
 
 
-if __name__ == '__main__':
-    CreateJournalJCRDict()
 

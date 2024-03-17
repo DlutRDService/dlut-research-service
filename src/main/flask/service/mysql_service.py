@@ -4,15 +4,14 @@
 import pymysql
 import torch.cuda
 
-from utils.paper_utils import DealPaperInformation
-from utils.paper_utils import get_titles
+from pipeline.paper_process import DealPaperInformation
+from pipeline.paper_process import get_titles
 
 class MysqlService:
 
     def __init__(self, db_connection):
         self.db = db_connection
         self.cursor = self.db.cursor()
-        pass
 
     def import_to_mysql(self, titles):
 
@@ -80,12 +79,10 @@ class MysqlService:
 # 测试
 if __name__ == '__main__':
 
-    torch.cuda.empty_cache()
-    # 打开数据库连接,设置路径，端口，用户名，密码，数据库名。
     db = pymysql.connect(host='localhost', user='AI', passwd='!@#$AI', port=3306, db='dlut_academic_platform')
     # 批量处理数据
     # 将txt文本切割成文献列表
-    paper = get_titles(r'C:\Users\AI\Desktop\data\AI\2019')
+    paper = get_titles(r'C:\Users\AI\Desktop\data\AI\2023')
     a = MysqlService(db)
     a.import_to_mysql(paper)
 

@@ -43,9 +43,3 @@ class DataLoader:
         else:
             raise StopIteration
 
-
-
-
-if "__main__" == __name__:
-    data = DataLoader(r"C:\Users\AI\Desktop\data\AI\2021\record-1-500.txt", "TI", "PY", "DE")
-    a = data[1]
