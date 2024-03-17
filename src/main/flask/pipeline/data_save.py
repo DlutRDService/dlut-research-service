@@ -21,7 +21,7 @@ class DataSaver:
                 batch = []
 
         if batch:
-            file_name = "record-{}-{}.json".format(end - len(batch) + 1, end)
+            file_name = "recrd-{}-{}.json".format(end - len(batch) + 1, end)
             file_path = f"{self.output_dir}{file_name}"
             with open(file_path, "w", encoding="utf-8") as file:
                 json.dump(batch, file, ensure_ascii=False, indent=4)
