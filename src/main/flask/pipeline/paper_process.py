@@ -31,24 +31,19 @@ def get_titles(file_path:str) -> List[str]:
     """
     titles = []
     if file_path is None:
-        raise ValueError('Please enter a valid path')
-    paths = []
+        raise ValueError('Get no file_path. Please enter a valid path')
     num = 0
     if os.path.isdir(file_path):
-        for (dir_path, dirname, filenames) in os.walk(file_path):
-            if filenames is None:
-                continue
-            for i, filename in enumerate(filenames):
-                # get the processing file path
-                paths.append(os.path.join(dir_path, filename))
-        for path in paths:
-            title = split_to_titles(path)
-            for i in title:
-                num += 1
-                if num % 10000 == 0 and num != 0:
-                    print('----Already Reading {} papers----'.format(num))
-                titles.append(i)
-        print("A total of {} papers".format(len(titles)))
+        for dir_path, _, filenames in os.walk(file_path):
+            for filename in filenames:
+                full_path = os.path.join(dir_path, filename)
+                title = split_to_titles(full_path)
+                for t in title:
+                    num += 1
+                    if num % 10000 == 0:
+                        print(f'Already Reading {num} papers')
+                    titles.append(t)
+        print("---------A total of {} papers-----------".format(len(titles)))
     elif os.path.isfile(file_path):
         title = split_to_titles(file_path)
         for i in title:
@@ -58,16 +53,16 @@ def get_titles(file_path:str) -> List[str]:
             titles.append(i)
         print("A total of {} papers".format(len(titles)))
     else:
-        raise ValueError('Please enter a valid path')
+        raise ValueError("Get file_path", file_path, 'Please enter a valid path')
     return titles
 
-def DealPaperInformation(title, *args) -> Paper:
+def DealPaperInformation(title, fileds:List[str]) -> Paper:
     """
     Pass a variable of type String named 'title' and a list of statistics wos fields.
     :return: wos_data object correspond to the 'title' where store the wos fields in the list passed.
     """
-    if not args:
-        args = ["TI", "AF", "DE", "AB", "SO", "SE", "NR", "TC", "JCR", "WC", "PY", "ab_seq", 'CR', 'DI']
+    if not fileds:
+        fileds = ["TI", "AF", "DE", "AB", "SO", "SE", "NR", "TC", "JCR", "WC", "PY", "ab_seq", 'CR', 'DI']
 
     wos_data = Paper()
     Esi_dict = CreateJournalCategoryDict()
@@ -75,7 +70,7 @@ def DealPaperInformation(title, *args) -> Paper:
     title = title.split('\n')
     for num, line in enumerate(title):
         # author
-        if line[:2] not in args:
+        if line[:2] not in fileds:
             continue
         if line.find('AF ') == 0:
             Author = AuthorInformation()

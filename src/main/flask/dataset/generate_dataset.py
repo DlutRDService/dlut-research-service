@@ -8,8 +8,11 @@ Date: 2024-02-27
 
 import ast
 import json
+import os
 
 from transformers import BertTokenizer
+
+from config.gpt_config import gpt_api
 from pipeline.data_loarder import DataLoader
 
 
@@ -26,16 +29,19 @@ class GenerateDataset:
         Paper fields like TI,DE u dataset need.
     """
 
-    def __init__(self, data_file, batch_size:int = None, *args):
+    def __init__(self, data_file, output_dir, batch_size:int = None, *args):
         self.data_loader = DataLoader(data_file, *args)
         self.batch_size = batch_size if batch_size is not None else 500
+        self.output_dir = output_dir
 
-    def generate_method_ft_dataset(self):
+    def generate_method_ft_dataset(self) -> None:
         """
         Description: Generate the fine-tuning dataset about paper method.
         # fileds["TI", "WC", "AB", "ab_seq"]
         """
         ft_dataset = []
+
+
         try:
             for i in range(0, len(self.data_loader), 2):
                 if (self.data_loader[i].r_result and self.data_loader[i].r_result) != '':
@@ -58,28 +64,35 @@ class GenerateDataset:
         except IndexError as e:
             print(e)
 
-    @staticmethod
-    def generate_summarize_abstract_ft_dataset():
+
+    def generate_summarize_abstract_ft_dataset(self) -> None:
         """
-        Author: AI
+        Author: zsl
         Date: 2024-02
-        Description: This script generates a summarized dataset by t5_dataset.json
         """
-        t5_file_path = r'C:\Users\AI\Desktop\data\t5_dataset.json'
+        ft_dataset = []
 
-        with open(t5_file_path, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+        for num, i in enumerate(self.data_loader):
+            messages = [
+                {"role": "system",
+                 "content": "You are an intelligent robot specializing in summarizing and condensing text. I will provide you with a summary text, and your task is to condense it to around 200 words."},
+                {"role": "user", "content": i.AB}
+            ]
+            result = gpt_api(messages)
+            ft_dataset.append({
+                "instruction": "You are an intelligent robot specializing in summarizing and condensing text. I will "
+                               "provide you with a summary text, and your task is to condense it to around 200 words.",
+                "input": i.AB,
+                "output": result
+            })
+            if (num + 1) % self.batch_size == 0:
+                self.save_dataset(self.output_dir,
+                                  "sum_AB-{}-{}.json".format(num - self.batch_size + 2, num + 1),
+                                  ft_dataset)
+                ft_dataset = []
 
-        dataset = [{
-            "Instruction": "Summarize this English abstract to about 150-200 words.",
-            "Input": i["long_abs"],
-            "Output": i["short_abs"]
-        } for i in data]
 
-        with open(r'C:\Users\AI\Desktop\data\summarize_abstract_dataset.json', 'w', encoding='utf-8') as f:
-            json.dump(dataset, f, ensure_ascii=False, indent=4)
-
-    def paper_info_ft_dataset(self):
+    def paper_info_ft_dataset(self) -> None:
         """
         Author: zsl
         Date: 2024-02-25
@@ -109,6 +122,7 @@ class GenerateDataset:
             au_tag = [(j, "author") for j in i.AU if i.AU]
             so_tag = [(i.SO, "Academic Publications") if i.SO else ""]
             de_tag = [(j, "object") for j in i.DE if i.DE]
+            py_tag = [(i.PY, "Year") if i.PY else ""]
             '''
             # gpt generate
             messages=[
@@ -122,51 +136,76 @@ class GenerateDataset:
             result = gpt_api(messages).replace("\n", "")
             '''
             # without gpt
-            if de_tag and au_tag and so_tag:
-                dataset.append({"title": i.TI, "de_tag": str(de_tag), "au_tag": str(au_tag), "so_tag":str(so_tag)})
+            if de_tag and au_tag and so_tag and py_tag:
+                i.TI = "Paper '{}' authored by {} and published on {} in {}".format(
+                    i.TI, ", ".join(i.AU), i.SO, i.PY
+                )
+                dataset.append({"title": i.TI,
+                                "de_tag": str(de_tag),
+                                "au_tag": str(au_tag),
+                                "so_tag": str(so_tag),
+                                "py_tag": str(py_tag)
+                                })
                 num += 1
                 if (num + 1) % self.batch_size == 0:
-                    self.save_dataset("record-{}-{}.json".format(num - self.batch_size + 2, num + 1), dataset)
+                    self.save_dataset(self.output_dir, "record-{}-{}.json".format(num - self.batch_size + 2, num + 1),
+                                      dataset)
                     dataset = []
 
-    @staticmethod
-    def generate_ner_dataset(file_path: str) -> None:
+    def generate_ner_dataset(self, file_path: str) -> None:
         data = []
-        with open(file_path, "r", encoding="utf-8") as f:
-            results = json.load(f)
-        for result in results:
-            sentence = result['Text']
-            result_list = ast.literal_eval(result['tag'])
+        results = self.read_json_list_file(file_path)
+
+        for num, result in enumerate(results):
+            sentence = result['title']
+            de_list = ast.literal_eval(result['de_tag'])
+            au_list = ast.literal_eval(result['au_tag'])
+            so_list = ast.literal_eval(result['so_tag'])
+            py_list = ast.literal_eval(result['py_tag'])
+            tags = de_list + au_list + so_list + py_list
+
+            # token
             tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-            # 对句子进行分词
             tokenized_sentence = tokenizer.tokenize(sentence)
             labels = ['O'] * len(tokenized_sentence)
-            result_list = [item for item in result_list if isinstance(item, tuple)]
-            if result_list:
-                try:
-                    for entity, entity_type in result_list:
-                        entity_tokens = tokenizer.tokenize(entity)
-                        start_index = None
-                        # 在分词后的句子中查找实体的开始位置
-                        for i in range(len(tokenized_sentence) - len(entity_tokens) + 1):
-                            if tokenized_sentence[i:i + len(entity_tokens)] == entity_tokens:
-                                start_index = i
-                                break
-                        # 如果找到实体，为其分配BIO标签
-                        if start_index is not None:
-                            labels[start_index] = f"B-{entity_type}"
-                            for i in range(start_index + 1, start_index + len(entity_tokens)):
-                                labels[i] = f"I-{entity_type}"
-                    data.append({"sentence": sentence, "labels": labels})
-                except ValueError:
-                    continue
-        with open("ner_data.json", "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+            if tags:
+                for entity, entity_type in tags:
+                    entity_tokens = tokenizer.tokenize(entity)
+                    start_index = None
+                    # find the start
+                    for i in range(len(tokenized_sentence) - len(entity_tokens) + 1):
+                         if tokenized_sentence[i:i + len(entity_tokens)] == entity_tokens:
+                            start_index = i
+                            break
+                    # tag BIO for the entity
+                    if start_index is not None:
+                        labels[start_index] = f"B-{entity_type}"
+                        for i in range(start_index + 1, start_index + len(entity_tokens)):
+                            labels[i] = f"I-{entity_type}"
+                data.append({"text": sentence, "labels": labels})
+            if num % self.batch_size == 0:
+                 file_name = "record-{}-{}.json".format(num-self.batch_size + 2, num)
+                 self.save_dataset(self.output_dir, file_name, data)
+                 data = []
 
     @staticmethod
-    def save_dataset(file_path, data:list | str) -> None:
-        with open('../data/{}'.format(file_path), 'w', encoding='utf-8') as file:
+    def save_dataset(output_dir, file_name, data:list | str) -> None:
+        with open('{}/{}'.format(output_dir,file_name), 'w', encoding='utf-8') as file:
             json.dump(data, file, ensure_ascii=False, indent=4)
-        print("Saved {} records".format(file_path).replace(".json", ""))
+        print("Saved {} records".format(file_name).replace(".json", ""))
 
+    @staticmethod
+    def read_json_list_file(file_path: str) -> list:
+        all_results = []
+        if os.path.isdir(file_path):
+            for filename in os.listdir(file_path):
+                full_path = os.path.join(file_path, filename)
+                if os.path.isfile(full_path):
+                    with open(full_path, "r", encoding="utf-8") as f:
+                        results = json.load(f)
+                        all_results.extend(results)
+        elif os.path.isfile(file_path):
+            with open(file_path, "r", encoding="utf-8") as f:
+                all_results = json.load(f)
+        return all_results
 
