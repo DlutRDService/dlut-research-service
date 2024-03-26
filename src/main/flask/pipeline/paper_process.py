@@ -14,14 +14,22 @@ from dao.paper import Paper, AuthorInformation, CitedReference
 from model.RoBERTaGAT.RoBERTaGAT import RobertaGAT
 
 
-# load RobertaGAT
-model = RobertaGAT(roberta_model_name="roberta-base", num_classes=5)
-model.load_state_dict(torch.load(r'C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\model\RoBERTaGAT'
-                                 r'\model5.pth', map_location='cuda:0'), strict=False)
-# model = RobertaGAT(roberta_model_name="roberta-base", num_classes=4)
-# model.load_state_dict(torch.load('../model/RoBERTaGAT/model.pth', map_location='cuda:0'))
-model.eval()
+global_model = None
 
+def load_model():
+
+    model = RobertaGAT(roberta_model_name="roberta-base", num_classes=5)
+    model.load_state_dict(torch.load(r'C:\Users\AI\IdeaProjects\dlut-research-service\src\main\flask\model\RoBERTaGAT\model.pth', map_location='cuda:0'), strict=False)
+    model.eval()
+    return model
+
+
+def get_model():
+
+    global global_model
+    if global_model is None:
+        global_model = load_model()
+    return global_model
 
 
 def get_titles(file_path:str) -> List[str]:
@@ -56,7 +64,8 @@ def get_titles(file_path:str) -> List[str]:
         raise ValueError("Get file_path", file_path, 'Please enter a valid path')
     return titles
 
-def DealPaperInformation(title, fileds:List[str]) -> Paper:
+
+def DealPaperInformation(title, fileds:List[str]=None) -> Paper:
     """
     Pass a variable of type String named 'title' and a list of statistics wos fields.
     :return: wos_data object correspond to the 'title' where store the wos fields in the list passed.
@@ -149,7 +158,7 @@ def DealPaperInformation(title, fileds:List[str]) -> Paper:
                 i += 1
             wos_data.AB = abstract
 
-            if "ab_seq" in args:
+            if "ab_seq" in fileds:
                 ab_seqs = sent_tokenize(abstract)
 
                 indices = [list(range(1, len(ab_seqs) + 1)), [0 for _ in range(len(ab_seqs))]]
@@ -255,7 +264,7 @@ def DealPaperInformation(title, fileds:List[str]) -> Paper:
             continue
         # 若没有C1字段,则查找RP字段
         if len(wos_data.Nation) == 0 and len(wos_data.Organization) == 0:
-            if line.find('RP ') == 0 and 'AF' in args:
+            if line.find('RP ') == 0 and 'AF' in fileds:
                 # 统计国家
                 for AF in wos_data.AF:
                     if CheckNation(line) != -1:
@@ -327,37 +336,7 @@ def DealPaperInformation(title, fileds:List[str]) -> Paper:
     return wos_data
 
 
-
-# def handle_author(lines: List[str], index: int, paper: Paper) -> int:
-#
-#     author_line = lines[index][3:].replace('\'', '').replace('\"', '')
-#     paper.AF.append(author_line)
-#     index += 1
-#     while index < len(lines) and lines[index].startswith('   '):
-#         # 继续处理下一行作为作者信息的一部分
-#         author_line_continued = lines[index][3:].replace('\'', '').replace('\"', '')
-#         paper.AF[-1] += ' ' + author_line_continued
-#         index += 1
-#     return index - 1  # 返回更新后的索引（减一是因为主循环会再次加一）
-#
-# def process_paper_data(title: str, args: List[str]) -> Paper:
-#     lines = title.split('\n')
-#     paper = Paper()
-#     Esi_dict = CreateJournalCategoryDict()
-#     jcr_dict = CreateJournalJCRDict()
-#     index = 0
-#     while index < len(lines):
-#         line = lines[index]
-#         if line.startswith('AF '):
-#             index = handle_author(lines, index, paper)
-#         # 对于其他字段，可以使用类似的方式处理
-#         index += 1
-#     return paper
-
-
-
-
-def split_to_titles(file_path):
+def split_to_titles(file_path) -> list:
     """
     Splits the string about wos_data txt. return a list of strings where each string is a title.
     """
@@ -365,7 +344,8 @@ def split_to_titles(file_path):
         content = f.read()
         return content.split('\nER\n')
 
-def CheckNation(Str=''):
+
+def CheckNation(Str='') -> int:
     """
     Judge the nation of Author by checking if it exists in the nationList.
     """
@@ -586,19 +566,12 @@ def CheckNation(Str=''):
             return nation
     return -1
 
-def CreateJournalCategoryDict():
+
+def CreateJournalCategoryDict() -> dict:
     """
     Create a dict of ESI Journal list for charging the simple journal name to full name
     :return: ESI Journal dict
     """
-    #
-    # python3.9 and above no longer support xlrd1.2, xlrd1.2 and above no longer support xlsx file format
-    # table = xlrd.open_workbook(r'./esi-master-journal-list-4-2021.xlsx').sheets()[0]
-    # fullTitle = np.matrix(table.col_values(0)).tolist()[0]
-    # Title_2017 = np.matrix(table.col_values(1)).tolist()[0]
-    # Title_2019 = np.matrix(table.col_values(2)).tolist()[0]
-    # esiCategory = np.matrix(table.col_values(5)).tolist()[0]
-    #
 
     # Get the sheet with index.
     # Use pandas to read the first sheet of the Excel file.
@@ -618,7 +591,7 @@ def CreateJournalCategoryDict():
     return esi_dict
 
 
-def CreateJournalJCRDict():
+def CreateJournalJCRDict() -> dict:
     jcr_dict = {}
     # load the Jcr excel
     df = pd.read_excel(r"C:\Users\AI\Desktop\data\JCR_and_Journal_Quartiles.xlsx", sheet_name="Q区")
@@ -627,7 +600,7 @@ def CreateJournalJCRDict():
     return jcr_dict
 
 
-def seq_annotation(data):
+def seq_annotation(data) -> dict:
     """
     Annotation the list of abstract sentences by roberta+gat.
     retunr a dict where the key is sentence and value is label.
@@ -635,11 +608,13 @@ def seq_annotation(data):
     tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
     tokenors = tokenizer(data['seq'], padding='max_length', truncation=True, max_length=96, return_tensors="pt")
     with torch.no_grad():
+        model = get_model()
         output = model(tokenors['input_ids'], tokenors['attention_mask'], torch.tensor(data['rel']))[0]
         output = output.argmax(dim=1).tolist()
     return {"seq": data['seq'][1:], "label": output[1:]}
 
-def split_sentence(abstract):
+
+def split_sentence(abstract) -> list:
     """
     Split the abstract to a list of sentences
     """
@@ -647,7 +622,8 @@ def split_sentence(abstract):
     ab_seqs = sent_tokenize(abstract)
     return ab_seqs
 
-def replace_abbreviations(text):
+
+def replace_abbreviations(text) -> str:
     """
     Replace all the normal omitted words to the complete word like etc.
     """

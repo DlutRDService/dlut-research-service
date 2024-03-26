@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from transformers import BertTokenizer
 
 
-tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+tokenizer = BertTokenizer.from_pretrained("bert_crf-base-uncased")
 
 class SentenceDataset(Dataset):
     def __init__(self, encoded_inputs, labels):

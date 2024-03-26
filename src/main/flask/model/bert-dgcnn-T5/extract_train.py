@@ -9,8 +9,8 @@ from dataset import SentenceDataset, collate_fn
 import json
 
 # 加载分词
-tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-model = BertDGCNNModel(bert_model='bert-base-uncased', dgcnn_input_dim=768, dgcnn_hidden_dim=384, dgcnn_output_dim=128, num_classes=1)
+tokenizer = BertTokenizer.from_pretrained("bert_crf-base-uncased")
+model = BertDGCNNModel(bert_model='bert_crf-base-uncased', dgcnn_input_dim=768, dgcnn_hidden_dim=384, dgcnn_output_dim=128, num_classes=1)
 model.to("cuda:0")
 
 abstracts = []

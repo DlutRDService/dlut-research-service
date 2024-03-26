@@ -124,7 +124,7 @@ def abstract_segment():
         return Transformer.abstract_segmentation(roberta_gat, abstract)
 
 
-# TODO ner
+# TODO ner_2018
 @data_process_blueprint.route('/api/ner', methods=['POST'])
 def ner():
     text = request.form.get('text')
@@ -134,7 +134,7 @@ def ner():
         return Gpt.ner(client, text)
     if model == 'llama':
         return Llama.ner(llama, text)
-    if model == 'bert':
+    if model == 'bert_crf':
         return Transformer.ner(text)
 
 # TODO txt 转成格式化excel

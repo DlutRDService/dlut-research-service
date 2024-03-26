@@ -34,6 +34,7 @@ class GenerateDataset:
         self.batch_size = batch_size if batch_size is not None else 500
         self.output_dir = output_dir
 
+
     def generate_method_ft_dataset(self) -> None:
         """
         Description: Generate the fine-tuning dataset about paper method.
@@ -65,6 +66,36 @@ class GenerateDataset:
             print(e)
 
 
+
+    def generate_summarize_topic_ft_dataset(self) -> None:
+        """
+         Generate the fine-tuning dataset about paper method by gpt.
+         # fileds["TI", "AB"]
+        """
+        ft_dataset = []
+        for num, i in enumerate(self.data_loader):
+            messages = [
+                {"role": "system",
+                 "content": "You are an intelligent robot specializing in summarizing topic. I will provide you with a "
+                            " text, and your summarize the research topic"},
+                {"role": "user", "content": "Summarize the theme of the paper in one sentence. This is the paper "
+                                            "content: " + i.AB}
+            ]
+            result = gpt_api(messages)
+            if result is not None:
+                ft_dataset.append({
+                    "Instruction": "You are an intelligent robot specializing in summarizing topic. "
+                                   "I will provide you with a text, and your summarize the research topic",
+                    "input": "Summarize the theme of the paper in one sentence. This is the paper "
+                                            "content: " + i.AB,
+                    "output": result
+                })
+            if (num + 1) % self.batch_size == 0:
+                file_name = "summarize_topic_record-{}-{}.json".format(num - self.batch_size + 2, num)
+                self.save_dataset(self.output_dir, file_name, ft_dataset)
+                ft_dataset = []
+
+
     def generate_summarize_abstract_ft_dataset(self) -> None:
         """
         Author: zsl
@@ -73,11 +104,14 @@ class GenerateDataset:
         ft_dataset = []
 
         for num, i in enumerate(self.data_loader):
+            if not i.AB:
+                continue
             messages = [
                 {"role": "system",
                  "content": "You are an intelligent robot specializing in summarizing and condensing text. I will provide you with a summary text, and your task is to condense it to around 200 words."},
                 {"role": "user", "content": i.AB}
             ]
+
             result = gpt_api(messages)
             ft_dataset.append({
                 "instruction": "You are an intelligent robot specializing in summarizing and condensing text. I will "
@@ -115,8 +149,7 @@ class GenerateDataset:
 
     def generate_word_seq_dataset(self) -> None:
         dataset = []
-        num:int = 0
-        for i in self.data_loader:
+        for num, i in enumerate(self.data_loader, start=1):
             if not i.DE:
                 continue
             au_tag = [(j, "author") for j in i.AU if i.AU]
@@ -146,17 +179,16 @@ class GenerateDataset:
                                 "so_tag": str(so_tag),
                                 "py_tag": str(py_tag)
                                 })
-                num += 1
-                if (num + 1) % self.batch_size == 0:
-                    self.save_dataset(self.output_dir, "record-{}-{}.json".format(num - self.batch_size + 2, num + 1),
+                if num % self.batch_size == 0:
+                    self.save_dataset(self.output_dir, "record-{}-{}.json".format(num - self.batch_size + 1, num),
                                       dataset)
                     dataset = []
 
     def generate_ner_dataset(self, file_path: str) -> None:
         data = []
-        results = self.read_json_list_file(file_path)
+        results = self.read_file(file_path)
 
-        for num, result in enumerate(results):
+        for num, result in enumerate(results, start=1):
             sentence = result['title']
             de_list = ast.literal_eval(result['de_tag'])
             au_list = ast.literal_eval(result['au_tag'])
@@ -172,7 +204,7 @@ class GenerateDataset:
                 for entity, entity_type in tags:
                     entity_tokens = tokenizer.tokenize(entity)
                     start_index = None
-                    # find the start
+                    # find the start BIO position
                     for i in range(len(tokenized_sentence) - len(entity_tokens) + 1):
                          if tokenized_sentence[i:i + len(entity_tokens)] == entity_tokens:
                             start_index = i
@@ -182,9 +214,9 @@ class GenerateDataset:
                         labels[start_index] = f"B-{entity_type}"
                         for i in range(start_index + 1, start_index + len(entity_tokens)):
                             labels[i] = f"I-{entity_type}"
-                data.append({"text": sentence, "labels": labels})
+                data.append({"text": sentence, "tags": labels})
             if num % self.batch_size == 0:
-                 file_name = "record-{}-{}.json".format(num-self.batch_size + 2, num)
+                 file_name = "record-{}-{}.json".format(num-self.batch_size + 1, num)
                  self.save_dataset(self.output_dir, file_name, data)
                  data = []
 
@@ -195,7 +227,7 @@ class GenerateDataset:
         print("Saved {} records".format(file_name).replace(".json", ""))
 
     @staticmethod
-    def read_json_list_file(file_path: str) -> list:
+    def read_file(file_path: str) -> list:
         all_results = []
         if os.path.isdir(file_path):
             for filename in os.listdir(file_path):
@@ -209,3 +241,36 @@ class GenerateDataset:
                 all_results = json.load(f)
         return all_results
 
+    @staticmethod
+    def demo(file_path:str):
+        all_results = []
+        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        for filename in os.listdir(file_path):
+            full_path = os.path.join(file_path, filename)
+            if os.path.isfile(full_path):
+                with open(full_path, "r", encoding="utf-8") as f:
+                    results = json.load(f)
+                    for i in results:
+                        if len(tokenizer.tokenize(i["text"])) < 511:
+                            tag_to_id = {
+                                "O": 0,
+                                "B-object": 1,
+                                "I-object": 2,
+                                "B-author": 3,
+                                "I-author": 4,
+                                "B-Academic Publications": 5,
+                                "I-Academic Publications": 6,
+                                "B-Year": 7,
+                            }
+                            tags_ids = [tag_to_id[tag] for tag in i['tags']]
+                            i['tags'] = tags_ids
+                            all_results.append(i)
+
+        with open('../data/ner1/demo.json', "w", encoding="utf-8") as f:
+            json.dump(all_results, f, ensure_ascii=False, indent=4)
+
+
+if __name__ == "__main__":
+    a = GenerateDataset(r"C:\Users\AI\Desktop\data\AI\2010-2017", "../data/ner1", 1000)
+    a.generate_ner_dataset("../data/ner_2018")
+    # a.demo("../data/ner_2018")

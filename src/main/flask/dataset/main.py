@@ -14,9 +14,9 @@ def choose_dataset_function_name(dataset:GenerateDataset, name:str) -> None:
 def main():
     parser = argparse.ArgumentParser(description="Generate dataset")
 
-    parser.add_argument('--data_file', type=str, help='Path to the data file')
+    parser.add_argument('--data_file', type=str, help='Path of the data file')
     parser.add_argument('--batch_size', type=int, default=500, help='Batch size for processing (optional)')
-    parser.add_argument("--dataset_name", type=str, help="Name of the dataset")
+    parser.add_argument("--dataset_name", type=str, help="which class of the dataset you want to generate")
     parser.add_argument("--output_dir", type=str, help="Path to the output directory")
     args, unknown = parser.parse_known_args()
     logging.basicConfig(level=logging.INFO)
