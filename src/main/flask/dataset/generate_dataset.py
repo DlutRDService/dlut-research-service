@@ -33,7 +33,7 @@ class GenerateDataset:
         self.data_loader = DataLoader(data_file, *args)
         self.batch_size = batch_size if batch_size is not None else 500
         self.output_dir = output_dir
-
+        self.exit_file_num = len(os.listdir(output_dir))
 
     def generate_method_ft_dataset(self) -> None:
         """
@@ -41,31 +41,27 @@ class GenerateDataset:
         # fileds["TI", "WC", "AB", "ab_seq"]
         """
         ft_dataset = []
-
-
         try:
             for i in range(0, len(self.data_loader), 2):
                 if (self.data_loader[i].r_result and self.data_loader[i].r_result) != '':
                     ft_dataset.append({
-                        "Instruction": "What research methods and findings are presented in the paper '{TI}'?".format(
+                        "instruction": "What research methods and findings are presented in the paper '{TI}'?".format(
                             TI=self.data_loader[i].TI),
                         "input": "",
-                        "Output": "In '{TI}', {r_method} and found that {r_result}. "
+                        "output": "In '{TI}', {r_method} and found that {r_result}. "
                                   "The study contributes significantly to the field of {WC}."
                         .format(TI=self.data_loader[i].TI, r_method=self.data_loader[i].r_method,
                                 r_result=self.data_loader[i].r_result, WC=self.data_loader[i].WC)
                     })
                 if (self.data_loader[i + 1].r_result and self.data_loader[i + 1].r_result) != "":
                     ft_dataset.append({
-                        "Instruction": "Provide the main research methods and conclusions of this paper.",
+                        "instruction": "Provide the main research methods and conclusions of this paper.",
                         "input": "'{TI}'".format(TI=self.data_loader[i].TI),
-                        "Output": "In '{TI}', {r_method} and found that {r_result}. "
+                        "output": "In '{TI}', {r_method} and found that {r_result}. "
                         .format(TI=self.data_loader[i].TI, r_method=self.data_loader[i].r_method, r_result=self.data_loader[i].r_result, )
                     })
-        except IndexError as e:
-            print(e)
-
-
+        except IndexError:
+            pass
 
     def generate_summarize_topic_ft_dataset(self) -> None:
         """
@@ -84,7 +80,7 @@ class GenerateDataset:
             result = gpt_api(messages)
             if result is not None:
                 ft_dataset.append({
-                    "Instruction": "You are an intelligent robot specializing in summarizing topic. "
+                    "instruction": "You are an intelligent robot specializing in summarizing topic. "
                                    "I will provide you with a text, and your summarize the research topic",
                     "input": "Summarize the theme of the paper in one sentence. This is the paper "
                                             "content: " + i.AB,
@@ -125,8 +121,7 @@ class GenerateDataset:
                                   ft_dataset)
                 ft_dataset = []
 
-
-    def paper_info_ft_dataset(self) -> None:
+    def generate_paper_info_ft_dataset(self) -> None:
         """
         Author: zsl
         Date: 2024-02-25
@@ -144,6 +139,16 @@ class GenerateDataset:
                                         PY=i.PY,
                                         TI=i.TI,
                                         WC="and ".join(i.WC))
+            })
+
+    def generate_dataset(self) -> None:
+        ft_dataset = []
+        for i in self.data_loader:
+            ft_dataset.append({
+                "instruction": "You are an AI assistant. Provide a detailed answer so user don’t need to search outside to understand the answer.",
+                "input": "I want to learn about recent research related to {} and {}".format(i.AB[0],i.DE[1]),
+                "output": "Of course, research on large models and GNN is a popular field. At {} in {}, "
+                          "a paper '{}' show that {}.".format(i.SO, i.SE, i.TI, i.AB)
             })
 
 
@@ -184,7 +189,7 @@ class GenerateDataset:
                                       dataset)
                     dataset = []
 
-    def generate_ner_dataset(self, file_path: str) -> None:
+    def ner_ins_to_seq(self, file_path: str) -> None:
         data = []
         results = self.read_file(file_path)
 
@@ -216,33 +221,12 @@ class GenerateDataset:
                             labels[i] = f"I-{entity_type}"
                 data.append({"text": sentence, "tags": labels})
             if num % self.batch_size == 0:
-                 file_name = "record-{}-{}.json".format(num-self.batch_size + 1, num)
+                 file_name = "record-{}-{}.json".format(num-self.batch_size + 1 + self.exit_file_num * self.batch_size,
+                                                        num + self.exit_file_num * self.batch_size)
                  self.save_dataset(self.output_dir, file_name, data)
                  data = []
 
-    @staticmethod
-    def save_dataset(output_dir, file_name, data:list | str) -> None:
-        with open('{}/{}'.format(output_dir,file_name), 'w', encoding='utf-8') as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
-        print("Saved {} records".format(file_name).replace(".json", ""))
-
-    @staticmethod
-    def read_file(file_path: str) -> list:
-        all_results = []
-        if os.path.isdir(file_path):
-            for filename in os.listdir(file_path):
-                full_path = os.path.join(file_path, filename)
-                if os.path.isfile(full_path):
-                    with open(full_path, "r", encoding="utf-8") as f:
-                        results = json.load(f)
-                        all_results.extend(results)
-        elif os.path.isfile(file_path):
-            with open(file_path, "r", encoding="utf-8") as f:
-                all_results = json.load(f)
-        return all_results
-
-    @staticmethod
-    def demo(file_path:str):
+    def ner_ins_to_seq1(self, file_path:str):
         all_results = []
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         for filename in os.listdir(file_path):
@@ -265,12 +249,35 @@ class GenerateDataset:
                             tags_ids = [tag_to_id[tag] for tag in i['tags']]
                             i['tags'] = tags_ids
                             all_results.append(i)
-
+        self.save_dataset()
         with open('../data/ner1/demo.json', "w", encoding="utf-8") as f:
             json.dump(all_results, f, ensure_ascii=False, indent=4)
+
+    @staticmethod
+    def save_dataset(output_dir, file_name, data:list | str) -> None:
+        with open('{}/{}'.format(output_dir,file_name), 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+        print("Saved {} records".format(file_name).replace(".json", ""))
+
+    @staticmethod
+    def read_file(file_path: str) -> list:
+        all_results = []
+        if os.path.isdir(file_path):
+            for filename in os.listdir(file_path):
+                full_path = os.path.join(file_path, filename)
+                if os.path.isfile(full_path):
+                    with open(full_path, "r", encoding="utf-8") as f:
+                        results = json.load(f)
+                        all_results.extend(results)
+        elif os.path.isfile(file_path):
+            with open(file_path, "r", encoding="utf-8") as f:
+                all_results = json.load(f)
+        return all_results
+
+
 
 
 if __name__ == "__main__":
     a = GenerateDataset(r"C:\Users\AI\Desktop\data\AI\2010-2017", "../data/ner1", 1000)
-    a.generate_ner_dataset("../data/ner_2018")
+    a.ner_ins_to_seq("../data/demo")
     # a.demo("../data/ner_2018")

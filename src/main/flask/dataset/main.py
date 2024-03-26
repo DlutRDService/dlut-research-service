@@ -2,14 +2,21 @@ import argparse
 from dataset.generate_dataset import GenerateDataset
 import logging
 
-
 def choose_dataset_function_name(dataset:GenerateDataset, name:str) -> None:
-    if name == "ner":
+    if name == "pos_tagging":
         dataset.generate_word_seq_dataset()
     if name == "summarize_abstract":
         dataset.generate_summarize_abstract_ft_dataset()
     if name == "method":
         dataset.generate_method_ft_dataset()
+    if name == "summarize_topic":
+        dataset.generate_summarize_topic_ft_dataset()
+    if name == "paper_info":
+        dataset.generate_paper_info_ft_dataset()
+    if name == "ner_ins_to_seq":
+
+
+
 
 def main():
     parser = argparse.ArgumentParser(description="Generate dataset")
