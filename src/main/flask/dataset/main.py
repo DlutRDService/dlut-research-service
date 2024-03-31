@@ -14,6 +14,8 @@ def choose_dataset_function_name(dataset:GenerateDataset, name:str) -> None:
     if name == "paper_info":
         dataset.generate_paper_info_ft_dataset()
     if name == "ner_ins_to_seq":
+        dataset.ner_ins_to_seq()
+
 
 
 

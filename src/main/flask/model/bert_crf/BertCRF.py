@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 from transformers import BertModel
 from torchcrf import CRF
@@ -18,9 +19,11 @@ class BertCRF(nn.Module):
         logits = self.classifier(sequence_output)
 
         if labels is not None:
-            loss = -self.crf(logits, labels, mask=attention_mask.byte(), reduction='mean')
+
+            loss = -self.crf(logits, labels, mask=attention_mask.bool(), reduction='mean')
             return loss
         else:
-            predictions = self.crf.decode(logits, mask=attention_mask)
+
+            predictions = self.crf.decode(logits, mask=attention_mask.bool())
             return predictions
 

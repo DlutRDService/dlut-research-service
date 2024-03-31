@@ -225,8 +225,8 @@ class GenerateDataset:
                                                         num + self.exit_file_num * self.batch_size)
                  self.save_dataset(self.output_dir, file_name, data)
                  data = []
-
-    def ner_ins_to_seq1(self, file_path:str):
+    @staticmethod
+    def tag_ner_str(file_path:str):
         all_results = []
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         for filename in os.listdir(file_path):
@@ -245,12 +245,12 @@ class GenerateDataset:
                                 "B-Academic Publications": 5,
                                 "I-Academic Publications": 6,
                                 "B-Year": 7,
+                                "I-Year": 8
                             }
                             tags_ids = [tag_to_id[tag] for tag in i['tags']]
                             i['tags'] = tags_ids
                             all_results.append(i)
-        self.save_dataset()
-        with open('../data/ner1/demo.json', "w", encoding="utf-8") as f:
+        with open('../model/bert_crf/dataset.json', "w", encoding="utf-8") as f:
             json.dump(all_results, f, ensure_ascii=False, indent=4)
 
     @staticmethod
@@ -275,9 +275,7 @@ class GenerateDataset:
         return all_results
 
 
-
-
 if __name__ == "__main__":
-    a = GenerateDataset(r"C:\Users\AI\Desktop\data\AI\2010-2017", "../data/ner1", 1000)
-    a.ner_ins_to_seq("../data/demo")
-    # a.demo("../data/ner_2018")
+    a = GenerateDataset(r"C:\Users\AI\Desktop\data\AI\2010-2017", "../data/ner_str", 1000)
+    a.ner_ins_to_seq("../data/ner_list")
+    # a.tag_ner_str("../data/ner_str")
