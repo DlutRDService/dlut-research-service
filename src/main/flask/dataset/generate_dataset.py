@@ -104,7 +104,8 @@ class GenerateDataset:
                 continue
             messages = [
                 {"role": "system",
-                 "content": "You are an intelligent robot specializing in summarizing and condensing text. I will provide you with a summary text, and your task is to condense it to around 200 words."},
+                 "content": "You are an intelligent robot specializing in summarizing and condensing text. "
+                            "I will provide you with a summary text, and your task is to condense it to around 200 words."},
                 {"role": "user", "content": i.AB}
             ]
 
@@ -263,12 +264,13 @@ class GenerateDataset:
     def read_file(file_path: str) -> list:
         all_results = []
         if os.path.isdir(file_path):
-            for filename in os.listdir(file_path):
-                full_path = os.path.join(file_path, filename)
-                if os.path.isfile(full_path):
-                    with open(full_path, "r", encoding="utf-8") as f:
-                        results = json.load(f)
-                        all_results.extend(results)
+            for root, dirs, files in os.walk(file_path):
+                for filename in files:
+                    full_path = os.path.join(root, filename)
+                    if os.path.isfile(full_path):
+                        with open(full_path, "r", encoding="utf-8") as f:
+                            results = json.load(f)
+                            all_results.extend(results)
         elif os.path.isfile(file_path):
             with open(file_path, "r", encoding="utf-8") as f:
                 all_results = json.load(f)

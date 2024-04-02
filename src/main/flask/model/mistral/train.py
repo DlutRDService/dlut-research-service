@@ -5,7 +5,7 @@ import os
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainerCallback, TrainingArguments, Trainer, \
     DataCollatorForLanguageModeling
-import valohai
+
 from accelerate import Accelerator, FullyShardedDataParallelPlugin
 from datasets import load_dataset
 from peft import LoraConfig, get_peft_model
@@ -67,9 +67,9 @@ class FineTuner:
         data = self.data
 
         # json file
-        df = load_dataset("json", data_files=data)
+        df = load_dataset("json", data_files=data, split="train")
         # split dataset 8:2
-        split_data = df['train'].train_test_split(test_size=0.2)
+        split_data = df.train_test_split(test_size=0.2)
 
         def generate_and_tokenize_prompt(prompt):
             return self.tokenizer(formatting_func(prompt))
@@ -79,7 +79,7 @@ class FineTuner:
             generate prompt text
             """
             # TODO modify the prompt (use the token <s></s>?)
-            alpaca_prompt = """<s>[INST] {} [/INST] {}</s> [INST] {} [/INST]"""
+            alpaca_prompt = """{}"""
             instructions = example["instruction"]
             inputs = example["input"]
             outputs = example["output"]
@@ -88,7 +88,6 @@ class FineTuner:
 
         self.train_df = split_data['train'].map(generate_and_tokenize_prompt)
         self.val_df = split_data['test'].map(generate_and_tokenize_prompt)
-
 
 
     def print_trainable_parameters(self):
@@ -131,9 +130,8 @@ class FineTuner:
 
         self.model = self.accelerator.prepare_model(model)
 
+    # TODO 解决CKPT问题
     def train(self):
-        # set the ckpt dir
-        checkpoint_output_dir = valohai.outputs().path(self.output_dir)
         # set the trainer
         trainer = Trainer(
             model=self.model,
@@ -163,8 +161,6 @@ class FineTuner:
         self.model.config.use_cache = False
 
         trainer.train()
-        model_save_dir = os.path.join(checkpoint_output_dir, 'best_model')
-
         trainer.save_model(model_save_dir)
 
 
