@@ -33,7 +33,7 @@ class GenerateDataset:
         self.data_loader = DataLoader(data_file, *args)
         self.batch_size = batch_size if batch_size is not None else 500
         self.output_dir = output_dir
-        self.exit_file_num = len(os.listdir(output_dir))
+        self.exit_file_num = len(os.listdir(self.output_dir))
 
     def generate_method_ft_dataset(self) -> None:
         """
@@ -91,7 +91,6 @@ class GenerateDataset:
                 self.save_dataset(self.output_dir, file_name, ft_dataset)
                 ft_dataset = []
 
-
     def generate_summarize_abstract_ft_dataset(self) -> None:
         """
         Author: zsl
@@ -109,7 +108,7 @@ class GenerateDataset:
                 {"role": "user", "content": i.AB}
             ]
 
-            result = gpt_api(messages)
+            result = gpt_api(messages, "gpt-3.5-turbo")
             ft_dataset.append({
                 "instruction": "You are an intelligent robot specializing in summarizing and condensing text. I will "
                                "provide you with a summary text, and your task is to condense it to around 200 words.",
@@ -152,7 +151,6 @@ class GenerateDataset:
                           "a paper '{}' show that {}.".format(i.SO, i.SE, i.TI, i.AB)
             })
 
-
     def generate_word_seq_dataset(self) -> None:
         dataset = []
         for num, i in enumerate(self.data_loader, start=1):
@@ -190,17 +188,70 @@ class GenerateDataset:
                                       dataset)
                     dataset = []
 
+
+
+    def generate_ab_ner_dataset_by_gpt(self):
+        dataset = []
+        for num, i in enumerate(self.data_loader, start=1):
+            if i.AB:
+                messages = [
+                    {"role": "system",
+                     "content": "You are a AI model. You need to identify the research subject mentioned in this text "
+                                "and label them by 'subject' as detailed as possible."
+                                "You only need to return a list like [('word', 'subject')]."},
+                    {"role": "user",
+                     "content": "Text:{} ".format(i.AB)},
+                ]
+                response = gpt_api(messages, "gpt-3.5-turbo").replace("\n", '')
+                try :
+                    ab_tag = list(set(ast.literal_eval(response)))
+                except Exception as e:
+                    print(e)
+                    continue
+                text = "Paper '{}' authored by {} and published on {} in {}. {}".format(
+                    i.TI, ", ".join(i.AU), i.SO, i.PY, i.AB
+                )
+                au_tag = [(j, "author") for j in i.AU if i.AU]
+                so_tag = [(i.SO, "Academic Publications") if i.SO else ""]
+                de_tag = [(j, "object") for j in i.DE if i.DE]
+                py_tag = [(i.PY, "Year") if i.PY else ""]
+                de_tag = de_tag + ab_tag
+                dataset.append({
+                    "instruction": "You are a AI model. You need to identify the research subjects mentioned in this "
+                                   "text and label them by 'subject' as detailed as possible."
+                                   "You only need to return a list like [(word, subject)].",
+                    "input": i.AB,
+                    "text": text,
+                    "de_tag": str(de_tag),
+                    "au_tag": str(au_tag),
+                    "so_tag": str(so_tag),
+                    "py_tag": str(py_tag),
+                    "ab_tag": str(ab_tag)
+                })
+            if num % self.batch_size == 0:
+
+                self.exit_file_num = len(os.listdir(self.output_dir))
+                file_name = "record-{}-{}.json".format(num - self.batch_size + 1 + self.exit_file_num * self.batch_size,
+                                                       num + self.exit_file_num * self.batch_size)
+                self.save_dataset(self.output_dir, file_name,
+                                  dataset)
+                dataset = []
+
+
+
     def ner_ins_to_seq(self, file_path: str) -> None:
         data = []
         results = self.read_file(file_path)
 
         for num, result in enumerate(results, start=1):
-            sentence = result['title']
+            sentence = result['text']
             de_list = ast.literal_eval(result['de_tag'])
             au_list = ast.literal_eval(result['au_tag'])
             so_list = ast.literal_eval(result['so_tag'])
             py_list = ast.literal_eval(result['py_tag'])
-            tags = de_list + au_list + so_list + py_list
+            ab_list = ast.literal_eval(result['ab_tag'])
+            tags = de_list + au_list + so_list + py_list + ab_list
+            tags = list(set(tags))
 
             # token
             tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
@@ -222,10 +273,11 @@ class GenerateDataset:
                             labels[i] = f"I-{entity_type}"
                 data.append({"text": sentence, "tags": labels})
             if num % self.batch_size == 0:
-                 file_name = "record-{}-{}.json".format(num-self.batch_size + 1 + self.exit_file_num * self.batch_size,
+
+                file_name = "record-{}-{}.json".format(num-self.batch_size + 1 + self.exit_file_num * self.batch_size,
                                                         num + self.exit_file_num * self.batch_size)
-                 self.save_dataset(self.output_dir, file_name, data)
-                 data = []
+                self.save_dataset(self.output_dir, file_name, data)
+                data = []
     @staticmethod
     def tag_ner_str(file_path:str):
         all_results = []
@@ -278,6 +330,7 @@ class GenerateDataset:
 
 
 if __name__ == "__main__":
-    a = GenerateDataset(r"C:\Users\AI\Desktop\data\AI\2010-2017", "../data/ner_str", 1000)
-    a.ner_ins_to_seq("../data/ner_list")
+    a = GenerateDataset(r"C:\Users\AI\Desktop\data\AI\2010-2017\2017\record-1-500.txt", "../data", 100)
+    a.ner_ins_to_seq("../data/AB_ner")
     # a.tag_ner_str("../data/ner_str")
+    # b.generate_ab_ner_dataset_by_gpt()

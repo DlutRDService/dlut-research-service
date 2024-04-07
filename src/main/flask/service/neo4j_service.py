@@ -70,7 +70,7 @@ if __name__ == "__main__":
     user = "neo4j"
     pwd = "AcademicKG"
 
-    papers = DataLoader(r'C:\Users\AI\Desktop\data\AI', 'DE')
+    papers = DataLoader(r'C:\Users\AI\Desktop\data\AI\2018-2024\2019', 'DE')
 
     neo4j_service = Neo4jService(uri, user, pwd)
     for paper in papers:
