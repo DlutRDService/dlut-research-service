@@ -52,9 +52,10 @@ class FineTuner:
         self.tokenizer = AutoTokenizer.from_pretrained(
             base_model_id,
             model_max_length=self.model_max_length,
-            padding_side='right',
+            padding_side='left',
             add_eos_token=True,
         )
+
 
         # Set the pad equal to the eos to
         # ensure data consistency and reduce the impact of pad information.
@@ -105,7 +106,6 @@ class FineTuner:
         )
 
     def apply_peft(self):
-
         config = LoraConfig(
             r=16,
             lora_alpha=32,
@@ -130,7 +130,7 @@ class FineTuner:
 
         self.model = self.accelerator.prepare_model(model)
 
-    # TODO 解决CKPT问题
+
     def train(self):
         # set the trainer
         trainer = Trainer(

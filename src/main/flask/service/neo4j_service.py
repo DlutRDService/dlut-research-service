@@ -1,3 +1,5 @@
+import argparse
+
 from py2neo import Graph
 import logging
 
@@ -66,11 +68,14 @@ class Neo4jService:
 
 # demo
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate dataset")
+    parser.add_argument('--year', type=str)
+    args, unknown = parser.parse_known_args()
     uri = "bolt://localhost:7687"
     user = "neo4j"
     pwd = "AcademicKG"
 
-    papers = DataLoader(r'C:\Users\AI\Desktop\data\AI\2018-2024\2019', 'DE')
+    papers = DataLoader(r'C:\Users\AI\Desktop\data\AI\2018-2024\{}'.format(args.year), 'DE')
 
     neo4j_service = Neo4jService(uri, user, pwd)
     for paper in papers:
